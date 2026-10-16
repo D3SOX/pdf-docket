@@ -2,10 +2,12 @@
 
 An Android app that stores your PDF tickets, passes and certificates and shows their barcodes in fullscreen.
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://d3sox.me/pdfwallet-android/)
-[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="54">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/D3SOX/pdfwallet-android)
+<p>
+  <a href="https://pdfwallet.d3sox.me/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/D3SOX/pdfwallet"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="80"></a>
+</p>
 
-The F-Droid badge opens this project's own F-Droid repository, which you add to your F-Droid client. Every commit to `main` publishes a new release there and on [GitHub Releases](https://github.com/D3SOX/pdfwallet-android/releases).
+The F-Droid badge opens this project's own F-Droid repository, which you add to your F-Droid client. Every commit to `main` publishes a new release there and on [GitHub Releases](https://github.com/D3SOX/pdfwallet/releases).
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="200" alt="Document list"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="200" alt="Barcode in fullscreen"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="200" alt="Documents filtered by tag"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="200" alt="Dark mode">
 
@@ -22,6 +24,7 @@ This fork keeps the app open source under the GPLv3. It rebuilds the interface w
 - Swipe between documents and switch between the barcode and the PDF.
 - Tag, search and sort documents by import date, name or file size.
 - Open password protected PDFs and lock the app with biometrics or the device PIN.
+- Use a light or dark theme, in green or in your system colors on Android 12 and later.
 - Work offline, with no internet permission, ads or tracking.
 
 ## Building

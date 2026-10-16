@@ -1,9 +1,0 @@
- - Aztec Code support (experimental)
- - Improved document renaming
- - Improved document ordering
- - When documents are filtered, then you can choose between sharing/deleting all or just the currently visible ones
- - Add "open in new window" icons to the links on the "More" screen
- - Fix Authentication preference display when a high font size is chosen
- - Performance improvements
- - Greek translation (thx to "OpenContribution")
- - Update of dependencies

@@ -68,4 +68,5 @@
     <string name="filter_tag_or_mode">أي علامة مختارة</string>
     <string name="tag_filter_mode_description">إظهار النتائج التي تطابق:</string>
     <string name="search_results_reset_filters_cta">إعادة تعيين جميع المرشحات</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
 </resources>

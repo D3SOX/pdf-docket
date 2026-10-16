@@ -1,3 +1,0 @@
-- Added new setting to make QR code search optional
-- Require authentication in order to change authentication app setting
-- Added new app translations. Thx to PandaCoderPL, Martin Martinov, Sitavi, verydutch, XoseM, TriLinder, NeverMine17

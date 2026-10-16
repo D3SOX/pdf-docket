@@ -1,9 +1,9 @@
 # Configuration of the F-Droid repository published to GitHub Pages.
 # Secrets come from environment variables, see build-repo.sh.
-repo_url: https://d3sox.me/pdfwallet-android/repo
+repo_url: https://pdfwallet.d3sox.me/repo
 repo_name: PDF Wallet
 repo_description: >-
-  Releases of PDF Wallet, built from https://github.com/D3SOX/pdfwallet-android
+  Releases of PDF Wallet, built from https://github.com/D3SOX/pdfwallet
 repo_icon: icon.png
 archive_older: 0
 

@@ -1,3 +1,0 @@
-- Add Italian language. Thx to Daniele Garau!
-- New "More" section with links to privacy policy etc.  
-- Fix biometric login bypass when adding documents

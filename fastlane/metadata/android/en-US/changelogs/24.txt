@@ -1,2 +1,0 @@
-- Fix crash when resources are cleared on app close
-- Delete file if not supported by Google's PdfRenderer

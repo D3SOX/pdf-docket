@@ -1,0 +1,10 @@
+body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1c16; background: #f9faef; }
+a { color: #4c662b; }
+code { word-break: break-all; background: #e2e3d8; padding: .1rem .3rem; border-radius: .25rem; }
+.button { display: inline-block; background: #4c662b; color: #fff; padding: .6rem 1.2rem; border-radius: 2rem; text-decoration: none; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e2e3d8; background: #12140e; }
+  a { color: #b1d18a; }
+  code { background: #33362e; }
+  .button { background: #b1d18a; color: #1f3701; }
+}

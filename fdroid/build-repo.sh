@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the F-Droid repository in fdroid/site from a signed APK.
+# Builds the website with the F-Droid repository in fdroid/site from a signed APK.
 # Usage: build-repo.sh APK KEYSTORE
 # Requires FDROID_KEYSTORE_PASS, FDROID_KEY_PASS and ANDROID_HOME, and fdroidserver on PATH.
 set -euo pipefail
@@ -7,7 +7,7 @@ set -euo pipefail
 apk=$(realpath "$1")
 keystore=$(realpath "$2")
 root=$(cd "$(dirname "$0")/.." && pwd)
-app_id=com.michaeltroger.gruenerpass
+app_id=me.d3sox.pdfwallet
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
@@ -28,4 +28,4 @@ cp "$apk" "$work/repo/${app_id}_${version_code}.apk"
 rm -rf "$root/fdroid/site"
 mkdir -p "$root/fdroid/site"
 cp -r "$work/repo" "$root/fdroid/site/repo"
-cp "$root/fdroid/index.html" "$root/fdroid/site/index.html"
+cp -r "$root/website/." "$root/fdroid/site/"

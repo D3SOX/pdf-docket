@@ -1,2 +1,0 @@
-- Android 13 Themed Icons support
-- Update of dependencies

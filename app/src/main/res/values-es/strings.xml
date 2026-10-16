@@ -65,4 +65,5 @@
     <string name="filter_tag_or_mode">Cualquier etiqueta seleccionada</string>
     <string name="tag_filter_mode_description">Mostrar resultados que coincidan con:</string>
     <string name="search_results_reset_filters_cta">Restablecer todos los filtros</string>
+    <string name="privacy_policy">Política de Privacidad</string>
 </resources>

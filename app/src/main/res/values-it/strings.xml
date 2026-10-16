@@ -65,4 +65,5 @@
     <string name="filter_tag_or_mode">Qualsiasi tag selezionato</string>
     <string name="tag_filter_mode_description">Mostra risultati che corrispondono a:</string>
     <string name="search_results_reset_filters_cta">Reimposta tutti i filtri</string>
+    <string name="privacy_policy">Informativa sulla privacy</string>
 </resources>

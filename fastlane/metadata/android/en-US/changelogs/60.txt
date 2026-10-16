@@ -1,6 +1,0 @@
- - Android 16 support
- - Update of dependencies
- - Fix link to Licenses
- - Add voluntary in-app purchase option for supporting the project (all app functionality remains free)
- - Add "imprint" and "developer contact" menu options
- - Adapted spacing to border for barcodes

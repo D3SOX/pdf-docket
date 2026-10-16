@@ -81,6 +81,9 @@ fun AboutScreen(onBack: () -> Unit) {
                 Link(R.string.changelog, R.string.changelog_summary, R.string.changelog_uri)
             }
             item {
+                Link(R.string.privacy_policy, R.string.privacy_policy_summary, R.string.privacy_policy_uri)
+            }
+            item {
                 Link(R.string.license, R.string.license_summary, R.string.license_uri)
             }
             item {

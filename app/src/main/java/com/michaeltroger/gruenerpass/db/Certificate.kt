@@ -15,8 +15,7 @@ data class Certificate(
      */
     @ColumnInfo(name = "name") val name: String,
     /**
-     * Import timestamp in epoch millis. Documents imported before this column existed
-     * carry their former manual display order instead, which keeps their relative order.
+     * Import timestamp in epoch millis
      */
-    @ColumnInfo(name = "importedAt", defaultValue = "0") val importedAt: Long,
+    @ColumnInfo(name = "importedAt") val importedAt: Long,
 )

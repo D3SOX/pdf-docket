@@ -9,7 +9,7 @@ android {
     namespace = "com.michaeltroger.gruenerpass"
 
     defaultConfig {
-        applicationId = "com.michaeltroger.gruenerpass"
+        applicationId = "me.d3sox.pdfwallet"
         versionCode = buildNumber ?: 80
         versionName = "5.2.${buildNumber ?: 0}"
     }
@@ -45,7 +45,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.test.ext.junit.ktx)
     testImplementation(libs.io.kotest.assertions.core)
     testImplementation(libs.org.jetbrains.kotlinx.coroutines.test)
@@ -54,6 +53,3 @@ dependencies {
     testImplementation(libs.com.google.dagger.hilt.androidtesting)
     kspTest(libs.com.google.dagger.hilt.compiler)
 }
-
-// Room schemas for the migration tests (Robolectric reads them from the debug assets)
-android.sourceSets.getByName("debug").assets.srcDir("$projectDir/schemas")

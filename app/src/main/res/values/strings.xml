@@ -94,6 +94,8 @@
     <string name="about_description">Stores your PDF documents and shows their barcodes in fullscreen. Works fully offline, without ads or tracking.</string>
     <string name="source_code">Source code</string>
     <string name="source_code_summary">This app is free and open-source software</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="privacy_policy_summary">The app collects no data</string>
     <string name="license">License</string>
     <string name="license_summary">GNU General Public License v3.0</string>
     <string name="based_on">Based on PDF Wallet by Michael Troger</string>

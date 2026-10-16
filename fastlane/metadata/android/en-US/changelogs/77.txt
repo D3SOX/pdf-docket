@@ -1,2 +1,0 @@
-- Improve switching of layout
-- Add Korean, Japanese, Russian and Arabic

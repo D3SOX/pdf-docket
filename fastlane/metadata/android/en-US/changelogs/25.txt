@@ -1,2 +1,0 @@
-- Allow reversed portrait mode on tablets (rotating the screen by 180 degrees)
-- Make QR code check more memory friendly

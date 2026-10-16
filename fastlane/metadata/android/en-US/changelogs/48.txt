@@ -1,2 +1,0 @@
-- Android 14 support
-- Update of libraries used by the app

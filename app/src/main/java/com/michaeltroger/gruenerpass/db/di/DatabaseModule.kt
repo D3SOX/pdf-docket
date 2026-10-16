@@ -36,7 +36,6 @@ object DatabaseModule {
             context.applicationContext,
             AppDatabase::class.java, "greenpass"
         )
-            .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
             .build()
     }
 }

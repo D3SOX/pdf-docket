@@ -2,7 +2,6 @@ package com.michaeltroger.gruenerpass.settings
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -16,32 +15,22 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
-    name = "app_settings",
-    produceMigrations = { context ->
-        // values were stored in the default SharedPreferences by earlier app versions
-        listOf(SharedPreferencesMigration(context, "${context.packageName}_preferences"))
-    },
-)
+private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")
 
-// Keys and values match those of the former SharedPreferences, so they migrate as is.
 private object Keys {
-    val requireAuthentication = booleanPreferencesKey("shouldAuthenticate")
-    val barcodeSearchMode = stringPreferencesKey("extractBarcodes")
+    val requireAuthentication = booleanPreferencesKey("requireAuthentication")
+    val barcodeSearchMode = stringPreferencesKey("barcodeSearchMode")
     val halfSizeBarcodes = booleanPreferencesKey("halfSizeBarcodes")
-    val generateNewBarcode = booleanPreferencesKey("newBarcodeGeneration")
+    val generateNewBarcode = booleanPreferencesKey("generateNewBarcode")
     val fullBrightness = booleanPreferencesKey("fullBrightness")
-    val showOnLockScreen = booleanPreferencesKey("showOnLockedScreen")
+    val showOnLockScreen = booleanPreferencesKey("showOnLockScreen")
     val preventScreenshots = booleanPreferencesKey("preventScreenshots")
-    val themeMode = stringPreferencesKey("forceTheme")
+    val themeMode = stringPreferencesKey("themeMode")
     val dynamicColor = booleanPreferencesKey("dynamicColor")
     val invertPdfColors = booleanPreferencesKey("invertPdfColors")
     val sortOrder = stringPreferencesKey("sortOrder")
-    val tagFilterMode = stringPreferencesKey("tag_filter_type")
+    val tagFilterMode = stringPreferencesKey("tagFilterMode")
 }
-
-private const val TAG_FILTER_ANY = "OR"
-private const val TAG_FILTER_ALL = "AND"
 
 @Singleton
 class SettingsRepository @Inject constructor(
@@ -73,29 +62,23 @@ class SettingsRepository @Inject constructor(
             dynamicColor = this[Keys.dynamicColor] ?: defaults.dynamicColor,
             invertPdfColors = this[Keys.invertPdfColors] ?: defaults.invertPdfColors,
             sortOrder = enumOrDefault(this[Keys.sortOrder], defaults.sortOrder),
-            tagFilterMode = when (this[Keys.tagFilterMode]) {
-                TAG_FILTER_ANY -> TagFilterMode.ANY
-                else -> TagFilterMode.ALL
-            },
+            tagFilterMode = enumOrDefault(this[Keys.tagFilterMode], defaults.tagFilterMode),
         )
     }
 
     private fun MutablePreferences.write(settings: AppSettings) {
         this[Keys.requireAuthentication] = settings.requireAuthentication
-        this[Keys.barcodeSearchMode] = settings.barcodeSearchMode.name.lowercase()
+        this[Keys.barcodeSearchMode] = settings.barcodeSearchMode.name
         this[Keys.halfSizeBarcodes] = settings.halfSizeBarcodes
         this[Keys.generateNewBarcode] = settings.generateNewBarcode
         this[Keys.fullBrightness] = settings.fullBrightness
         this[Keys.showOnLockScreen] = settings.showOnLockScreen
         this[Keys.preventScreenshots] = settings.preventScreenshots
-        this[Keys.themeMode] = settings.themeMode.name.lowercase()
+        this[Keys.themeMode] = settings.themeMode.name
         this[Keys.dynamicColor] = settings.dynamicColor
         this[Keys.invertPdfColors] = settings.invertPdfColors
         this[Keys.sortOrder] = settings.sortOrder.name
-        this[Keys.tagFilterMode] = when (settings.tagFilterMode) {
-            TagFilterMode.ALL -> TAG_FILTER_ALL
-            TagFilterMode.ANY -> TAG_FILTER_ANY
-        }
+        this[Keys.tagFilterMode] = settings.tagFilterMode.name
     }
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String?, default: T): T =

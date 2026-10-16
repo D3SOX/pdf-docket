@@ -1,3 +1,0 @@
-- Added share functionality (indirectly allows printing)
-- New empty state with more visible add button
-- Update of dependencies

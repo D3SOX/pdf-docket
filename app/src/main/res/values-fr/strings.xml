@@ -65,4 +65,5 @@
     <string name="filter_tag_or_mode">N’importe quelle étiquette sélectionnée</string>
     <string name="tag_filter_mode_description">Afficher les résultats correspondant à :</string>
     <string name="search_results_reset_filters_cta">Réinitialiser tous les filtres</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
 </resources>
