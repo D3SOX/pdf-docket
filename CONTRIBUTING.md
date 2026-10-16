@@ -30,7 +30,8 @@ Thank you for your interest in contributing to this project!
 - There is no guarantee that every PR will get accepted, it's decided case by case
 
 ## Would you like to translate the app?
-- Translations can be done on [Crowdin](https://crwd.in/green-pass)
+- Translations live in `app/src/main/res/values-<language>/strings.xml`
+- Open a pull request with new or improved translations
 
 ## Need support?
-If you need support understanding the code, the CI setup etc. then feel free to [contact me](https://michaeltroger.com/contact).
+Ask in the [issue tracker](https://github.com/D3SOX/pdfwallet/issues).

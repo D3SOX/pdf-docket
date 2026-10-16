@@ -1,4 +1,3 @@
-import com.github.jk1.license.filter.LicenseBundleNormalizer
 import java.io.ByteArrayInputStream
 import java.util.Properties
 
@@ -9,7 +8,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
 
-    id("com.github.jk1.dependency-license-report")
     id("io.gitlab.arturbosch.detekt")
 }
 
@@ -90,11 +88,6 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
-licenseReport {
-    outputDir = "$rootDir/docs/licenses"
-    configurations = arrayOf("releaseRuntimeClasspath")
-    filters = arrayOf(LicenseBundleNormalizer())
-}
 
 dependencies {
     coreLibraryDesugaring(libs.libDesugarJdkLibs)

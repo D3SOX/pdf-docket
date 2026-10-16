@@ -9,6 +9,5 @@ dependencies {
     implementation(libs.plugin.org.jetbrains.kotlin.compose)
     implementation(libs.plugin.org.jetbrains.kotlin.serialization)
     implementation(libs.plugin.com.google.devtools.ksp)
-    implementation(libs.plugin.com.github.jk1.dependency.license.report)
     implementation(libs.plugin.io.gitlab.arturbosch.detekt)
 }
