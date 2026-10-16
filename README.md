@@ -10,7 +10,7 @@ An Android app that stores your PDF tickets, passes and certificates and shows t
 
 The F-Droid badge opens this project's own F-Droid repository, which you add to your F-Droid client. New versions appear there and on [GitHub Releases](https://github.com/D3SOX/pdfwallet/releases).
 
-To join the Google Play closed test, first [join the tester group](https://groups.google.com/g/vegsnap-testers), then [opt in on Google Play](https://play.google.com/apps/testing/me.d3sox.pdfwallet) with the same Google account. Please stay opted in for at least 14 days, try the app and send feedback via [GitHub Issues](https://github.com/D3SOX/pdfwallet/issues). Google Play, F-Droid and GitHub builds share one signing key, so you can switch between them without reinstalling the app.
+To join the Google Play closed test, first [join the tester group](https://groups.google.com/g/d3sox-apps-testers), then [opt in on Google Play](https://play.google.com/apps/testing/me.d3sox.pdfwallet) with the same Google account. Please stay opted in for at least 14 days, try the app and send feedback via [GitHub Issues](https://github.com/D3SOX/pdfwallet/issues). Google Play, F-Droid and GitHub builds share one signing key, so you can switch between them without reinstalling the app.
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="200" alt="Document list"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="200" alt="Barcode in fullscreen"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="200" alt="Documents filtered by tag"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="200" alt="Dark mode">
 
