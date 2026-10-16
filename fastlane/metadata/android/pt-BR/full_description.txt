@@ -27,10 +27,6 @@ Mais funcionalidades
 - PDFs podem ser partilhados com outras apps (permite impressão indireta)
 - Suporte a modo escuro (o documento mantém as cores originais)
 - Suporte a PDFs protegidos por palavra-passe/senha
-- Duas opções de layout disponíveis
-
-A versão “Pro” inclui adicionalmente (requer compra dentro do app):
-- Remove o banner “Obter Pro / Get Pro” de várias telas
 - Atribuir etiquetas a documentos
 - Filtrar documentos por etiquetas
 - Opção para inverter as cores do documento no modo escuro
@@ -39,6 +35,3 @@ A versão “Pro” inclui adicionalmente (requer compra dentro do app):
 
 Privacidade
 Este aplicativo respeita a sua privacidade por funcionar totalmente offline. Sem anúncios, sem rastreamento.
-
-Problemas ou dúvidas
-Este é um projeto de tempo livre desenvolvido por uma única pessoa. Portanto, pedimos compreensão caso as respostas demorem um pouco.

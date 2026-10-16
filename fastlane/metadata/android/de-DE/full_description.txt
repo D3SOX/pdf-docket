@@ -27,10 +27,6 @@ Mehr Funktionen
 - PDFs mit anderen Apps teilen (ermöglicht indirekt Drucken)
 - Dark Mode (Dokument bleibt in Originalfarbe)
 - Liest auch passwortgeschützte PDFs
-- Zwei verschiedene Layouts zum Auswählen
-
-Die "Pro" Version bringt darüber hinaus (erfordert In-App-Kauf):
-- Entfernt "Pro"-Banner auf mehreren Screens
 - Tags zu Dokumenten hinzufügen
 - Dokumente nach Tags filtern
 - Option um Dokumentenfarben zu invertieren im Dark Mode
@@ -39,6 +35,3 @@ Die "Pro" Version bringt darüber hinaus (erfordert In-App-Kauf):
 
 Privatsphäre
 Diese App schätzt Ihre Privatsphäre, indem sie vollständig offline funktioniert. Keine Werbung, kein Tracking.
-
-Probleme
-Es handelt sich hier um ein Freizeitprojekt eines einzelnen Entwicklers. Bitte um Verständnis, dass die Beantwortung von Anfragen dauern kann.

@@ -27,10 +27,6 @@ Fonctions supplémentaires
 - Les PDF peuvent être partagés avec d’autres applications (permet indirectement l’impression)
 - Mode sombre pris en charge (le document reste dans sa couleur d’origine)
 - Compatibilité avec les PDF protégés par mot de passe
-- Deux mises en page différentes au choix
-
-La version « Pro » apporte en plus (achat intégré requis) :
-- Suppression de la bannière « Get Pro » sur divers écrans
 - Assigner des tags aux documents
 - Filtrer les documents par tags
 - Option pour inverser les couleurs du document en mode sombre
@@ -39,6 +35,3 @@ La version « Pro » apporte en plus (achat intégré requis) :
 
 Confidentialité
 Cette application respecte votre vie privée : elle fonctionne entièrement hors ligne. Aucune publicité, aucun suivi.
-
-Problèmes / Support
-Il s’agit d’un projet personnel développé sur le temps libre d’un seul développeur. Merci donc de votre compréhension si les réponses peuvent prendre un certain temps.

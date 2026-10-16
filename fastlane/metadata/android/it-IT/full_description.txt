@@ -27,10 +27,6 @@ Altre Funzionalità
 - I PDF possono essere condivisi con altre app (consente indirettamente la stampa)
 - Supporto per Modalità Scura (il documento rimane nei suoi colori originali)
 - Supporto anche per PDF protetti da password
-- Due diversi layout tra cui scegliere
-
-La versione “Pro” aggiunge inoltre (richiede acquisto in-app):
-- Rimozione del banner “Get Pro” in varie schermate
 - Assegna tag ai documenti
 - Filtra i documenti per tag
 - Opzione per invertire i colori del documento in modalità scura
@@ -39,6 +35,3 @@ La versione “Pro” aggiunge inoltre (richiede acquisto in-app):
 
 Privacy
 Questa app tutela la tua privacy funzionando completamente offline. Nessuna pubblicità, nessun tracciamento.
-
-Problemi
-Questo è un progetto sviluppato nel tempo libero da un singolo sviluppatore. Ti preghiamo quindi di comprendere che le risposte possono richiedere un po’ di tempo.

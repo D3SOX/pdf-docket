@@ -20,25 +20,14 @@ Currently supported barcode formats are:
 
 More Features
 - Can detect and extract barcodes in PDFs
-- (Optional) fingerprint authentication
-- PDFs can be individually sorted and named
-- PDFs can be opened
+- (Optional) biometric authentication
+- PDFs can be sorted by name, file size, or import date
+- PDFs can be individually named
+- Assign tags to documents and filter documents by tags
 - PDFs can be shared from other apps
 - PDFs can be shared with other apps (indirectly allows printing)
-- Dark Mode support (document stays in original color)
+- Dark Mode support (document stays in original color, optionally inverted)
 - Also supports password protected PDFs
-- Two different layouts to choose from
-
-The "Pro" version additionally brings (requires In-App Purchase):
-- Removes "Get Pro" banner on various screens
-- Assign tags to documents
-- Filter documents by tags
-- Option to invert document colors in dark mode
-- Option to force dark or light theme by overriding system settings
-- Option to show barcodes in half size
 
 Privacy
 This app values your privacy by working fully offline. No ads, no tracking.
-
-Issues
-This is a free-time project of a single developer. Therefore please understand that replies can take a little while.
