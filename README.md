@@ -1,4 +1,4 @@
-# PDF Wallet
+<h1><img src="website/logo.svg" alt="" width="40" height="40" align="left">PDF Wallet</h1>
 
 An Android app that stores your PDF tickets, passes and certificates and shows their barcodes in fullscreen.
 

@@ -1,5 +1,6 @@
 body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1c16; background: #f9faef; }
 a { color: #4c662b; }
+h1 { display: flex; align-items: center; gap: .75rem; }
 code { word-break: break-all; background: #e2e3d8; padding: .1rem .3rem; border-radius: .25rem; }
 .screenshots { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin: 2rem 0; }
 .screenshots img { width: 100%; height: auto; border-radius: .75rem; box-shadow: 0 1px 4px rgb(0 0 0 / 25%); }
