@@ -1,0 +1,82 @@
+name: Publish to Google Play
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+    secrets:
+      PLAY_SERVICE_ACCOUNT_JSON:
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag (for example v5.2.850)
+        required: true
+        type: string
+      verify_only:
+        description: Verify credentials and track access without uploading
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: play-store-publishing
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FASTLANE_SKIP_UPDATE_CHECK: 'true'
+      FASTLANE_OPT_OUT_USAGE: 'true'
+      FASTLANE_SKIP_DOCS: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the release notes list the commits since the previous release
+          fetch-depth: 0
+      - uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a # v1.329.0
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - name: Configure Play credentials
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          [[ -n "$PLAY_SERVICE_ACCOUNT_JSON" ]] || { echo 'Configure PLAY_SERVICE_ACCOUNT_JSON before publishing.'; exit 1; }
+          umask 077
+          PLAY_JSON_KEY="$RUNNER_TEMP/play-service-account.json"
+          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > "$PLAY_JSON_KEY"
+          echo "PLAY_JSON_KEY=$PLAY_JSON_KEY" >> "$GITHUB_ENV"
+      - name: Verify track access
+        run: bundle exec fastlane android verify_play
+      - name: Download the release bundle and write its notes
+        if: ${{ !inputs.verify_only }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'A release tag is required.'; exit 1; }
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir play-release --pattern '*.aab'
+          mv play-release/*.aab play-release/pdfwallet.aab
+          previous=$(git describe --tags --abbrev=0 "$RELEASE_TAG^" 2>/dev/null || true)
+          range=${previous:+$previous..}$RELEASE_TAG
+          git log --no-merges --format='• %s' "$range" | head -c 500 > play-release/notes.txt
+          [[ -s play-release/notes.txt ]] || echo '• Bug fixes and improvements' > play-release/notes.txt
+          cat play-release/notes.txt
+      - name: Submit to the testing track
+        if: ${{ !inputs.verify_only }}
+        run: bundle exec fastlane android publish_play aab:play-release/pdfwallet.aab notes:play-release/notes.txt
+      - name: Record submission
+        if: ${{ success() && !inputs.verify_only }}
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: printf 'Submitted %s to the Google Play testing track. Google checks and review can still be pending.\n' "$RELEASE_TAG" >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/play-service-account.json"

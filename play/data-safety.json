@@ -1,0 +1,18 @@
+{
+  "package_name": "me.d3sox.pdfwallet",
+  "ads": false,
+  "analytics_or_telemetry": false,
+  "sells_user_data": false,
+  "collects_data": false,
+  "shares_data": false,
+  "internet_permission": false,
+  "account_creation": false,
+  "encryption_in_transit": "Not applicable. The app has no internet permission and sends no data.",
+  "data_deletion": "Uninstalling the app or clearing its storage deletes all documents, tags and settings.",
+  "privacy_policy": "https://pdfwallet.d3sox.me/privacy.html",
+  "notes": [
+    "Imported PDFs, names, tags and settings stay in the app's private storage on the device.",
+    "Biometric authentication runs through Android's BiometricPrompt. The app receives no biometric data.",
+    "Cloud backup is disabled (allowBackup=false)."
+  ]
+}

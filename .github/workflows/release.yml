@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      tag: v${{ steps.build.outputs.version_name }}
     env:
       JAVA_VERSION: '21'
 
@@ -41,25 +43,28 @@ jobs:
     - name: Run unit tests
       run: ./gradlew testDebugUnitTest
 
-    - name: Build APK
+    - name: Build APK and App Bundle
+      id: build
       env:
         RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
         RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
       run: |
         mkdir credentials
         echo "$RELEASE_KEYSTORE" | base64 -d > credentials/keystore.jks
-        ./gradlew assembleRelease
+        ./gradlew assembleRelease bundleRelease
         apk=app/build/outputs/apk/release/app-release.apk
         aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort -V | tail -1)
         version_name=$("$aapt2" dump badging "$apk" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
         echo "VERSION_NAME=$version_name" >> "$GITHUB_ENV"
+        echo "version_name=$version_name" >> "$GITHUB_OUTPUT"
         cp "$apk" "pdfwallet-$version_name.apk"
+        cp app/build/outputs/bundle/release/app-release.aab "pdfwallet-$version_name.aab"
 
     - name: Create GitHub release
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        gh release create "v$VERSION_NAME" "pdfwallet-$VERSION_NAME.apk" \
+        gh release create "v$VERSION_NAME" "pdfwallet-$VERSION_NAME.apk" "pdfwallet-$VERSION_NAME.aab" \
           --title "$VERSION_NAME" \
           --target "$GITHUB_SHA" \
           --generate-notes \
@@ -102,6 +107,16 @@ jobs:
           */build/reports/detekt/detekt.html
           */build/reports/lint-results-release.html
           */build/reports/tests/testDebugUnitTest/
+
+  # enable by setting the repository variable PLAY_PUBLISHING to true, see play/SUBMISSION.txt
+  publish-play-store:
+    needs: release
+    if: ${{ vars.PLAY_PUBLISHING == 'true' }}
+    uses: ./.github/workflows/publish-play-store.yml
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+    secrets:
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
   deploy-fdroid-repo:
     needs: release

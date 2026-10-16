@@ -1,0 +1,67 @@
+PDF Wallet: Google Play submission
+
+Application ID: me.d3sox.pdfwallet
+Listing texts and graphics: fastlane/metadata/android (title, short and full
+description per locale, icon.png 512x512, featureGraphic.png 1024x500 and
+phone screenshots in a 1:2 aspect ratio).
+Privacy policy: https://pdfwallet.d3sox.me/privacy.html
+Data safety answers: data-safety.json in this directory (no data collected).
+Price and category proposal: free, Productivity. Contains no ads.
+
+1. CREATE THE APP (MANUAL, ONCE)
+
+Google Play only accepts API uploads for an app that already exists in the
+Play Console and has one manually uploaded release.
+
+  a. Create the app in the Play Console with the package me.d3sox.pdfwallet.
+  b. Fill in the store listing, either manually or with the upload_listing
+     lane (step 3), the content rating questionnaire, the target audience,
+     the data safety form (data-safety.json) and the privacy policy URL.
+  c. Download pdfwallet-<version>.aab from the latest GitHub release and
+     upload it manually to a testing track (Alpha / closed testing).
+
+2. SIGNING
+
+Releases are signed with the key in the RELEASE_KEYSTORE secret. The App
+Bundle uses the same key as its upload key.
+
+For Play App Signing, choose one of these when Play asks for the app signing
+key:
+  - Use the existing release key: export it with Google's PEPK tool and upload
+    it. Play, GitHub, Obtainium and F-Droid installs then share one signature
+    and can update each other.
+  - Let Google generate the key: Play installs get a different signature than
+    the GitHub and F-Droid APKs. Users can't switch between the two without
+    uninstalling the app.
+Keep an encrypted backup of the release keystore. Losing it ends updates for
+the GitHub and F-Droid channels.
+
+3. AUTOMATED UPLOADS
+
+The release workflow calls .github/workflows/publish-play-store.yml for every
+release once the repository variable PLAY_PUBLISHING is set to true. It
+uploads the release's App Bundle to the Alpha track with the commit subjects
+since the previous release as release notes. Listings, screenshots, testers
+and policy declarations stay untouched.
+
+  a. Enable the Google Play Developer API in a Google Cloud project, create a
+     service account with a JSON key, and invite it in the Play Console with
+     release permissions for PDF Wallet.
+  b. gh secret set PLAY_SERVICE_ACCOUNT_JSON -R D3SOX/pdfwallet < key.json
+     Keep the key file outside the repository and delete local copies.
+  c. Check access without uploading:
+     gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<latest tag> -f verify_only=true
+  d. gh variable set PLAY_PUBLISHING -R D3SOX/pdfwallet --body true
+
+Retry the upload of a published release:
+  gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<tag>
+
+Local CLI (Ruby 3.4 and Bundler):
+  bundle install
+  export PLAY_JSON_KEY=/secure/path/play-service-account.json
+  bundle exec fastlane android verify_play
+  bundle exec fastlane android upload_listing
+  bundle exec fastlane android publish_play aab:/path/pdfwallet.aab notes:/path/notes.txt
+
+Version codes are the commit count of main, so every release has a higher
+code. Google Play rejects a version code that it already received.

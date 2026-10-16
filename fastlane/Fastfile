@@ -1,0 +1,60 @@
+require "fileutils"
+require "tmpdir"
+
+default_platform(:android)
+
+PACKAGE_NAME = "me.d3sox.pdfwallet"
+TRACK = "alpha"
+
+platform :android do
+  desc "Verify API access to the Google Play testing track"
+  lane :verify_play do
+    validate_play_store_json_key(json_key: ENV.fetch("PLAY_JSON_KEY"))
+    google_play_track_version_codes(
+      package_name: PACKAGE_NAME,
+      track: TRACK,
+      json_key: ENV.fetch("PLAY_JSON_KEY")
+    )
+  end
+
+  desc "Submit a signed App Bundle with release notes to the Google Play testing track"
+  lane :publish_play do |options|
+    root = File.expand_path("..", __dir__)
+    bundle = File.expand_path(options.fetch(:aab), root)
+    UI.user_error!("App Bundle not found: #{bundle}") unless File.file?(bundle)
+    notes = File.read(File.expand_path(options.fetch(:notes), root)).strip
+    UI.user_error!("Release notes must contain 1–500 characters") unless (1..500).cover?(notes.length)
+
+    Dir.mktmpdir("pdfwallet-play-notes") do |metadata|
+      directory = File.join(metadata, "en-US", "changelogs")
+      FileUtils.mkdir_p(directory)
+      File.write(File.join(directory, "default.txt"), notes)
+      upload_to_play_store(
+        package_name: PACKAGE_NAME,
+        track: TRACK,
+        release_status: "completed",
+        aab: bundle,
+        json_key: ENV.fetch("PLAY_JSON_KEY"),
+        metadata_path: metadata,
+        skip_upload_metadata: true,
+        skip_upload_images: true,
+        skip_upload_screenshots: true,
+        validate_only: options[:validate_only] == true,
+        changes_not_sent_for_review: false,
+        rescue_changes_not_sent_for_review: false
+      )
+    end
+  end
+
+  desc "Upload the store listing texts and graphics from fastlane/metadata/android"
+  lane :upload_listing do
+    upload_to_play_store(
+      package_name: PACKAGE_NAME,
+      json_key: ENV.fetch("PLAY_JSON_KEY"),
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_changelogs: true,
+      sync_image_upload: true
+    )
+  end
+end

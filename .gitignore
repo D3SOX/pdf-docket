@@ -11,8 +11,9 @@
 local.properties
 /credentials
 *.swp
-Gemfile.lock
 bundletool.jar
 *.jks
 .junie
 /fdroid/site
+/fastlane/report.xml
+/fastlane/README.md
