@@ -39,6 +39,7 @@ import com.michaeltroger.gruenerpass.R
 import com.michaeltroger.gruenerpass.lock.authenticate
 import com.michaeltroger.gruenerpass.lock.canAuthenticate
 import com.michaeltroger.gruenerpass.ui.components.SingleChoiceDialog
+import com.michaeltroger.gruenerpass.ui.theme.supportsDynamicColor
 
 private enum class SettingsDialog { BARCODE_MODE, THEME, TAG_FILTER_MODE }
 
@@ -139,6 +140,17 @@ fun SettingsScreen(
                     icon = R.drawable.contrast_24px,
                     onClick = { dialog = SettingsDialog.THEME },
                 )
+            }
+            if (supportsDynamicColor) {
+                item {
+                    SwitchItem(
+                        title = R.string.preference_dynamic_color,
+                        summary = R.string.preference_dynamic_color_description,
+                        icon = R.drawable.palette_24,
+                        checked = settings.dynamicColor,
+                        onCheckedChange = { checked -> vm.update { it.copy(dynamicColor = checked) } },
+                    )
+                }
             }
             item {
                 SwitchItem(

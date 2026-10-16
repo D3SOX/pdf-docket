@@ -34,6 +34,7 @@ private object Keys {
     val showOnLockScreen = booleanPreferencesKey("showOnLockedScreen")
     val preventScreenshots = booleanPreferencesKey("preventScreenshots")
     val themeMode = stringPreferencesKey("forceTheme")
+    val dynamicColor = booleanPreferencesKey("dynamicColor")
     val invertPdfColors = booleanPreferencesKey("invertPdfColors")
     val sortOrder = stringPreferencesKey("sortOrder")
     val tagFilterMode = stringPreferencesKey("tag_filter_type")
@@ -69,6 +70,7 @@ class SettingsRepository @Inject constructor(
             showOnLockScreen = this[Keys.showOnLockScreen] ?: defaults.showOnLockScreen,
             preventScreenshots = this[Keys.preventScreenshots] ?: defaults.preventScreenshots,
             themeMode = enumOrDefault(this[Keys.themeMode], defaults.themeMode),
+            dynamicColor = this[Keys.dynamicColor] ?: defaults.dynamicColor,
             invertPdfColors = this[Keys.invertPdfColors] ?: defaults.invertPdfColors,
             sortOrder = enumOrDefault(this[Keys.sortOrder], defaults.sortOrder),
             tagFilterMode = when (this[Keys.tagFilterMode]) {
@@ -87,6 +89,7 @@ class SettingsRepository @Inject constructor(
         this[Keys.showOnLockScreen] = settings.showOnLockScreen
         this[Keys.preventScreenshots] = settings.preventScreenshots
         this[Keys.themeMode] = settings.themeMode.name.lowercase()
+        this[Keys.dynamicColor] = settings.dynamicColor
         this[Keys.invertPdfColors] = settings.invertPdfColors
         this[Keys.sortOrder] = settings.sortOrder.name
         this[Keys.tagFilterMode] = when (settings.tagFilterMode) {

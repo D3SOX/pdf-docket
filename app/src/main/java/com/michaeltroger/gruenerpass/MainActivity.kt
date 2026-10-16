@@ -74,7 +74,7 @@ class MainActivity : FragmentActivity() {
                 applyWindowSettings(uiState.settings)
             }
 
-            PdfWalletTheme(darkTheme = darkTheme) {
+            PdfWalletTheme(darkTheme = darkTheme, dynamicColor = uiState.settings.dynamicColor) {
                 AppRoot(
                     vm = vm,
                     state = uiState,

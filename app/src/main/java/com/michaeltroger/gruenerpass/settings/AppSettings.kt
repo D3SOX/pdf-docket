@@ -24,6 +24,7 @@ data class AppSettings(
     val showOnLockScreen: Boolean = false,
     val preventScreenshots: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val dynamicColor: Boolean = false,
     val invertPdfColors: Boolean = false,
     val sortOrder: SortOrder = SortOrder.IMPORT_DATE_DESC,
     val tagFilterMode: TagFilterMode = TagFilterMode.ALL,
