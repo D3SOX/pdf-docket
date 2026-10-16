@@ -1,0 +1,119 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      JAVA_VERSION: '21'
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        # the commit count is the version code
+        fetch-depth: 0
+
+    - name: Set up JDK
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        cache: 'gradle'
+
+    - name: Set build number
+      run: echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+
+    - name: Run Detekt
+      run: ./gradlew detekt
+    - name: Run Lint
+      run: ./gradlew lintRelease
+    - name: Run unit tests
+      run: ./gradlew testDebugUnitTest
+
+    - name: Build APK
+      env:
+        RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
+        RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+      run: |
+        mkdir credentials
+        echo "$RELEASE_KEYSTORE" | base64 -d > credentials/keystore.jks
+        ./gradlew assembleRelease
+        apk=app/build/outputs/apk/release/app-release.apk
+        aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort -V | tail -1)
+        version_name=$("$aapt2" dump badging "$apk" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
+        echo "VERSION_NAME=$version_name" >> "$GITHUB_ENV"
+        cp "$apk" "pdfwallet-$version_name.apk"
+
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "v$VERSION_NAME" "pdfwallet-$VERSION_NAME.apk" \
+          --title "$VERSION_NAME" \
+          --target "$GITHUB_SHA" \
+          --generate-notes \
+          --latest
+
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+        cache-dependency-path: fdroid/requirements.txt
+
+    - name: Build F-Droid repository
+      env:
+        RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
+      run: |
+        pip install -r fdroid/requirements.txt
+        store_pass=$(echo "$RELEASE_KEYSTORE_PROPERTIES" | sed -n 's/^STORE_PASSWORD=//p')
+        key_pass=$(echo "$RELEASE_KEYSTORE_PROPERTIES" | sed -n 's/^KEY_PASSWORD=//p')
+        echo "::add-mask::$store_pass"
+        echo "::add-mask::$key_pass"
+        FDROID_KEYSTORE_PASS="$store_pass" FDROID_KEY_PASS="$key_pass" \
+          fdroid/build-repo.sh "pdfwallet-$VERSION_NAME.apk" credentials/keystore.jks
+
+    - name: Remove credentials
+      if: always()
+      run: rm -rf credentials
+
+    - name: Upload F-Droid repository
+      uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      with:
+        path: fdroid/site
+
+    - name: Upload test reports
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      if: always()
+      with:
+        name: test_reports
+        path: |
+          */build/reports/detekt/detekt.html
+          */build/reports/lint-results-release.html
+          */build/reports/tests/testDebugUnitTest/
+
+  deploy-fdroid-repo:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
