@@ -2,7 +2,6 @@
 <resources>
     <string name="delete">Apagar</string>
     <string name="document_name">Nome do documento</string>
-    <string name="barcode">Código de barras</string>
     <string name="add">Adicionar</string>
     <string name="warning">Aviso</string>
     <string name="error_reading_pdf">Erro ao ler o PDF. Tente outro arquivo ou local do arquivo</string>
@@ -16,18 +15,8 @@
     <string name="authenticate">Autenticar</string>
     <string name="report_issue_summary">Algum problema usando o aplicativo? Vamos tentar ajudá-lo</string>
     <string name="report_issue">Reportar problema</string>
-    <string name="rate_summary">Se você gosta deste aplicativo, considere avaliá-lo</string>
-    <string name="rate">Avalie o aplicativo</string>
-    <string name="help_translating">Localizar</string>
-    <string name="help_translating_summary">Traduza o aplicativo para o seu idioma nativo</string>
-    <string name="contact_developer">Contate o desenvolvedor</string>
-    <string name="more">Mais</string>
-    <string name="imprint">Imprimir</string>
-    <string name="privacy_policy">Política de privacidade</string>
     <string name="preference_max_brightness">100\u0025 luminosidade</string>
     <string name="preference_max_brightness_description">Sempre exiba o aplicativo com brilho de tela cheia.</string>
-    <string name="licenses">Licenças</string>
-    <string name="licenses_summary">Exibir as licenças de código aberto utilizadas neste projeto</string>
     <string name="version">Versão %1$s</string>
     <string name="share">Compartilhar</string>
     <string name="changelog">Registro de alterações</string>
@@ -38,23 +27,13 @@
     <string name="dialog_warning_description">O aplicativo está atualmente configurado para ser mostrado no topo da tela de bloqueio. Isso significa que seus documentos podem ser acessados sem desbloquear seu telefone. Vá para configurações para alterar isso.</string>
     <string name="lock">Bloquear</string>
     <string name="export_all">Exportar tudo</string>
-    <string name="preference_add_documents_front">Adicionar documentos na frente</string>
-    <string name="preference_add_documents_front_description">Novos PDFs são inseridos na frente ao invés de na parte de trás.</string>
     <string name="preference_add_show_on_locked_screen">Mostrar na tela de bloqueio</string>
     <string name="preference_add_show_on_locked_screen_description">Permite acessar o aplicativo sem desbloquear o telefone. Não use essa configuração permanentemente.</string>
-    <string name="scroll_to_first">Rolar para o primeiro PDF</string>
-    <string name="scroll_to_last">Rolar para o último PDF</string>
-    <string name="pdfs">PDFs</string>
     <string name="search">Buscar</string>
     <string name="search_query_hint">Nome do documento</string>
     <string name="dialog_document_name_title">Alterar nome do documento</string>
-    <string name="dialog_document_order_title">Alterar ordem do documento</string>
-    <string name="change_order">Alterar ordem</string>
     <string name="export_filtered">Exportação filtrada atualmente</string>
     <string name="delete_filtered">Excluir filtrados atualmente</string>
-    <string name="switch_layout">Alternar layout</string>
-    <string name="preference_show_list_layout">Mostrar PDFs no layout de lista</string>
-    <string name="preference_show_list_layout_description">Layout alternativo no qual ao invés de mostrar o PDF imediatamente, apenas os títulos em PDF são exibidos em uma lista.</string>
     <!--suppress MissingQuantity -->
     <plurals name="dialog_delete_filtered_confirmation_text">
         <item quantity="one">Você realmente deseja excluir o documento %d do aplicativo?</item>
@@ -66,10 +45,6 @@
     <string name="preference_barcode_extended">Estendido (melhor detecção possível)</string>
     <string name="preference_prevent_screenshots">Impedir capturas de tela</string>
     <string name="preference_prevent_screenshots_description">Capturas de tela nunca são permitidas, caso você ative a autenticação. Isso tem razões de segurança.</string>
-    <string name="support_this_project">PDF Wallet Pro</string>
-    <string name="menu_support_this_project">Obtenha o \"PDF Wallet Pro\"</string>
-    <string name="preference_support_this_project">Obtenha o \"PDF Wallet Pro\"</string>
-    <string name="preference_support_this_project_description">Desbloqueie recursos adicionais.</string>
     <string name="preference_invert_pdf_colors">Inverter cores para PDF</string>
     <string name="preference_invert_pdf_colors_description">Inverter cores do documento em modo escuro.</string>
     <string name="preference_force_theme">Forçar tema</string>
@@ -78,8 +53,6 @@
     <string name="preference_theme_dark">Escuro</string>
     <string name="preference_half_size_barcodes">Exibir códigos de barras em tamanho médio</string>
     <string name="preference_half_size_barcodes_description">Isso pode melhorar a legibilidade de alguns scanners de código de barras.</string>
-    <string name="menu_toggle_barcode_size">Tamanho do código de barras</string>
     <string name="preference_barcode_generation">Criar novo código de barras</string>
     <string name="preference_barcode_generation_description">Quando desativado (recomendado), o app recorta o código de barras original, o que é melhor para a verificação de bilhetes. Quando ativado, o app cria um novo código de barras nítido.</string>
-    <string name="more_screen_footer_developed_in_eu">Desenvolvido na UE 🇪🇺</string>
 </resources>

@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GruenerPass"
+        android:theme="@style/Theme.GruenerPass.Starting"
         tools:ignore="DataExtractionRules"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="tiramisu" >
@@ -27,8 +27,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:screenOrientation="sensorPortrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity" >
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

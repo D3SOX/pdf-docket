@@ -28,7 +28,6 @@ kotlin {
     jvmToolchain(Versions.JAVA)
     compilerOptions {
         allWarningsAsErrors = true
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
 }
 
@@ -38,4 +37,9 @@ dependencies {
     ksp(libs.libHiltCompiler)
 
     implementation(platform(libs.libComposeBom))
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
 }

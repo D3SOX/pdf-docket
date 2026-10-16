@@ -1,48 +1,28 @@
 package com.michaeltroger.gruenerpass.lock
 
-import android.content.Context
-import android.content.SharedPreferences
-import com.michaeltroger.gruenerpass.R
-import com.michaeltroger.gruenerpass.settings.getBooleanFlow
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.michaeltroger.gruenerpass.settings.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface AppLockedRepo {
-    fun isAppLocked(): Flow<Boolean>
-    suspend fun lockApp()
-    suspend fun unlockApp()
-}
+@Singleton
+class AppLockedRepo @Inject constructor(
+    settingsRepository: SettingsRepository,
+) {
+    private val isLocked = MutableStateFlow(true)
 
-class AppLockedRepoImpl @Inject constructor(
-    @ApplicationContext context: Context,
-    sharedPrefs: SharedPreferences,
-) : AppLockedRepo {
-    
-    private val _isLocked: MutableStateFlow<Boolean> = MutableStateFlow(
-        true
-    )
-    private val isLocked: StateFlow<Boolean> = _isLocked
-
-    private val shouldAuthenticate =
-        sharedPrefs.getBooleanFlow(
-            context.getString(R.string.key_preference_biometric),
-            false
-        )
-
-    override fun isAppLocked() = shouldAuthenticate.combine(isLocked) {
-        shouldAuthenticate: Boolean, isLocked: Boolean ->
-        shouldAuthenticate && isLocked
+    val isAppLocked: Flow<Boolean> = combine(settingsRepository.settings, isLocked) { settings, locked ->
+        settings.requireAuthentication && locked
     }.distinctUntilChanged()
 
-    override suspend fun lockApp() {
-        _isLocked.value = true
+    fun lockApp() {
+        isLocked.value = true
     }
-    override suspend fun unlockApp() {
-        _isLocked.value = false
+
+    fun unlockApp() {
+        isLocked.value = false
     }
 }

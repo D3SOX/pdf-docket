@@ -1,20 +1,11 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.GruenerPass" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryVariant">@color/primaryDarkColor</item>
-        <item name="colorPrimaryContainer">@color/primary_container_light</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/secondaryColor</item>
-        <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
-        <item name="colorOnSecondary">@color/black</item>
+<resources>
+    <style name="Theme.GruenerPass" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
-    <style name="MyThemeOverlay_Toolbar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
-        <!-- color used by navigation icon and overflow icon -->
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="popupTheme">@style/ThemeOverlay.MaterialComponents.Light</item>
+    <style name="Theme.GruenerPass.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.GruenerPass</item>
     </style>
 </resources>

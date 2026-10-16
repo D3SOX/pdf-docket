@@ -1,15 +1,17 @@
 plugins {
     id("greenpass.app-conventions")
-    id("org.jetbrains.kotlin.plugin.compose")
 }
+
+// CI passes the commit count, so every commit on main gets a higher version code
+val buildNumber = providers.environmentVariable("BUILD_NUMBER").orNull?.toInt()
 
 android {
     namespace = "com.michaeltroger.gruenerpass"
 
     defaultConfig {
         applicationId = "com.michaeltroger.gruenerpass"
-        versionCode = 79
-        versionName = "5.1.4"
+        versionCode = buildNumber ?: 80
+        versionName = "5.2.${buildNumber ?: 0}"
     }
 }
 
@@ -20,41 +22,38 @@ dependencies {
     implementation(project(":pdfimporter"))
     implementation(project(":pdfrenderer"))
 
-    playImplementation(project(":billing"))
+    implementation(platform(libs.org.jetbrains.kotlinx.coroutines.bom))
+    implementation(libs.org.jetbrains.kotlinx.coroutines.android)
 
-    implementation(libs.androidx.activity.ktx)
-    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.biometric)
-    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.fragment.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.preference.ktx)
-    implementation(libs.com.github.lisawray.groupie)
-    implementation(libs.com.github.lisawray.groupie.viewbinding)
-    implementation(libs.com.google.android.material)
-    implementation(libs.io.github.panpf.zoomimage.view)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.io.github.panpf.zoomimage.compose)
+    implementation(libs.kotlinx.serialization.core)
 
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.test.ext.junit.ktx)
-    testImplementation(libs.app.cash.turbine)
     testImplementation(libs.io.kotest.assertions.core)
-    testImplementation(libs.io.mockk)
     testImplementation(libs.org.jetbrains.kotlinx.coroutines.test)
     testImplementation(libs.org.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.com.google.dagger.hilt.androidtesting)
     kspTest(libs.com.google.dagger.hilt.compiler)
-
-    androidTestImplementation(libs.androidx.test.espresso.contrib)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(libs.androidx.test.uiautomator)
-
-    androidTestUtil(libs.androidx.test.orchestrator)
 }
+
+// Room schemas for the migration tests (Robolectric reads them from the debug assets)
+android.sourceSets.getByName("debug").assets.srcDir("$projectDir/schemas")

@@ -1,68 +1,40 @@
 package com.michaeltroger.gruenerpass
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.view.WindowManager
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.core.graphics.Insets
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import com.michaeltroger.gruenerpass.certificates.dialogs.CertificateErrors
-import com.michaeltroger.gruenerpass.extensions.getUri
-import com.michaeltroger.gruenerpass.navigation.GetAutoRedirectDestinationUseCase
-import com.michaeltroger.gruenerpass.navigation.GetStartDestinationUseCase
-import com.michaeltroger.gruenerpass.settings.PreferenceUtil
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.core.content.IntentCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.michaeltroger.gruenerpass.settings.AppSettings
+import com.michaeltroger.gruenerpass.settings.ThemeMode
+import com.michaeltroger.gruenerpass.ui.AppRoot
+import com.michaeltroger.gruenerpass.ui.theme.PdfWalletTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
+// same as the androidx.activity defaults
+private val LIGHT_NAVIGATION_BAR_SCRIM = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
+private val DARK_NAVIGATION_BAR_SCRIM = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
 
-private const val INTERACTION_TIMEOUT_MS = 5 * 60 * 1000L
-private const val PDF_MIME_TYPE = "application/pdf"
-
-@Suppress("TooManyFunctions")
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(R.layout.activity_main), AddFile {
+class MainActivity : FragmentActivity() {
 
     private val vm by viewModels<MainViewModel>()
-
-    @Inject
-    lateinit var preferenceUtil: PreferenceUtil
-    @Inject
-    lateinit var certificateErrors: CertificateErrors
-    @Inject
-    lateinit var getStartDestinationUseCase: GetStartDestinationUseCase
-
-    private val timeoutHandler: Handler = Handler(Looper.getMainLooper())
-    private lateinit var interactionTimeoutRunnable: Runnable
-
-    private var navController: NavController? = null
-    private val appBarConfiguration = AppBarConfiguration.Builder(
-        R.id.certificatesFragment,
-        R.id.lockFragment,
-    )
-
-    private val documentPick = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri == null) return@registerForActivityResult
-        vm.setPendingFile(uri)
-    }
+    private var hasAppliedWindowSettings = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen().setKeepOnScreenCondition { vm.uiState.value == null }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
@@ -70,143 +42,85 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), AddFile {
             window.setHideOverlayWindows(true)
         }
 
-        setupToolbarStatusbar()
-        setupBottomInsets()
-
         if (savedInstanceState == null) {
-            vm.setPendingFile(intent)
+            intent.pdfUri()?.let(vm::onFileSelected)
         }
 
-        updateSettings()
+        setContent {
+            val state by vm.uiState.collectAsStateWithLifecycle()
+            val uiState = state ?: return@setContent
+            val darkTheme = when (uiState.settings.themeMode) {
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
 
-        interactionTimeoutRunnable = InteractionTimeoutRunnable()
-        startTimeoutHandler()
+            DisposableEffect(darkTheme) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(
+                        lightScrim = android.graphics.Color.TRANSPARENT,
+                        darkScrim = android.graphics.Color.TRANSPARENT,
+                    ) { darkTheme },
+                    // the scrim keeps the navigation bar icons readable before Android 8,
+                    // which can't draw dark navigation bar icons
+                    navigationBarStyle = SystemBarStyle.auto(
+                        lightScrim = LIGHT_NAVIGATION_BAR_SCRIM,
+                        darkScrim = DARK_NAVIGATION_BAR_SCRIM,
+                    ) { darkTheme },
+                )
+                onDispose {}
+            }
+            LaunchedEffect(uiState.settings) {
+                applyWindowSettings(uiState.settings)
+            }
 
-        lifecycleScope.launch {
-            setUpNavigation()
-
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                vm.getAutoRedirectDestination(navController!!).collect {
-                    handleTargetDestination(it)
-                }
+            PdfWalletTheme(darkTheme = darkTheme) {
+                AppRoot(
+                    vm = vm,
+                    state = uiState,
+                    isDarkTheme = darkTheme,
+                )
             }
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                vm.viewEvent.collect {
-                    handleEvent(it)
-                }
-            }
-        }
-    }
-
-    private fun setupBottomInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.nav_host_fragment)) { v, insets ->
-            val bars: Insets = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or
-                        WindowInsetsCompat.Type.displayCutout()
-            )
-            v.updatePadding(
-                bottom = bars.bottom,
-            )
-            WindowInsetsCompat.CONSUMED
-        }
-    }
-
-    private fun setupToolbarStatusbar() {
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        WindowCompat.getInsetsController(window, window.decorView)
-            .isAppearanceLightStatusBars = false
-    }
-
-    private fun handleEvent(it: ViewEvent) {
-        when (it) {
-            ViewEvent.ShowParsingFileError -> {
-                certificateErrors.showFileErrorSnackbar(window.decorView.rootView)
-            }
-        }
-    }
-
-    private fun handleTargetDestination(navDestination: GetAutoRedirectDestinationUseCase.Result) {
-        when (navDestination) {
-            GetAutoRedirectDestinationUseCase.Result.NavigateBack -> {
-                navController?.popBackStack()
-            }
-            is GetAutoRedirectDestinationUseCase.Result.NavigateTo -> {
-                navController?.navigate(navDestination.navDirections)
-            }
-            GetAutoRedirectDestinationUseCase.Result.NothingTodo -> {
-                // nothing to do
-            }
-        }
-    }
-
-    private suspend fun setUpNavigation() {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController.apply {
-            val navGraph = navInflater.inflate(R.navigation.nav_graph).apply {
-                setStartDestination(getStartDestinationUseCase())
-            }
-            graph = navGraph
-        }.also {
-            setupActionBarWithNavController(
-                navController = it,
-                configuration = appBarConfiguration.build()
-            )
-        }
-    }
-
-    private fun updateSettings() {
-        lifecycleScope.launch {
-            preferenceUtil.updateScreenBrightness(this@MainActivity)
-            preferenceUtil.updateShowOnLockedScreen(this@MainActivity)
-            preferenceUtil.updatePreventScreenshots(this@MainActivity)
-        }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        return navController?.navigateUp() == true || super.onSupportNavigateUp()
-    }
-
-    override fun onDestroy() {
-        timeoutHandler.removeCallbacks(interactionTimeoutRunnable)
-        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        vm.setPendingFile(intent)
-    }
-
-    override fun addFile() {
-        documentPick.launch(arrayOf(PDF_MIME_TYPE))
+        intent.pdfUri()?.let(vm::onFileSelected)
     }
 
     override fun onUserInteraction() {
         super.onUserInteraction()
-        timeoutHandler.removeCallbacks(interactionTimeoutRunnable)
-        startTimeoutHandler()
+        vm.onUserInteraction()
     }
 
-    private fun startTimeoutHandler() {
-        timeoutHandler.postDelayed(interactionTimeoutRunnable, INTERACTION_TIMEOUT_MS)
-    }
-
-    private fun MainViewModel.setPendingFile(intent: Intent?) {
-        intent?.getUri()?.let {
-            setPendingFile(it)
+    private fun applyWindowSettings(settings: AppSettings) {
+        val isSecure = window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0
+        if (settings.blockScreenshots != isSecure) {
+            if (settings.blockScreenshots) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            }
+            // an existing surface doesn't reliably pick up the changed flag, a new window does
+            if (hasAppliedWindowSettings) recreate()
+        }
+        hasAppliedWindowSettings = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(settings.showOnLockScreen)
+        }
+        window.attributes = window.attributes.apply {
+            screenBrightness = if (settings.fullBrightness) {
+                WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+            } else {
+                WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            }
         }
     }
 
-    private inner class InteractionTimeoutRunnable : Runnable {
-        override fun run() {
-            vm.onInteractionTimeout()
-        }
+    private fun Intent.pdfUri(): Uri? = data ?: if (action == Intent.ACTION_SEND) {
+        IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+        null
     }
-}
-
-interface AddFile {
-    fun addFile()
 }

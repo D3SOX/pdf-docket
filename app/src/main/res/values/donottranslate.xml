@@ -1,55 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PDF Wallet</string>
-    <string name="issues_uri">https://github.com/michaeltroger/pdfwallet-android/issues</string>
-    <string name="contact_uri">mailto:pdfwallet@troger.app</string>
-    <string name="imprint_uri">https://michaeltroger.com/imprint/</string>
-    <string name="rate_uri">https://play.google.com/store/apps/details?id=com.michaeltroger.gruenerpass</string>
-    <string name="help_translating_uri">https://crowdin.com/project/green-pass</string>
-    <string name="privacy_policy_uri">https://pdfwallet.troger.app/privacy/</string>
-    <string name="key_preference_biometric">shouldAuthenticate</string>
-    <string name="key_preference_full_brightness">fullBrightness</string>
-    <string name="key_preference_new_barcode_generation">newBarcodeGeneration</string>
-    <string name="key_preference_show_list_layout">showListLayout</string>
-    <string name="key_preference_show_on_locked_screen">showOnLockedScreen</string>
-    <string name="licenses_uri">https://pdfwallet.troger.app/licenses/</string>
+    <string name="source_code_uri">https://github.com/D3SOX/pdfwallet-android</string>
+    <string name="issues_uri">https://github.com/D3SOX/pdfwallet-android/issues</string>
+    <string name="changelog_uri">https://github.com/D3SOX/pdfwallet-android/releases</string>
+    <string name="license_uri">https://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="pdf_file_provider_authority">com.michaeltroger.gruenerpass.pdffileprovider</string>
-    <string name="changelog_uri">https://github.com/michaeltroger/pdfwallet-android/releases</string>
-    <string name="key_preference_add_documents_front">addDocumentsFront</string>
-    <string name="up">˄</string>
-    <string name="down">˅</string>
-    <string-array name="preference_barcode_entries">
-        <item>@string/preference_barcode_disabled</item>
-        <item>@string/preference_barcode_regular</item>
-        <item>@string/preference_barcode_extended</item>
-    </string-array>
-    <string-array name="preference_barcode_entry_values">
-        <item>@string/key_preference_barcodes_disabled</item>
-        <item>@string/key_preference_barcodes_regular</item>
-        <item>@string/key_preference_barcodes_extended</item>
-    </string-array>
-    <string name="key_preference_extract_barcodes">extractBarcodes</string>
-    <string name="key_preference_barcodes_disabled">disabled</string>
-    <string name="key_preference_barcodes_regular">regular</string>
-    <string name="key_preference_barcodes_extended">extended</string>
-    <string name="key_preference_prevent_screenshots">preventScreenshots</string>
-    <string name="key_preference_billing">billing</string>
-    <string name="key_preference_billing_separator">billing_separator</string>
-    <string name="key_preference_invert_pdf_colors">invertPdfColors</string>
-    <string name="key_preference_force_theme">forceTheme</string>
-    <string name="key_preference_theme_system">system</string>
-    <string name="key_preference_theme_light">light</string>
-    <string name="key_preference_theme_dark">dark</string>
-    <string-array name="preference_theme_entries">
-        <item>@string/preference_theme_system</item>
-        <item>@string/preference_theme_light</item>
-        <item>@string/preference_theme_dark</item>
-    </string-array>
-    <string-array name="preference_theme_entry_values">
-        <item>@string/key_preference_theme_system</item>
-        <item>@string/key_preference_theme_light</item>
-        <item>@string/key_preference_theme_dark</item>
-    </string-array>
-    <string name="key_preference_half_size_barcodes">halfSizeBarcodes</string>
-    <string name="preference_tag_filter_type">tag_filter_type</string>
 </resources>

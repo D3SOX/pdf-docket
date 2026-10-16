@@ -5,9 +5,9 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.plugin.parcelize")
     id("com.google.dagger.hilt.android")
-    id("androidx.navigation.safeargs.kotlin")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 
     id("com.github.jk1.dependency-license-report")
     id("io.gitlab.arturbosch.detekt")
@@ -18,7 +18,7 @@ android {
 
     buildFeatures {
         buildConfig = true
-        viewBinding = true
+        compose = true
     }
 
     compileOptions {
@@ -30,7 +30,6 @@ android {
         targetSdk = Versions.TARGET_SDK
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }
 
     androidResources {
@@ -71,23 +70,12 @@ android {
             }
             signingConfig = signingConfigs.getByName("release")
         }
-
-        flavorDimensions += "variant"
-        productFlavors {
-            create("foss") {
-                dimension = "variant"
-            }
-            create("play") {
-                dimension = "variant"
-            }
-        }
     }
 
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
         }
-        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
 }
 
@@ -95,7 +83,6 @@ kotlin {
     jvmToolchain(Versions.JAVA)
     compilerOptions {
         allWarningsAsErrors = true
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
 }
 
@@ -105,7 +92,7 @@ ksp {
 
 licenseReport {
     outputDir = "$rootDir/docs/licenses"
-    configurations = arrayOf("playReleaseRuntimeClasspath")
+    configurations = arrayOf("releaseRuntimeClasspath")
     filters = arrayOf(LicenseBundleNormalizer())
 }
 
@@ -121,4 +108,9 @@ dependencies {
     ksp(libs.libHiltCompiler)
 
     implementation(platform(libs.libComposeBom))
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
 }

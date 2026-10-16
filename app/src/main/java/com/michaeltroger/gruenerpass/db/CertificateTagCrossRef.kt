@@ -2,9 +2,11 @@ package com.michaeltroger.gruenerpass.db
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     primaryKeys = ["certificateId", "tagId"],
+    indices = [Index("tagId")],
     foreignKeys = [
         ForeignKey(
             entity = Certificate::class,

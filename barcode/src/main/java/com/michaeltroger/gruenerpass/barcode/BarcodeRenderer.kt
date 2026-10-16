@@ -17,20 +17,26 @@ private const val BARCODE_FOREGROUND_COLOR = 0xff000000.toInt()
 private const val BARCODE_BACKGROUND_COLOR = 0xffffffff.toInt()
 
 private val preferredPriority = listOf(
-    ZxingCpp.BarcodeFormat.AZTEC,
-    ZxingCpp.BarcodeFormat.DATA_MATRIX,
-    ZxingCpp.BarcodeFormat.PDF_417,
-    ZxingCpp.BarcodeFormat.QR_CODE,
-    ZxingCpp.BarcodeFormat.UPC_A,
-    ZxingCpp.BarcodeFormat.UPC_E,
-    ZxingCpp.BarcodeFormat.EAN_8,
-    ZxingCpp.BarcodeFormat.EAN_13,
-    ZxingCpp.BarcodeFormat.CODE_39,
-    ZxingCpp.BarcodeFormat.CODE_93,
-    ZxingCpp.BarcodeFormat.CODE_128,
-    ZxingCpp.BarcodeFormat.CODABAR,
+    ZxingCpp.BarcodeFormat.Aztec,
+    ZxingCpp.BarcodeFormat.DataMatrix,
+    ZxingCpp.BarcodeFormat.PDF417,
+    ZxingCpp.BarcodeFormat.QRCode,
+    ZxingCpp.BarcodeFormat.UPCA,
+    ZxingCpp.BarcodeFormat.UPCE,
+    ZxingCpp.BarcodeFormat.EAN8,
+    ZxingCpp.BarcodeFormat.EAN13,
+    ZxingCpp.BarcodeFormat.Code39,
+    ZxingCpp.BarcodeFormat.Code93,
+    ZxingCpp.BarcodeFormat.Code128,
+    ZxingCpp.BarcodeFormat.Codabar,
     ZxingCpp.BarcodeFormat.ITF,
 )
+
+/**
+ * Results may report a specific variant (e.g. a QR code model) of a requested format family.
+ */
+private fun ZxingCpp.BarcodeFormat.priority(): Int =
+    preferredPriority.indexOfFirst { name.startsWith(it.name) }.takeIf { it >= 0 } ?: Int.MAX_VALUE
 
 private val readerOptions = ZxingCpp.ReaderOptions(
     formats = preferredPriority.toSet(),
@@ -95,8 +101,7 @@ internal class BarcodeRendererImpl @Inject constructor(
 
         if (resultSet.isEmpty()) return@withContext null
 
-        val resultsMap = resultSet.associateBy { it.result.format }
-        preferredPriority.firstNotNullOfOrNull { resultsMap[it] }
+        resultSet.minBy { it.result.format.priority() }
     }
 
     @Suppress("MagicNumber")
@@ -186,7 +191,7 @@ internal class BarcodeRendererImpl @Inject constructor(
             height = BARCODE_SIZE,
             setColor = BARCODE_FOREGROUND_COLOR,
             unsetColor = BARCODE_BACKGROUND_COLOR,
-            margin = 0,
+            addQuietZones = false,
         )
     }
 

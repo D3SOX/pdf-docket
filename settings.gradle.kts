@@ -17,7 +17,6 @@ rootProject.name = "pdfwallet"
 
 include(":app")
 include(":barcode")
-include(":billing")
 include(":coroutines")
 include(":logger")
 include(":pdfdecryptor")
