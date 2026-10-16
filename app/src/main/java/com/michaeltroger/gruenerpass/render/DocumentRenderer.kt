@@ -20,7 +20,10 @@ private const val MAX_CACHED_BARCODE_RESULTS = 32
 
 data class PageBarcode(val pageIndex: Int, val bitmap: Bitmap)
 
-data class BarcodeScan(val pageCount: Int, val barcodes: List<PageBarcode>)
+data class BarcodeScan(val pageCount: Int, val barcodes: List<PageBarcode>) {
+    val hasSeveralBarcodesPerPage: Boolean
+        get() = barcodes.groupingBy { it.pageIndex }.eachCount().any { it.value > 1 }
+}
 
 /**
  * Renders PDF pages, thumbnails and barcodes. Results are cached in memory, since the files never change.
@@ -61,12 +64,12 @@ class DocumentRenderer @Inject constructor(
         return scanMutex.withLock {
             scans[key] ?: withRenderer(id) { renderer ->
                 val pageCount = renderer.getPageCount()
-                val barcodes = (0 until pageCount).mapNotNull { pageIndex ->
+                val barcodes = (0 until pageCount).flatMap { pageIndex ->
                     val page = renderer.renderPage(
                         pageIndex = pageIndex,
                         highResolution = mode == BarcodeSearchMode.EXTENDED,
-                    ) ?: return@mapNotNull null
-                    val barcode = barcodeRenderer.getBarcodeIfPresent(
+                    ) ?: return@flatMap emptyList()
+                    val pageBarcodes = barcodeRenderer.getBarcodes(
                         document = page,
                         tryExtraHard = mode == BarcodeSearchMode.EXTENDED,
                         generateNewBarcode = generateNewBarcode,
@@ -74,7 +77,7 @@ class DocumentRenderer @Inject constructor(
                     if (cache.get(pageKey(id, pageIndex)) == null) {
                         cache.put(pageKey(id, pageIndex), page.scaleToWidth(screenWidth))
                     }
-                    barcode?.let { PageBarcode(pageIndex, it) }
+                    pageBarcodes.map { PageBarcode(pageIndex, it) }
                 }
                 BarcodeScan(pageCount, barcodes)
             }.also { scans.put(key, it) }

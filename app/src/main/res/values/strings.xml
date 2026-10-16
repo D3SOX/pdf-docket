@@ -84,6 +84,7 @@
     <string name="show_pdf">Show PDF</string>
     <string name="document_position">Document %1$d/%2$d</string>
     <string name="page_position">Page %1$d/%2$d</string>
+    <string name="barcode_position">Barcode %1$d/%2$d</string>
     <string name="tags">Tags</string>
     <string name="rename">Rename</string>
     <string name="no_tags">No tags yet</string>

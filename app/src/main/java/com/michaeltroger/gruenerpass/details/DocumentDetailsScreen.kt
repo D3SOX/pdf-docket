@@ -225,7 +225,11 @@ private fun DocumentPage(
                 pageCount = result.barcodes.size,
                 isActive = isActive,
                 pageLabel = {
-                    stringResource(R.string.page_position, result.barcodes[it].pageIndex + 1, result.pageCount)
+                    if (result.hasSeveralBarcodesPerPage) {
+                        stringResource(R.string.barcode_position, it + 1, result.barcodes.size)
+                    } else {
+                        stringResource(R.string.page_position, result.barcodes[it].pageIndex + 1, result.pageCount)
+                    }
                 },
             ) {
                 BarcodeView(result.barcodes[it], settings.halfSizeBarcodes)

@@ -44,7 +44,8 @@ private val readerOptions = ZxingCpp.ReaderOptions(
     tryRotate = true,
     tryInvert = true,
     tryDownscale = true,
-    maxNumberOfSymbols = 2,
+    // e.g. one page with several tickets
+    maxNumberOfSymbols = 0xff,
 )
 
 private data class BarcodeHit(
@@ -53,41 +54,47 @@ private data class BarcodeHit(
 )
 
 public interface BarcodeRenderer {
-    public suspend fun getBarcodeIfPresent(
+    /**
+     * Returns the barcodes of the page in reading order. When a page contains different formats,
+     * only the ones of the preferred format are returned, e.g. a ticket code instead of an advertisement.
+     */
+    public suspend fun getBarcodes(
         document: Bitmap?,
         tryExtraHard: Boolean,
         generateNewBarcode: Boolean
-    ): Bitmap?
+    ): List<Bitmap>
 }
 
 internal class BarcodeRendererImpl @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : BarcodeRenderer {
 
-    override suspend fun getBarcodeIfPresent(
+    override suspend fun getBarcodes(
         document: Bitmap?,
         tryExtraHard: Boolean,
         generateNewBarcode: Boolean,
-    ): Bitmap? = withContext(dispatcher) {
-        val hit: BarcodeHit = document?.extractBarcode(tryExtraHard) ?: return@withContext null
-        if (!isActive) return@withContext null
-        encodeBarcodeAsBitmap(
-            hit = hit,
-            source = document,
-            generateNewBarcode = generateNewBarcode
-        )
+    ): List<Bitmap> = withContext(dispatcher) {
+        val hits = document?.extractBarcodes(tryExtraHard) ?: return@withContext emptyList()
+        hits.mapNotNull { hit ->
+            if (!isActive) return@withContext emptyList()
+            encodeBarcodeAsBitmap(
+                hit = hit,
+                source = document,
+                generateNewBarcode = generateNewBarcode
+            )
+        }
     }
 
-    private suspend fun Bitmap.extractBarcode(
+    private suspend fun Bitmap.extractBarcodes(
         tryExtraHard: Boolean
-    ): BarcodeHit? = withContext(dispatcher) {
+    ): List<BarcodeHit>? = withContext(dispatcher) {
 
         val resultSet = try {
             getCropRectangles(tryExtraHard).flatMap { cropRect ->
                 if (!isActive) return@withContext null
 
                 ZxingCpp.readBitmap(
-                    bitmap = this@extractBarcode,
+                    bitmap = this@extractBarcodes,
                     cropRect = cropRect,
                     rotation = 0,
                     options = readerOptions,
@@ -101,8 +108,19 @@ internal class BarcodeRendererImpl @Inject constructor(
 
         if (resultSet.isEmpty()) return@withContext null
 
-        resultSet.minBy { it.result.format.priority() }
+        val preferredPriority = resultSet.minOf { it.result.format.priority() }
+        resultSet
+            .filter { it.result.format.priority() == preferredPriority }
+            // the overlapping crop rectangles find the same barcode several times
+            .distinctBy { it.result.format to it.result.rawBytes.contentHashCode() }
+            .sortedWith(compareBy({ it.top }, { it.left }))
     }
+
+    private val BarcodeHit.top: Int
+        get() = cropRect.top + minOf(result.position.topLeft.y, result.position.topRight.y)
+
+    private val BarcodeHit.left: Int
+        get() = cropRect.left + minOf(result.position.topLeft.x, result.position.bottomLeft.x)
 
     @Suppress("MagicNumber")
     private fun Bitmap.getCropRectangles(tryExtraHard: Boolean): List<Rect> {
