@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Published release tag (for example v5.2.850)
+        description: Published release tag (for example v1.0.0)
         required: true
         type: string
       verify_only:

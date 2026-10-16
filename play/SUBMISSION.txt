@@ -50,7 +50,7 @@ and policy declarations stay untouched.
   b. gh secret set PLAY_SERVICE_ACCOUNT_JSON -R D3SOX/pdfwallet < key.json
      Keep the key file outside the repository and delete local copies.
   c. Check access without uploading:
-     gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<latest tag> -f verify_only=true
+     gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<tag> -f verify_only=true
   d. gh variable set PLAY_PUBLISHING -R D3SOX/pdfwallet --body true
 
 Retry the upload of a published release:
@@ -63,5 +63,6 @@ Local CLI (Ruby 3.4 and Bundler):
   bundle exec fastlane android upload_listing
   bundle exec fastlane android publish_play aab:/path/pdfwallet.aab notes:/path/notes.txt
 
-Version codes are the commit count of main, so every release has a higher
-code. Google Play rejects a version code that it already received.
+Releases are created by pushing a version tag (git tag v1.0.1 && git push
+origin v1.0.1). The version code is the commit count, so every release has a
+higher code. Google Play rejects a version code that it already received.

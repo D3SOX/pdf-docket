@@ -1,0 +1,100 @@
+name: Website and F-Droid repository
+
+# Publishes the website with an F-Droid repository containing the APK of the latest release.
+on:
+  workflow_call:
+    secrets:
+      RELEASE_KEYSTORE:
+        required: true
+      RELEASE_KEYSTORE_PROPERTIES:
+        required: true
+  push:
+    branches: [ main ]
+    paths:
+      - 'website/**'
+      - 'fdroid/**'
+      - 'fastlane/metadata/**'
+      - '.github/workflows/website.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      has_release: ${{ steps.release.outputs.found }}
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    - name: Set up JDK
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+        cache-dependency-path: fdroid/requirements.txt
+
+    - name: Download the APK of the latest release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        if gh release download --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --output pdfwallet.apk; then
+          echo "found=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::No release yet, the website is published with the first release."
+        fi
+
+    - name: Build website and F-Droid repository
+      if: steps.release.outputs.found == 'true'
+      env:
+        RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+        RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
+      run: |
+        pip install -r fdroid/requirements.txt
+        mkdir credentials
+        echo "$RELEASE_KEYSTORE" | base64 -d > credentials/keystore.jks
+        store_pass=$(echo "$RELEASE_KEYSTORE_PROPERTIES" | sed -n 's/^STORE_PASSWORD=//p')
+        key_pass=$(echo "$RELEASE_KEYSTORE_PROPERTIES" | sed -n 's/^KEY_PASSWORD=//p')
+        echo "::add-mask::$store_pass"
+        echo "::add-mask::$key_pass"
+        FDROID_KEYSTORE_PASS="$store_pass" FDROID_KEY_PASS="$key_pass" \
+          fdroid/build-repo.sh pdfwallet.apk credentials/keystore.jks
+
+    - name: Remove credentials
+      if: always()
+      run: rm -rf credentials
+
+    - name: Upload website
+      if: steps.release.outputs.found == 'true'
+      uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      with:
+        path: fdroid/site
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.has_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

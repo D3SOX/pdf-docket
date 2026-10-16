@@ -2,16 +2,18 @@ plugins {
     id("greenpass.app-conventions")
 }
 
-// CI passes the commit count, so every commit on main gets a higher version code
+// The release workflow passes the commit count, which keeps version codes increasing,
+// and the version from the release tag
 val buildNumber = providers.environmentVariable("BUILD_NUMBER").orNull?.toInt()
+val releaseVersionName = providers.environmentVariable("VERSION_NAME").orNull
 
 android {
     namespace = "com.michaeltroger.gruenerpass"
 
     defaultConfig {
         applicationId = "me.d3sox.pdfwallet"
-        versionCode = buildNumber ?: 80
-        versionName = "5.2.${buildNumber ?: 0}"
+        versionCode = buildNumber ?: 1
+        versionName = releaseVersionName ?: "dev"
     }
 }
 

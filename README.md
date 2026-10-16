@@ -7,7 +7,7 @@ An Android app that stores your PDF tickets, passes and certificates and shows t
   <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/D3SOX/pdfwallet"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="80"></a>
 </p>
 
-The F-Droid badge opens this project's own F-Droid repository, which you add to your F-Droid client. Every commit to `main` publishes a new release there and on [GitHub Releases](https://github.com/D3SOX/pdfwallet/releases).
+The F-Droid badge opens this project's own F-Droid repository, which you add to your F-Droid client. New versions appear there and on [GitHub Releases](https://github.com/D3SOX/pdfwallet/releases).
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="200" alt="Document list"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="200" alt="Barcode in fullscreen"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="200" alt="Documents filtered by tag"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="200" alt="Dark mode">
 
@@ -34,6 +34,12 @@ The app requires JDK 21 to build and runs on Android 7.0 or later.
 ```sh
 ./gradlew assembleDebug
 ./gradlew detekt lintDebug testDebugUnitTest
+```
+
+To publish a release, push a version tag. The release workflow builds the signed APK and App Bundle, creates the GitHub release and updates the F-Droid repository.
+
+```sh
+git tag v1.0.1 && git push origin v1.0.1
 ```
 
 ## License
