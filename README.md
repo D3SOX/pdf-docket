@@ -5,9 +5,12 @@ An Android app that stores your PDF tickets, passes and certificates and shows t
 <p>
   <a href="https://fdroid.link/#https://pdfwallet.d3sox.me/repo?fingerprint=5DE94793532B65A47FF529D0BA9254338AA3879BF3C696AEFA3FAF56D05D08BB"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
   <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/D3SOX/pdfwallet"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="80"></a>
+  <a href="https://pdfwallet.d3sox.me/#play-test"><img src="website/play-test-badge.svg" alt="Join the test on Google Play" height="80"></a>
 </p>
 
 The F-Droid badge opens this project's own F-Droid repository, which you add to your F-Droid client. New versions appear there and on [GitHub Releases](https://github.com/D3SOX/pdfwallet/releases).
+
+To join the Google Play closed test, first [join the tester group](https://groups.google.com/g/vegsnap-testers), then [opt in on Google Play](https://play.google.com/apps/testing/me.d3sox.pdfwallet) with the same Google account. Please stay opted in for at least 14 days, try the app and send feedback via [GitHub Issues](https://github.com/D3SOX/pdfwallet/issues). Google Play, F-Droid and GitHub builds share one signing key, so you can switch between them without reinstalling the app.
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="200" alt="Document list"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="200" alt="Barcode in fullscreen"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="200" alt="Documents filtered by tag"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="200" alt="Dark mode">
 
