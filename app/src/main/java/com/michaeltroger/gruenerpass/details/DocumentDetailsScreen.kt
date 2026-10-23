@@ -1,5 +1,7 @@
 package com.michaeltroger.gruenerpass.details
 
+import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -36,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -54,6 +57,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -95,6 +99,19 @@ fun DocumentDetailsScreen(
     isDarkTheme: Boolean,
     onBack: () -> Unit,
 ) {
+    val window = LocalActivity.current?.window
+    DisposableEffect(window, settings.fullBrightness) {
+        if (window == null || !settings.fullBrightness) return@DisposableEffect onDispose {}
+        window.attributes = window.attributes.apply {
+            screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+        }
+        onDispose {
+            window.attributes = window.attributes.apply {
+                screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            }
+        }
+    }
+
     val list by vm.documentList.collectAsStateWithLifecycle()
     val documents = list?.visible ?: return
     if (documents.isEmpty()) {
@@ -145,6 +162,8 @@ fun DocumentDetailsScreen(
             Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                // e.g. while queuing at a gate
+                .keepScreenOn()
         ) {
             HorizontalPager(
                 state = pagerState,

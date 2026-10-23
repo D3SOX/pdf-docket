@@ -16,7 +16,7 @@
     <string name="report_issue_summary">Algum problema usando o aplicativo? Vamos tentar ajudá-lo</string>
     <string name="report_issue">Reportar problema</string>
     <string name="preference_max_brightness">100\u0025 luminosidade</string>
-    <string name="preference_max_brightness_description">Sempre exiba o aplicativo com brilho de tela cheia.</string>
+    <string name="preference_max_brightness_description">Usar o brilho máximo da tela ao exibir um documento.</string>
     <string name="version">Versão %1$s</string>
     <string name="share">Compartilhar</string>
     <string name="changelog">Registro de alterações</string>

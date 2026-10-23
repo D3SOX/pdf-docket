@@ -111,13 +111,6 @@ class MainActivity : FragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(settings.showOnLockScreen)
         }
-        window.attributes = window.attributes.apply {
-            screenBrightness = if (settings.fullBrightness) {
-                WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
-            } else {
-                WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-            }
-        }
     }
 
     private fun handleIntent(intent: Intent) {

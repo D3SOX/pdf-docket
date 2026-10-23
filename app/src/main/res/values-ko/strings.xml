@@ -15,7 +15,7 @@
     <string name="report_issue_summary">앱 사용에 문제가 있나요? 도와드리겠습니다</string>
     <string name="report_issue">문제 신고</string>
     <string name="preference_max_brightness">100\u0025 밝기</string>
-    <string name="preference_max_brightness_description">항상 전체 화면 밝기로 앱을 표시합니다.</string>
+    <string name="preference_max_brightness_description">문서를 표시하는 동안 화면을 최대 밝기로 표시합니다.</string>
     <string name="version">버전 %1$s</string>
     <string name="share">공유</string>
     <string name="changelog">변경 로그</string>

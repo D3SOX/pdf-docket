@@ -16,7 +16,7 @@
     <string name="report_issue_summary">هل تواجه مشكلة في استخدام التطبيق؟ دعنا نحاول مساعدتك</string>
     <string name="report_issue">الإبلاغ عن مشكلة</string>
     <string name="preference_max_brightness">سطوع 100%</string>
-    <string name="preference_max_brightness_description">عرض التطبيق دائمًا بسطوع الشاشة الكامل.</string>
+    <string name="preference_max_brightness_description">استخدام أقصى سطوع للشاشة أثناء عرض مستند.</string>
     <string name="version">الإصدار %1$s</string>
     <string name="share">مشاركة</string>
     <string name="changelog">سجل التغييرات</string>

@@ -16,7 +16,7 @@
     <string name="report_issue_summary">Έχετε πρόβλημα με τη χρήση της εφαρμογής; Αφήστε μας να σας βοηθήσουμε</string>
     <string name="report_issue">Αναφορά προβλήματος</string>
     <string name="preference_max_brightness">100\u0025 φωτεινότητα</string>
-    <string name="preference_max_brightness_description">Να εμφανίζεται πάντα η εφαρμογή με πλήρη φωτεινότητα οθόνης.</string>
+    <string name="preference_max_brightness_description">Χρήση πλήρους φωτεινότητας οθόνης κατά την εμφάνιση εγγράφου.</string>
     <string name="version">Έκδοση %1$s</string>
     <string name="share">Κοινοποίηση</string>
     <string name="changelog">Τι νέο υπάρχει</string>

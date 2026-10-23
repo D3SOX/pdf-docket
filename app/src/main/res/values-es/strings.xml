@@ -16,7 +16,7 @@
     <string name="report_issue_summary">¿Problema con la aplicación? Déjame intentar ayudarte</string>
     <string name="report_issue">Notificar problemas</string>
     <string name="preference_max_brightness">100\u0025 brillo</string>
-    <string name="preference_max_brightness_description">Mostrar siempre la aplicación con brillo a pantalla completa.</string>
+    <string name="preference_max_brightness_description">Usar el brillo máximo de la pantalla al mostrar un documento.</string>
     <string name="version">Versión %1$s</string>
     <string name="share">Compartir</string>
     <string name="changelog">Registro de cambios</string>
