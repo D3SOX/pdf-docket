@@ -14,10 +14,13 @@ import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlin.math.min
+import kotlin.math.sqrt
 
 private const val REGULAR_PDF_RESOLUTION_MULTIPLIER = 2
 private const val IMPROVED_PDF_RESOLUTION_MULTIPLIER = 4
 private const val MAX_BITMAP_SIZE = 100 * 1024 * 1024
+private const val BYTES_PER_PIXEL = 4
 
 @Suppress("MagicNumber")
 private val invertFilter = ColorMatrixColorFilter(
@@ -68,9 +71,11 @@ private class PdfRendererImpl(
 
     @Throws(Exception::class)
     override suspend fun loadFile(): Unit = withContext(renderContext) {
-        fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-        renderer = PdfRenderer(fileDescriptor!!)
-        renderer!!.openPage(0).use {  }
+        // Loading again would otherwise leak the previous file descriptor
+        close()
+        val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        fileDescriptor = descriptor
+        renderer = PdfRenderer(descriptor).also { it.openPage(0).use { } }
     }
 
     override suspend fun getPageCount(): Int = withContext(renderContext) {
@@ -89,6 +94,8 @@ private class PdfRendererImpl(
             renderer?.use {}
             fileDescriptor?.use {}
         } catch (ignore: Exception) {}
+        renderer = null
+        fileDescriptor = null
     }
 
     override suspend fun renderPage(
@@ -115,31 +122,32 @@ private class PdfRendererImpl(
 
     @Suppress("SwallowedException")
     private fun PdfRenderer.Page.createBitmap(highResolution: Boolean): Bitmap {
-        var renderWidth: Int = width
-        var renderHeight: Int = height
-        if (activityManager?.isLowRamDevice == false) {
-            val multiplier = if (highResolution) {
-                IMPROVED_PDF_RESOLUTION_MULTIPLIER
-            } else {
-                REGULAR_PDF_RESOLUTION_MULTIPLIER
-            }
-            renderWidth *= multiplier
-            renderHeight *= multiplier
+        val multiplier = when {
+            activityManager?.isLowRamDevice != false -> 1
+            highResolution -> IMPROVED_PDF_RESOLUTION_MULTIPLIER
+            else -> REGULAR_PDF_RESOLUTION_MULTIPLIER
         }
-        var bitmap = try {
-            Bitmap.createBitmap(renderWidth, renderHeight, Bitmap.Config.ARGB_8888)
+        // Scale before allocating, so the bitmap never exceeds the size limit, even for huge pages
+        val maxScale = sqrt(MAX_BITMAP_SIZE / (width.toDouble() * height * BYTES_PER_PIXEL))
+        val bitmap = try {
+            createScaledBitmap(min(multiplier.toDouble(), maxScale))
         } catch (e: OutOfMemoryError) {
-            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        }
-        if (bitmap.byteCount > MAX_BITMAP_SIZE) {
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            createScaledBitmap(min(1.0, maxScale))
         }
 
-        val canvas = Canvas(bitmap)
-        canvas.drawColor(Color.WHITE)
-        canvas.drawBitmap(bitmap, 0f, 0f, null)
+        // Pages can be transparent, so render them onto white
+        Canvas(bitmap).drawColor(Color.WHITE)
 
         return bitmap
+    }
+
+    // The page is rendered without a transform, so its content is scaled to fit the bitmap
+    private fun PdfRenderer.Page.createScaledBitmap(scale: Double): Bitmap {
+        val maxPixels = MAX_BITMAP_SIZE / BYTES_PER_PIXEL
+        // Rounding a very narrow page up to 1 pixel could otherwise push the bitmap over the limit
+        val bitmapWidth = (width * scale).toInt().coerceIn(1, maxPixels)
+        val bitmapHeight = (height * scale).toInt().coerceIn(1, maxPixels / bitmapWidth)
+        return Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888)
     }
 
     override fun getInvertFilter(): ColorFilter {
