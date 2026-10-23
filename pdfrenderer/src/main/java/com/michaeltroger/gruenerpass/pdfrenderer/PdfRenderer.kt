@@ -14,6 +14,8 @@ import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlin.math.min
+import kotlin.math.sqrt
 
 private const val REGULAR_PDF_RESOLUTION_MULTIPLIER = 2
 private const val IMPROVED_PDF_RESOLUTION_MULTIPLIER = 4
@@ -120,26 +122,17 @@ private class PdfRendererImpl(
 
     @Suppress("SwallowedException")
     private fun PdfRenderer.Page.createBitmap(highResolution: Boolean): Bitmap {
-        var renderWidth: Int = width
-        var renderHeight: Int = height
-        if (activityManager?.isLowRamDevice == false) {
-            val multiplier = if (highResolution) {
-                IMPROVED_PDF_RESOLUTION_MULTIPLIER
-            } else {
-                REGULAR_PDF_RESOLUTION_MULTIPLIER
-            }
-            renderWidth *= multiplier
-            renderHeight *= multiplier
+        val multiplier = when {
+            activityManager?.isLowRamDevice != false -> 1
+            highResolution -> IMPROVED_PDF_RESOLUTION_MULTIPLIER
+            else -> REGULAR_PDF_RESOLUTION_MULTIPLIER
         }
-        // Check the size before allocating, so an oversized bitmap never gets created
-        if (renderWidth.toLong() * renderHeight * BYTES_PER_PIXEL > MAX_BITMAP_SIZE) {
-            renderWidth = width
-            renderHeight = height
-        }
+        // Scale before allocating, so the bitmap never exceeds the size limit, even for huge pages
+        val maxScale = sqrt(MAX_BITMAP_SIZE / (width.toDouble() * height * BYTES_PER_PIXEL))
         val bitmap = try {
-            Bitmap.createBitmap(renderWidth, renderHeight, Bitmap.Config.ARGB_8888)
+            createScaledBitmap(min(multiplier.toDouble(), maxScale))
         } catch (e: OutOfMemoryError) {
-            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            createScaledBitmap(min(1.0, maxScale))
         }
 
         // Pages can be transparent, so render them onto white
@@ -147,6 +140,13 @@ private class PdfRendererImpl(
 
         return bitmap
     }
+
+    // The page is rendered without a transform, so its content is scaled to fit the bitmap
+    private fun PdfRenderer.Page.createScaledBitmap(scale: Double): Bitmap = Bitmap.createBitmap(
+        (width * scale).toInt().coerceAtLeast(1),
+        (height * scale).toInt().coerceAtLeast(1),
+        Bitmap.Config.ARGB_8888,
+    )
 
     override fun getInvertFilter(): ColorFilter {
         return invertFilter

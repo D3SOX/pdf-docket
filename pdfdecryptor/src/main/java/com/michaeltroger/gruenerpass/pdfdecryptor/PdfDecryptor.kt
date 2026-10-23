@@ -37,7 +37,7 @@ internal class PdfDecryptorImpl @Inject constructor(
         file: File,
     ): Unit = withContext(dispatcher) {
         // PDFBox reads lazily from the file, so saving into it directly could corrupt the document
-        val decrypted = File.createTempFile("decrypted", ".pdf", file.parentFile)
+        val decrypted = File.createTempFile("decrypted", ".pdf", file.absoluteFile.parentFile)
         try {
             PDDocument.load(file, password).use { document ->
                 document.isAllSecurityToBeRemoved = true
