@@ -45,7 +45,7 @@
     <string name="preference_prevent_screenshots">Prevent screenshots</string>
     <string name="preference_prevent_screenshots_description">Screenshots are never allowed, in case you enabled authentication. This has security reasons.</string>
     <string name="preference_dynamic_color">Use system colors</string>
-    <string name="preference_dynamic_color_description">Use the colors of your wallpaper instead of green.</string>
+    <string name="preference_dynamic_color_description">Use the colors of your wallpaper instead of blue.</string>
     <string name="preference_invert_pdf_colors">Invert PDF colors</string>
     <string name="preference_invert_pdf_colors_description">Invert document colors in dark mode.</string>
     <string name="preference_force_theme">Force theme</string>
