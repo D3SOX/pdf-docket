@@ -34,6 +34,13 @@ android {
         generateLocaleConfig = true
     }
 
+    packaging {
+        jniLibs {
+            // Stripping depends on the installed NDK, keeping the prebuilt libraries as they are makes the APK reproducible
+            keepDebugSymbols += "**/*.so"
+        }
+    }
+
     lint {
         warningsAsErrors = true
         checkDependencies = true
@@ -51,22 +58,17 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
-            signingConfigs {
-                create("release") {
-                    try {
-                        val keystoreProperties = Properties()
-                        keystoreProperties.load(ByteArrayInputStream(System.getenv("RELEASE_KEYSTORE_PROPERTIES").toByteArray()))
-                        // keystoreProperties.load(ByteArrayInputStream(rootProject.file("credentials/keystore.properties").readBytes()))
-                        keyAlias = keystoreProperties.getProperty("KEY_ALIAS")
-                        keyPassword = keystoreProperties.getProperty("KEY_PASSWORD")
-                        storeFile = rootProject.file("credentials/keystore.jks")
-                        storePassword = keystoreProperties.getProperty("STORE_PASSWORD")
-                    } catch(ignored: Exception) {
-                        println("No signing configuration found, ignoring: $ignored")
-                    }
+            // Without the keystore secret, e.g. on F-Droid's build server, the APK stays unsigned
+            System.getenv("RELEASE_KEYSTORE_PROPERTIES")?.let { properties ->
+                val keystoreProperties = Properties()
+                keystoreProperties.load(ByteArrayInputStream(properties.toByteArray()))
+                signingConfig = signingConfigs.create("release") {
+                    keyAlias = keystoreProperties.getProperty("KEY_ALIAS")
+                    keyPassword = keystoreProperties.getProperty("KEY_PASSWORD")
+                    storeFile = rootProject.file("credentials/keystore.jks")
+                    storePassword = keystoreProperties.getProperty("STORE_PASSWORD")
                 }
             }
-            signingConfig = signingConfigs.getByName("release")
         }
     }
 
