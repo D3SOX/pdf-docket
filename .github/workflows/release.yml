@@ -77,17 +77,6 @@ jobs:
           */build/reports/lint-results-release.html
           */build/reports/tests/testDebugUnitTest/
 
-  website:
-    needs: release
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/website.yml
-    secrets:
-      RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
-      RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
-
   # enable by setting the repository variable PLAY_PUBLISHING to true, see play/SUBMISSION.txt
   publish-play-store:
     needs: release

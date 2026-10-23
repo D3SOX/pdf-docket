@@ -2,12 +2,10 @@ name: Website and F-Droid repository
 
 # Publishes the website with an F-Droid repository containing the APK of the latest release.
 on:
-  workflow_call:
-    secrets:
-      RELEASE_KEYSTORE:
-        required: true
-      RELEASE_KEYSTORE_PROPERTIES:
-        required: true
+  # GitHub Pages ignores deployments from the release tag, so deploy from main after a release
+  workflow_run:
+    workflows: [ Release ]
+    types: [ completed ]
   push:
     branches: [ main ]
     paths:
@@ -26,6 +24,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     outputs:
       has_release: ${{ steps.release.outputs.found }}
