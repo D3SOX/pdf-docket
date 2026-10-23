@@ -46,7 +46,8 @@ and policy declarations stay untouched.
 
   a. Enable the Google Play Developer API in a Google Cloud project, create a
      service account with a JSON key, and invite it in the Play Console with
-     release permissions for PDF Wallet Revived.
+     release permissions for PDF Wallet Revived. play-listing.yml also needs
+     the "Manage store presence" permission.
   b. gh secret set PLAY_SERVICE_ACCOUNT_JSON -R D3SOX/pdfwallet < key.json
      Keep the key file outside the repository and delete local copies.
   c. Check access without uploading:
@@ -56,6 +57,9 @@ and policy declarations stay untouched.
 Retry the upload of a published release:
   gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<tag>
 
+Upload the store listing texts and graphics after changing them:
+  gh workflow run play-listing.yml -R D3SOX/pdfwallet
+
 Local CLI (Ruby 3.4 and Bundler):
   bundle install
   export PLAY_JSON_KEY=/secure/path/play-service-account.json
@@ -63,6 +67,7 @@ Local CLI (Ruby 3.4 and Bundler):
   bundle exec fastlane android upload_listing
   bundle exec fastlane android publish_play aab:/path/pdfwallet.aab notes:/path/notes.txt
 
-Releases are created by pushing a version tag (git tag v1.0.1 && git push
-origin v1.0.1). The version code is the commit count, so every release has a
-higher code. Google Play rejects a version code that it already received.
+Releases are created by bumping versionCode and versionName in
+app/build.gradle.kts and pushing a matching version tag (git tag v1.1.2 &&
+git push origin v1.1.2). Google Play rejects a version code that it already
+received.
