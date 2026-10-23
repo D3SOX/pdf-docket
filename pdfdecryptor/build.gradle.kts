@@ -13,4 +13,8 @@ dependencies {
     implementation(libs.org.bouncycastle.bcprov.jdk15to18)
     implementation(libs.org.bouncycastle.bcpkix.jdk15to18)
     implementation(libs.org.bouncycastle.bcutil.jdk15to18)
+
+    testImplementation(libs.androidx.test.ext.junit.ktx)
+    testImplementation(libs.io.kotest.assertions.core)
+    testImplementation(libs.org.jetbrains.kotlinx.coroutines.test)
 }

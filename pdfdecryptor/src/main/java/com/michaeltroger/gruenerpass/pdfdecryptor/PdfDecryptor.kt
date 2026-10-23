@@ -6,7 +6,6 @@ import com.tom_roush.pdfbox.pdmodel.encryption.InvalidPasswordException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 import javax.inject.Inject
 
 public interface PdfDecryptor {
@@ -24,7 +23,8 @@ internal class PdfDecryptorImpl @Inject constructor(
     @Throws(Exception::class, OutOfMemoryError::class)
     override suspend fun isPdfPasswordProtected(file: File): Boolean = withContext(dispatcher) {
         try {
-            PDDocument.load(file)
+            // Closing the document again frees PDFBox's buffers for it
+            PDDocument.load(file).close()
             return@withContext false
         } catch (e: InvalidPasswordException) {
             return@withContext true
@@ -36,15 +36,16 @@ internal class PdfDecryptorImpl @Inject constructor(
         password: String,
         file: File,
     ): Unit = withContext(dispatcher) {
-            with(PDDocument.load(file, password)) {
-                removePasswordCopyAndClose(file)
+        // PDFBox reads lazily from the file, so saving into it directly could corrupt the document
+        val decrypted = File.createTempFile("decrypted", ".pdf", file.parentFile)
+        try {
+            PDDocument.load(file, password).use { document ->
+                document.isAllSecurityToBeRemoved = true
+                decrypted.outputStream().use(document::save)
             }
-    }
-
-    private fun PDDocument.removePasswordCopyAndClose(file: File) = use {
-        isAllSecurityToBeRemoved = true
-        FileOutputStream(file).use { outputStream ->
-            save(outputStream)
+            check(decrypted.renameTo(file)) { "Couldn't replace ${file.name} with its decrypted copy" }
+        } finally {
+            decrypted.delete()
         }
     }
 }

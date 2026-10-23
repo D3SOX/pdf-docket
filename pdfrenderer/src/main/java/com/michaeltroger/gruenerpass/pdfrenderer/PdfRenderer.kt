@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 private const val REGULAR_PDF_RESOLUTION_MULTIPLIER = 2
 private const val IMPROVED_PDF_RESOLUTION_MULTIPLIER = 4
 private const val MAX_BITMAP_SIZE = 100 * 1024 * 1024
+private const val BYTES_PER_PIXEL = 4
 
 @Suppress("MagicNumber")
 private val invertFilter = ColorMatrixColorFilter(
@@ -68,9 +69,11 @@ private class PdfRendererImpl(
 
     @Throws(Exception::class)
     override suspend fun loadFile(): Unit = withContext(renderContext) {
-        fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-        renderer = PdfRenderer(fileDescriptor!!)
-        renderer!!.openPage(0).use {  }
+        // Loading again would otherwise leak the previous file descriptor
+        close()
+        val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        fileDescriptor = descriptor
+        renderer = PdfRenderer(descriptor).also { it.openPage(0).use { } }
     }
 
     override suspend fun getPageCount(): Int = withContext(renderContext) {
@@ -89,6 +92,8 @@ private class PdfRendererImpl(
             renderer?.use {}
             fileDescriptor?.use {}
         } catch (ignore: Exception) {}
+        renderer = null
+        fileDescriptor = null
     }
 
     override suspend fun renderPage(
@@ -126,18 +131,19 @@ private class PdfRendererImpl(
             renderWidth *= multiplier
             renderHeight *= multiplier
         }
-        var bitmap = try {
+        // Check the size before allocating, so an oversized bitmap never gets created
+        if (renderWidth.toLong() * renderHeight * BYTES_PER_PIXEL > MAX_BITMAP_SIZE) {
+            renderWidth = width
+            renderHeight = height
+        }
+        val bitmap = try {
             Bitmap.createBitmap(renderWidth, renderHeight, Bitmap.Config.ARGB_8888)
         } catch (e: OutOfMemoryError) {
             Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         }
-        if (bitmap.byteCount > MAX_BITMAP_SIZE) {
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        }
 
-        val canvas = Canvas(bitmap)
-        canvas.drawColor(Color.WHITE)
-        canvas.drawBitmap(bitmap, 0f, 0f, null)
+        // Pages can be transparent, so render them onto white
+        Canvas(bitmap).drawColor(Color.WHITE)
 
         return bitmap
     }
