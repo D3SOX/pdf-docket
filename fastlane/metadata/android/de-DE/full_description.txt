@@ -33,6 +33,9 @@ Mehr Funktionen
 - Option um den dunklen oder hellen Theme-Mode zu erzwingen (überschreibt System-Einstellung)
 - Option um Barcodes in halber Größe anzuzeigen
 - Option um Barcode und PDF gleichzeitig im geteilten Bildschirm anzuzeigen
+- Mehrere PDFs auf einmal importieren
+- Dokumente zum Startbildschirm hinzufügen
+- Verschlüsselte Backups aller Dokumente und Tags
 
 Privatsphäre
 Diese App schätzt Ihre Privatsphäre, indem sie vollständig offline funktioniert. Keine Werbung, kein Tracking.

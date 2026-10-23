@@ -1,6 +1,8 @@
 package com.michaeltroger.gruenerpass.documents
 
+import android.content.Context
 import com.michaeltroger.gruenerpass.di.ApplicationScope
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -9,12 +11,19 @@ import javax.inject.Inject
  * Document and tag modifications, shared by the list and the detail screen.
  */
 class DocumentEditor @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val repository: DocumentRepository,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
-    fun rename(id: String, name: String) = scope.launch { repository.rename(id, name) }
+    fun rename(id: String, name: String) = scope.launch {
+        repository.rename(id, name)
+        context.renameShortcut(id, name)
+    }
 
-    fun delete(ids: List<String>) = scope.launch { repository.delete(ids) }
+    fun delete(ids: List<String>) = scope.launch {
+        repository.delete(ids)
+        context.disableShortcuts(ids)
+    }
 
     fun setTags(id: String, tagIds: Set<Long>) = scope.launch { repository.setTags(id, tagIds) }
 

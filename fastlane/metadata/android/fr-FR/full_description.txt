@@ -32,6 +32,9 @@ Fonctions supplémentaires
 - Option pour inverser les couleurs du document en mode sombre
 - Option pour forcer le thème sombre ou clair en écrasant les paramètres système
 - Possibilité d'afficher les codes-barres en demi-taille
+- Importer plusieurs PDF à la fois
+- Ajouter des documents à l'écran d'accueil
+- Sauvegardes chiffrées de tous les documents et tags
 
 Confidentialité
 Cette application respecte votre vie privée : elle fonctionne entièrement hors ligne. Aucune publicité, aucun suivi.

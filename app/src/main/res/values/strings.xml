@@ -104,4 +104,31 @@
     <string name="settings_section_security">Security</string>
     <string name="settings_section_barcodes">Barcodes</string>
     <string name="settings_section_display">Display</string>
+    <string name="add_to_home_screen">Add to home screen</string>
+    <string name="shortcut_document_deleted">This document was deleted</string>
+    <plurals name="documents_imported">
+        <item quantity="one">%d document imported</item>
+        <item quantity="other">%d documents imported</item>
+    </plurals>
+    <string name="settings_section_backup">Backup</string>
+    <string name="create_backup">Create backup</string>
+    <string name="create_backup_summary">Save all documents and tags to a password-protected file</string>
+    <string name="restore_backup">Restore backup</string>
+    <string name="restore_backup_summary">Add the documents of a backup file that aren\'t in the app yet</string>
+    <string name="dialog_backup_password_title">Set backup password</string>
+    <string name="dialog_backup_password_description">You need this password to restore the backup. If you forget it, the backup can\'t be restored.</string>
+    <string name="password">Password</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="passwords_dont_match">The passwords don\'t match</string>
+    <string name="dialog_restore_password_title">Enter backup password</string>
+    <string name="creating_backup">Creating backup…</string>
+    <string name="restoring_backup">Restoring backup…</string>
+    <string name="backup_created">Backup created</string>
+    <plurals name="backup_restored">
+        <item quantity="one">%d document restored</item>
+        <item quantity="other">%d documents restored</item>
+    </plurals>
+    <string name="error_creating_backup">Couldn\'t create the backup</string>
+    <string name="error_reading_backup">Couldn\'t read the backup</string>
+    <string name="error_not_a_backup">This file isn\'t a PDF Wallet Revived backup</string>
 </resources>

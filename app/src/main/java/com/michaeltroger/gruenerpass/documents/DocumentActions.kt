@@ -4,6 +4,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,6 +56,16 @@ fun DocumentMenuItems(
             context.sharePdfs(listOf(document))
         },
     )
+    if (remember { context.canAddToHomeScreen() }) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.add_to_home_screen)) },
+            leadingIcon = { Icon(painterResource(R.drawable.add_to_home_screen_24), contentDescription = null) },
+            onClick = {
+                onDismissMenu()
+                context.addToHomeScreen(document)
+            },
+        )
+    }
     DropdownMenuItem(
         text = { Text(stringResource(R.string.delete)) },
         leadingIcon = { Icon(painterResource(R.drawable.delete_24), contentDescription = null) },

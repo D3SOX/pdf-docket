@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <!-- keeps the glyph inside the 66dp safe zone of the 108dp icon -->
+    <foreground>
+        <inset android:drawable="@drawable/picture_as_pdf_24" android:inset="32dp"/>
+    </foreground>
+</adaptive-icon>

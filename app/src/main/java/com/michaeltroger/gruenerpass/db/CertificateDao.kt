@@ -13,6 +13,9 @@ interface CertificateDao {
     @Query("SELECT * FROM certificates")
     fun getAllWithTags(): Flow<List<CertificateWithTags>>
 
+    @Query("SELECT EXISTS(SELECT 1 FROM certificates WHERE id = :id)")
+    suspend fun exists(id: String): Boolean
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(certificate: Certificate)
 
