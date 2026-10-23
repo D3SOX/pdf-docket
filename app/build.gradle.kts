@@ -9,8 +9,8 @@ android {
         applicationId = "me.d3sox.pdfwallet"
         // Bump both before tagging a release. The release workflow checks that the tag matches versionName,
         // and F-Droid reads both from here to detect updates.
-        versionCode = 854
-        versionName = "1.1.1"
+        versionCode = 855
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "com.michaeltroger.gruenerpass.HiltTestRunner"
     }
