@@ -1,4 +1,4 @@
-<h1><img src="website/logo.svg" alt="" width="40" height="40" align="left">PDF Wallet</h1>
+<h1><img src="website/logo.svg" alt="" width="40" height="40" align="left">PDF Wallet Revived</h1>
 
 An Android app that stores your PDF tickets, passes and certificates and shows their barcodes in fullscreen.
 
@@ -22,7 +22,7 @@ This fork keeps the app open source under the GPLv3. It rebuilds the interface w
 
 ## Features
 
-- Import PDFs, or open them with PDF Wallet from a file browser, email client or web browser.
+- Import PDFs, or open them with PDF Wallet Revived from a file browser, email client or web browser.
 - Detect QR, Aztec, DataMatrix, PDF417, UPC-A, UPC-E, EAN-8, EAN-13, Code 39, Code 93, Code 128, ITF and Codabar barcodes and show them in fullscreen.
 - Swipe between documents and switch between the barcode and the PDF, or show both in split screen.
 - Tag, search and sort documents by import date, name or file size.
@@ -39,10 +39,10 @@ The app requires JDK 21 to build and runs on Android 7.0 or later.
 ./gradlew detekt lintDebug testDebugUnitTest
 ```
 
-To publish a release, push a version tag. The release workflow builds the signed APK and App Bundle, creates the GitHub release and updates the F-Droid repository.
+To publish a release, bump `versionCode` and `versionName` in `app/build.gradle.kts`, then push a matching version tag. The release workflow builds the signed APK and App Bundle, creates the GitHub release and updates the F-Droid repository.
 
 ```sh
-git tag v1.0.1 && git push origin v1.0.1
+git tag v1.1.0 && git push origin v1.1.0
 ```
 
 ## License

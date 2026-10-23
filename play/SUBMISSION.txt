@@ -1,4 +1,4 @@
-PDF Wallet: Google Play submission
+PDF Wallet Revived: Google Play submission
 
 Application ID: me.d3sox.pdfwallet
 Listing texts and graphics: fastlane/metadata/android (title, short and full
@@ -46,7 +46,7 @@ and policy declarations stay untouched.
 
   a. Enable the Google Play Developer API in a Google Cloud project, create a
      service account with a JSON key, and invite it in the Play Console with
-     release permissions for PDF Wallet.
+     release permissions for PDF Wallet Revived.
   b. gh secret set PLAY_SERVICE_ACCOUNT_JSON -R D3SOX/pdfwallet < key.json
      Keep the key file outside the repository and delete local copies.
   c. Check access without uploading:

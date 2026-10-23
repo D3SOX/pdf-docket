@@ -2,18 +2,15 @@ plugins {
     id("greenpass.app-conventions")
 }
 
-// The release workflow passes the commit count, which keeps version codes increasing,
-// and the version from the release tag
-val buildNumber = providers.environmentVariable("BUILD_NUMBER").orNull?.toInt()
-val releaseVersionName = providers.environmentVariable("VERSION_NAME").orNull
-
 android {
     namespace = "com.michaeltroger.gruenerpass"
 
     defaultConfig {
         applicationId = "me.d3sox.pdfwallet"
-        versionCode = buildNumber ?: 1
-        versionName = releaseVersionName ?: "dev"
+        // Bump both before tagging a release. The release workflow checks that the tag matches versionName,
+        // and F-Droid reads both from here to detect updates.
+        versionCode = 853
+        versionName = "1.1.0"
     }
 }
 

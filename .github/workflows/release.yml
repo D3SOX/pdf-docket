@@ -20,9 +20,6 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        # the commit count is the version code
-        fetch-depth: 0
 
     - name: Set up JDK
       uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
@@ -31,10 +28,12 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Set version
+    - name: Check that the tag matches versionName
       run: |
-        echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
-        echo "VERSION_NAME=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+        VERSION_NAME=${GITHUB_REF_NAME#v}
+        grep -q "versionName = \"$VERSION_NAME\"" app/build.gradle.kts \
+          || { echo "::error::Set versionName to $VERSION_NAME and bump versionCode in app/build.gradle.kts"; exit 1; }
+        echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
 
     - name: Run Detekt
       run: ./gradlew detekt

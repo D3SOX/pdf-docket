@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PDF Wallet</string>
+    <string name="app_name">PDF Wallet Revived</string>
     <string name="source_code_uri">https://github.com/D3SOX/pdfwallet</string>
     <string name="issues_uri">https://github.com/D3SOX/pdfwallet/issues</string>
     <string name="changelog_uri">https://github.com/D3SOX/pdfwallet/releases</string>
