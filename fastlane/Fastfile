@@ -50,6 +50,8 @@ platform :android do
   lane :upload_listing do
     upload_to_play_store(
       package_name: PACKAGE_NAME,
+      # supply looks up the latest release on the track even without changelogs, and production has none yet
+      track: TRACK,
       json_key: ENV.fetch("PLAY_JSON_KEY"),
       skip_upload_apk: true,
       skip_upload_aab: true,
