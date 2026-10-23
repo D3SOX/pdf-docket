@@ -142,11 +142,13 @@ private class PdfRendererImpl(
     }
 
     // The page is rendered without a transform, so its content is scaled to fit the bitmap
-    private fun PdfRenderer.Page.createScaledBitmap(scale: Double): Bitmap = Bitmap.createBitmap(
-        (width * scale).toInt().coerceAtLeast(1),
-        (height * scale).toInt().coerceAtLeast(1),
-        Bitmap.Config.ARGB_8888,
-    )
+    private fun PdfRenderer.Page.createScaledBitmap(scale: Double): Bitmap {
+        val maxPixels = MAX_BITMAP_SIZE / BYTES_PER_PIXEL
+        // Rounding a very narrow page up to 1 pixel could otherwise push the bitmap over the limit
+        val bitmapWidth = (width * scale).toInt().coerceIn(1, maxPixels)
+        val bitmapHeight = (height * scale).toInt().coerceIn(1, maxPixels / bitmapWidth)
+        return Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888)
+    }
 
     override fun getInvertFilter(): ColorFilter {
         return invertFilter
