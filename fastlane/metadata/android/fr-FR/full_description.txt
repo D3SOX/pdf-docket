@@ -1,13 +1,13 @@
 Cette application est un portefeuille PDF simple à utiliser. Cela signifie qu’elle prend en charge la tâche de stocker et d’afficher vos certificats PDF les plus importants. Elle inclut un affichage plein écran pratique des codes-barres, si un code-barres est présent dans le PDF.
 
 Brève instruction
-- Ouvrez « PDF Wallet »
+- Ouvrez « PDF Wallet Revived »
 - Importez un PDF
 - Terminé
 
 Instruction alternative
 - Allez dans votre explorateur de fichiers, votre application d’e-mail, votre navigateur web ou votre lecteur PDF
-- Ouvrez / partagez le PDF avec « PDF Wallet »
+- Ouvrez / partagez le PDF avec « PDF Wallet Revived »
 - Terminé
 
 Description

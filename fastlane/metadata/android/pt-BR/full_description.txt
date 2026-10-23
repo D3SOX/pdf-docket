@@ -1,13 +1,13 @@
 Este aplicativo é uma Carteira de PDFs simples de usar. Isso significa que ele assume a tarefa de guardar e exibir os seus certificados em PDF mais importantes. Inclui uma visualização prática em ecrã/ tela inteira do código de barras, se o PDF contiver um.
 
 Instruções rápidas
-- Abra o “PDF Wallet”
+- Abra o “PDF Wallet Revived”
 - Importe o PDF
 - Pronto
 
 Instruções rápidas alternativas
 - Vá ao seu gestor de ficheiros/arquivos, e-mail, navegador ou app de leitura de PDF
-- Abra ou partilhe/envie o PDF com o “PDF Wallet”
+- Abra ou partilhe/envie o PDF com o “PDF Wallet Revived”
 - Pronto
 
 Descrição
