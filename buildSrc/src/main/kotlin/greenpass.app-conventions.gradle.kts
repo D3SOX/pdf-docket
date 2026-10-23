@@ -34,6 +34,11 @@ android {
         generateLocaleConfig = true
     }
 
+    dependenciesInfo {
+        // F-Droid rejects APKs with this Google-encrypted block, Play still gets it from the App Bundle
+        includeInApk = false
+    }
+
     packaging {
         jniLibs {
             // Stripping depends on the installed NDK, keeping the prebuilt libraries as they are makes the APK reproducible
