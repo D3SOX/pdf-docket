@@ -20,10 +20,13 @@ private const val FORMAT_VERSION = 1
 private const val SCRYPT_LOG_N = 15
 private const val SCRYPT_R = 8
 private const val SCRYPT_P = 1
-// rejects files that would make the key derivation take ages or run out of memory
+// rejects files that would make the key derivation take ages or run out of memory.
+// scrypt needs 128 * r * N bytes.
 private const val MAX_SCRYPT_LOG_N = 20
 private const val MAX_SCRYPT_R = 16
 private const val MAX_SCRYPT_P = 4
+private const val MAX_SCRYPT_MEMORY = 64L * 1024 * 1024
+private const val SCRYPT_BLOCK_BYTES = 128L
 private const val SALT_SIZE = 16
 private const val NONCE_SIZE = 12
 private const val KEY_SIZE = 32
@@ -97,7 +100,8 @@ object BackupCipher {
         )
         val hasSaneParameters = header.logN in 1..MAX_SCRYPT_LOG_N &&
             header.r in 1..MAX_SCRYPT_R &&
-            header.p in 1..MAX_SCRYPT_P
+            header.p in 1..MAX_SCRYPT_P &&
+            (SCRYPT_BLOCK_BYTES * header.r shl header.logN) <= MAX_SCRYPT_MEMORY
         return header.takeIf { isBackup && hasSaneParameters }
     }
 

@@ -113,31 +113,43 @@ class MainViewModel @Inject constructor(
 
     private suspend fun importQueuedFiles() {
         val imported = mutableListOf<String>()
+        var hasFailures = false
         while (importQueue.isNotEmpty()) {
-            importFile(importQueue.removeFirst())?.let(imported::add)
+            when (val result = importFile(importQueue.removeFirst())) {
+                ImportResult.Failed -> hasFailures = true
+                ImportResult.Skipped -> Unit
+                is ImportResult.Imported -> imported += result.id
+            }
         }
-        if (imported.isEmpty()) return
-        // make sure the new documents are part of the visible documents
-        documentFilter.clear()
         // not suspending, so files selected meanwhile can't end up in the queue of a finished job
-        _events.trySend(
-            imported.singleOrNull()?.let(MainEvent::OpenDocument) ?: MainEvent.DocumentsImported(imported.size)
-        )
+        if (imported.isNotEmpty()) {
+            // make sure the new documents are part of the visible documents
+            documentFilter.clear()
+            _events.trySend(
+                imported.singleOrNull()?.let(MainEvent::OpenDocument) ?: MainEvent.DocumentsImported(imported.size)
+            )
+        }
+        // one message for the whole batch, after the imported documents are shown
+        if (hasFailures) _events.trySend(MainEvent.ImportFailed)
+    }
+
+    private sealed interface ImportResult {
+        data class Imported(val id: String) : ImportResult
+        data object Failed : ImportResult
+        /** e.g. the password dialog was dismissed */
+        data object Skipped : ImportResult
     }
 
     /**
-     * Imports a single file, asking for its password if needed. Returns the id of the new document.
+     * Imports a single file, asking for its password if needed.
      */
     @Suppress("ReturnCount")
-    private suspend fun importFile(uri: Uri): String? {
+    private suspend fun importFile(uri: Uri): ImportResult {
         // files are only imported once the app is unlocked
         lockedRepo.isAppLocked.first { !it }
         // e.g. a second tap on OK for the previous file
         passwords.tryReceive()
-        if (pdfImporter.preparePendingFile(uri) is PdfImportResult.ParsingError) {
-            _events.trySend(MainEvent.ImportFailed)
-            return null
-        }
+        if (pdfImporter.preparePendingFile(uri) is PdfImportResult.ParsingError) return ImportResult.Failed
         var password: String? = null
         while (true) {
             val result = pdfImporter.importPendingFile(password)
@@ -149,17 +161,14 @@ class MainViewModel @Inject constructor(
             when (result) {
                 is PdfImportResult.Success -> {
                     documentRepository.add(result.pendingCertificate)
-                    return result.pendingCertificate.fileName
+                    return ImportResult.Imported(result.pendingCertificate.fileName)
                 }
-                PdfImportResult.ParsingError -> {
-                    _events.trySend(MainEvent.ImportFailed)
-                    return null
-                }
-                PdfImportResult.NoFileToImport -> return null
+                PdfImportResult.ParsingError -> return ImportResult.Failed
+                PdfImportResult.NoFileToImport -> return ImportResult.Skipped
                 PdfImportResult.PasswordRequired -> password = passwords.receive() ?: run {
                     _passwordPrompt.value = PasswordPrompt.NONE
                     pdfImporter.deletePendingFile()
-                    return null
+                    return ImportResult.Skipped
                 }
             }
         }

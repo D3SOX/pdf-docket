@@ -129,10 +129,11 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun Intent.pdfUris(): List<Uri> = data?.let(::listOf) ?: when (action) {
-        Intent.ACTION_SEND -> listOfNotNull(IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java))
+    private fun Intent.pdfUris(): List<Uri> = when (action) {
         Intent.ACTION_SEND_MULTIPLE ->
             IntentCompat.getParcelableArrayListExtra(this, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
-        else -> emptyList()
+        Intent.ACTION_SEND ->
+            listOfNotNull(data ?: IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java))
+        else -> listOfNotNull(data)
     }
 }

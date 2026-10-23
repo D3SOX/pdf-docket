@@ -140,6 +140,20 @@ class BackupRepositoryTest {
     }
 
     @Test
+    fun restore_withScryptParametersNeedingTooMuchMemory_failsAsNotABackup() = runTest {
+        backupRepository.export(backupUri, PASSWORD)
+        val bytes = backup.readBytes()
+        // log2(N) and r follow the 9 byte magic and the format version, 2 GiB together
+        bytes[10] = 20
+        bytes[11] = 16
+        backup.writeBytes(bytes)
+
+        shouldThrow<NotABackupException> {
+            backupRepository.restore(backupUri, PASSWORD)
+        }
+    }
+
+    @Test
     fun restore_ofEmptyFile_failsAsNotABackup() = runTest {
         backup.writeBytes(ByteArray(0))
 
