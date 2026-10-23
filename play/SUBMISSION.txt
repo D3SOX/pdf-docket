@@ -56,6 +56,9 @@ and policy declarations stay untouched.
 Retry the upload of a published release:
   gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<tag>
 
+Upload the store listing texts and graphics after changing them:
+  gh workflow run play-listing.yml -R D3SOX/pdfwallet
+
 Local CLI (Ruby 3.4 and Bundler):
   bundle install
   export PLAY_JSON_KEY=/secure/path/play-service-account.json
@@ -63,6 +66,7 @@ Local CLI (Ruby 3.4 and Bundler):
   bundle exec fastlane android upload_listing
   bundle exec fastlane android publish_play aab:/path/pdfwallet.aab notes:/path/notes.txt
 
-Releases are created by pushing a version tag (git tag v1.0.1 && git push
-origin v1.0.1). The version code is the commit count, so every release has a
-higher code. Google Play rejects a version code that it already received.
+Releases are created by bumping versionCode and versionName in
+app/build.gradle.kts and pushing a matching version tag (git tag v1.1.2 &&
+git push origin v1.1.2). Google Play rejects a version code that it already
+received.
