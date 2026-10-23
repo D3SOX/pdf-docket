@@ -54,6 +54,8 @@
     <string name="preference_theme_dark">Темная</string>
     <string name="preference_half_size_barcodes">Показывать штрихкоды в половину размера</string>
     <string name="preference_half_size_barcodes_description">Это может улучшить читаемость для некоторых сканеров штрихкодов.</string>
+    <string name="preference_split_screen">Разделённый экран</string>
+    <string name="preference_split_screen_description">Показывать штрихкод и PDF одновременно.</string>
     <string name="preference_barcode_generation">Создать новый штрихкод</string>
     <string name="preference_barcode_generation_description">Если отключено (рекомендуется), приложение вырезает исходный штрихкод, что лучше всего подходит для проверки билетов. Если включено, приложение создает свежий и четкий новый штрихкод.</string>
     <string name="menu_item_manage_tags">Управление тегами</string>

@@ -20,6 +20,7 @@ Currently supported barcode formats are:
 
 More Features
 - Can detect and extract barcodes in PDFs
+- Split screen shows the barcode and the PDF at the same time
 - (Optional) biometric authentication
 - PDFs can be sorted by name, file size, or import date
 - PDFs can be individually named

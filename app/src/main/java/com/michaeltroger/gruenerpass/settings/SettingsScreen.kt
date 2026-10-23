@@ -124,6 +124,15 @@ fun SettingsScreen(
             }
             item {
                 SwitchItem(
+                    title = R.string.preference_split_screen,
+                    summary = R.string.preference_split_screen_description,
+                    icon = R.drawable.splitscreen_24,
+                    checked = settings.splitScreen,
+                    onCheckedChange = { checked -> vm.update { it.copy(splitScreen = checked) } },
+                )
+            }
+            item {
+                SwitchItem(
                     title = R.string.preference_barcode_generation,
                     summary = R.string.preference_barcode_generation_description,
                     icon = R.drawable.construction_24px,

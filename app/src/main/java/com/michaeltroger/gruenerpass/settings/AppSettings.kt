@@ -19,6 +19,7 @@ data class AppSettings(
     val requireAuthentication: Boolean = false,
     val barcodeSearchMode: BarcodeSearchMode = BarcodeSearchMode.EXTENDED,
     val halfSizeBarcodes: Boolean = false,
+    val splitScreen: Boolean = false,
     val generateNewBarcode: Boolean = false,
     val fullBrightness: Boolean = false,
     val showOnLockScreen: Boolean = false,

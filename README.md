@@ -24,7 +24,7 @@ This fork keeps the app open source under the GPLv3. It rebuilds the interface w
 
 - Import PDFs, or open them with PDF Wallet from a file browser, email client or web browser.
 - Detect QR, Aztec, DataMatrix, PDF417, UPC-A, UPC-E, EAN-8, EAN-13, Code 39, Code 93, Code 128, ITF and Codabar barcodes and show them in fullscreen.
-- Swipe between documents and switch between the barcode and the PDF.
+- Swipe between documents and switch between the barcode and the PDF, or show both in split screen.
 - Tag, search and sort documents by import date, name or file size.
 - Open password protected PDFs and lock the app with biometrics or the device PIN.
 - Use a light or dark theme, in green or in your system colors on Android 12 and later.

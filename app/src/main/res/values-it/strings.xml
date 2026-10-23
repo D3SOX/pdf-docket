@@ -53,6 +53,8 @@
     <string name="preference_theme_dark">Scuro</string>
     <string name="preference_half_size_barcodes">Mostra codici a barre di metà dimensione</string>
     <string name="preference_half_size_barcodes_description">Questo può migliorare la leggibilità per alcuni scanner di codici a barre.</string>
+    <string name="preference_split_screen">Schermo diviso</string>
+    <string name="preference_split_screen_description">Mostra il codice a barre e il PDF contemporaneamente.</string>
     <string name="preference_barcode_generation">Crea nuovo barcode</string>
     <string name="preference_barcode_generation_description">Quando disattivato (consigliato), l’app rimuove il barcode originale, il che è migliore per i controlli dei biglietti. Quando attivato, l’app crea un nuovo barcode nitido.</string>
     <string name="menu_item_manage_tags">Gestisci tag</string>

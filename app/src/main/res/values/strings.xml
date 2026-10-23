@@ -54,6 +54,8 @@
     <string name="preference_theme_dark">Dark</string>
     <string name="preference_half_size_barcodes">Display barcodes in half size</string>
     <string name="preference_half_size_barcodes_description">This can improve readability for some barcode scanners.</string>
+    <string name="preference_split_screen">Split screen</string>
+    <string name="preference_split_screen_description">Show the barcode and the PDF at the same time.</string>
     <string name="preference_barcode_generation">Create new barcode</string>
     <string name="preference_barcode_generation_description">When disabled (recommended), the app crops out the original barcode, which is best for ticket checks. When enabled, the app instead creates a fresh and sharp new barcode.</string>
     <string name="menu_item_manage_tags">Manage tags</string>

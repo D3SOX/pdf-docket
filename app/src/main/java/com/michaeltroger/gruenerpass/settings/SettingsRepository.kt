@@ -21,6 +21,7 @@ private object Keys {
     val requireAuthentication = booleanPreferencesKey("requireAuthentication")
     val barcodeSearchMode = stringPreferencesKey("barcodeSearchMode")
     val halfSizeBarcodes = booleanPreferencesKey("halfSizeBarcodes")
+    val splitScreen = booleanPreferencesKey("splitScreen")
     val generateNewBarcode = booleanPreferencesKey("generateNewBarcode")
     val fullBrightness = booleanPreferencesKey("fullBrightness")
     val showOnLockScreen = booleanPreferencesKey("showOnLockScreen")
@@ -54,6 +55,7 @@ class SettingsRepository @Inject constructor(
             requireAuthentication = this[Keys.requireAuthentication] ?: defaults.requireAuthentication,
             barcodeSearchMode = enumOrDefault(this[Keys.barcodeSearchMode], defaults.barcodeSearchMode),
             halfSizeBarcodes = this[Keys.halfSizeBarcodes] ?: defaults.halfSizeBarcodes,
+            splitScreen = this[Keys.splitScreen] ?: defaults.splitScreen,
             generateNewBarcode = this[Keys.generateNewBarcode] ?: defaults.generateNewBarcode,
             fullBrightness = this[Keys.fullBrightness] ?: defaults.fullBrightness,
             showOnLockScreen = this[Keys.showOnLockScreen] ?: defaults.showOnLockScreen,
@@ -70,6 +72,7 @@ class SettingsRepository @Inject constructor(
         this[Keys.requireAuthentication] = settings.requireAuthentication
         this[Keys.barcodeSearchMode] = settings.barcodeSearchMode.name
         this[Keys.halfSizeBarcodes] = settings.halfSizeBarcodes
+        this[Keys.splitScreen] = settings.splitScreen
         this[Keys.generateNewBarcode] = settings.generateNewBarcode
         this[Keys.fullBrightness] = settings.fullBrightness
         this[Keys.showOnLockScreen] = settings.showOnLockScreen

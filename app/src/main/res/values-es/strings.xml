@@ -53,6 +53,8 @@
     <string name="preference_theme_dark">Oscuro</string>
     <string name="preference_half_size_barcodes">Mostrar códigos de barras en medio tamaño</string>
     <string name="preference_half_size_barcodes_description">Esto puede mejorar la legibilidad de algunos escáner de código de barras.</string>
+    <string name="preference_split_screen">Pantalla dividida</string>
+    <string name="preference_split_screen_description">Mostrar el código de barras y el PDF al mismo tiempo.</string>
     <string name="preference_barcode_generation">Crear nuevo código de barras</string>
     <string name="preference_barcode_generation_description">Cuando está desactivado (recomendado), la app recorta el código de barras original, lo que es ideal para la verificación de boletos. Cuando está activado, la app crea un nuevo código de barras nítido.</string>
     <string name="menu_item_manage_tags">Administrar etiquetas</string>
