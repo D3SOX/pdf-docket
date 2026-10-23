@@ -16,7 +16,7 @@
     <string name="report_issue_summary">Qualche problema nell\'uso dell\'app? Cerchiamo di aiutarti</string>
     <string name="report_issue">Segnala un problema</string>
     <string name="preference_max_brightness">100\u0025 luminosità</string>
-    <string name="preference_max_brightness_description">Visualizza sempre l\'app con luminosità a schermo intero.</string>
+    <string name="preference_max_brightness_description">Usa la luminosità massima dello schermo durante la visualizzazione di un documento.</string>
     <string name="version">Versione %1$s</string>
     <string name="share">Condividi</string>
     <string name="changelog">Registro delle modifiche</string>

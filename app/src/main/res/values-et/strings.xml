@@ -16,7 +16,7 @@
     <string name="report_issue_summary">Rakenduse kasutamisel tekkis mõni viga? Luba meil sind aidata</string>
     <string name="report_issue">Teata probleemist või veast</string>
     <string name="preference_max_brightness">100\u0025 eredus</string>
-    <string name="preference_max_brightness_description">Selle rakenduse puhul kasuta alati ekraani maksimaalset eredust.</string>
+    <string name="preference_max_brightness_description">Kasuta dokumendi kuvamisel ekraani maksimaalset eredust.</string>
     <string name="version">Versioon %1$s</string>
     <string name="share">Jaga</string>
     <string name="changelog">Muudatuste logi</string>

@@ -16,7 +16,7 @@
     <string name="report_issue_summary">Есть проблемы с приложением? Позвольте нам помочь вам</string>
     <string name="report_issue">Сообщить о проблеме</string>
     <string name="preference_max_brightness">100% яркость</string>
-    <string name="preference_max_brightness_description">Всегда отображать приложение с максимальной яркостью экрана.</string>
+    <string name="preference_max_brightness_description">Использовать максимальную яркость экрана при показе документа.</string>
     <string name="version">Версия %1$s</string>
     <string name="share">Поделиться</string>
     <string name="changelog">История изменений</string>

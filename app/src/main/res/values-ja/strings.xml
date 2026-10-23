@@ -15,7 +15,7 @@
     <string name="report_issue_summary">アプリの使用に問題がありますか？お手伝いします</string>
     <string name="report_issue">問題を報告</string>
     <string name="preference_max_brightness">100\u0025の明るさ</string>
-    <string name="preference_max_brightness_description">常に最大輝度でアプリを表示します。</string>
+    <string name="preference_max_brightness_description">ドキュメントの表示中は画面を最大輝度にします。</string>
     <string name="version">バージョン %1$s</string>
     <string name="share">共有</string>
     <string name="changelog">変更履歴</string>
