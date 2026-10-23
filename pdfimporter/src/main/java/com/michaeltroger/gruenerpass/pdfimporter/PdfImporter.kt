@@ -6,16 +6,12 @@ import com.michaeltroger.gruenerpass.logger.Logger
 import com.michaeltroger.gruenerpass.pdfdecryptor.PdfDecryptor
 import com.michaeltroger.gruenerpass.pdfrenderer.PdfRendererBuilder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 public interface PdfImporter {
     public suspend fun preparePendingFile(uri: Uri): PdfImportResult
-    public fun hasPendingFile(): Flow<Boolean>
     public fun deletePendingFile()
     public suspend fun importPendingFile(password: String?): PdfImportResult
 }
@@ -44,10 +40,6 @@ internal class PdfImporterImpl @Inject constructor(
             PdfImportResult.ParsingError
         }
     }
-
-    override fun hasPendingFile(): Flow<Boolean> = pendingFile.map {
-        it != null
-    }.distinctUntilChanged()
 
     override fun deletePendingFile() {
         pendingFile.value?.let {

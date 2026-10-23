@@ -52,6 +52,8 @@ class DocumentRepository @Inject constructor(
         )
     }
 
+    suspend fun exists(id: String): Boolean = certificateDao.exists(id)
+
     suspend fun rename(id: String, name: String) = certificateDao.updateName(id, name)
 
     suspend fun delete(ids: List<String>) {

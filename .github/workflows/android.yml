@@ -31,6 +31,11 @@ jobs:
       run: ./gradlew testDebugUnitTest
     - name: Build APK
       run: ./gradlew assembleDebug
+    - name: Check that the database schema is committed
+      # a changed schema without a version bump would otherwise go unnoticed
+      run: |
+        git status --porcelain app/schemas
+        test -z "$(git status --porcelain app/schemas)"
     - name: Upload APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
@@ -45,3 +50,38 @@ jobs:
           */build/reports/detekt/detekt.html
           */build/reports/lint-results-debug.html
           */build/reports/tests/testDebugUnitTest/
+
+  instrumented-tests:
+
+    runs-on: ubuntu-latest
+    env:
+      JAVA_VERSION: '21'
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - name: Set up JDK
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        cache: 'gradle'
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+    - name: Run instrumented tests
+      uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+      with:
+        api-level: 34
+        target: aosp_atd
+        arch: x86_64
+        disable-animations: true
+        script: ./gradlew connectedDebugAndroidTest
+    - name: Upload test reports
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      if: always()
+      with:
+        name: instrumented_test_reports
+        path: app/build/reports/androidTests/connected/

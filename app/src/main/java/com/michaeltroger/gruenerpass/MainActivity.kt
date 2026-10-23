@@ -17,6 +17,8 @@ import androidx.core.content.IntentCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.michaeltroger.gruenerpass.documents.ACTION_OPEN_DOCUMENT
+import com.michaeltroger.gruenerpass.documents.EXTRA_DOCUMENT_ID
 import com.michaeltroger.gruenerpass.settings.AppSettings
 import com.michaeltroger.gruenerpass.settings.ThemeMode
 import com.michaeltroger.gruenerpass.ui.AppRoot
@@ -43,7 +45,7 @@ class MainActivity : FragmentActivity() {
         }
 
         if (savedInstanceState == null) {
-            intent.pdfUri()?.let(vm::onFileSelected)
+            handleIntent(intent)
         }
 
         setContent {
@@ -86,7 +88,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent.pdfUri()?.let(vm::onFileSelected)
+        handleIntent(intent)
     }
 
     override fun onUserInteraction() {
@@ -118,9 +120,20 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun Intent.pdfUri(): Uri? = data ?: if (action == Intent.ACTION_SEND) {
-        IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java)
-    } else {
-        null
+    private fun handleIntent(intent: Intent) {
+        val documentId = intent.getStringExtra(EXTRA_DOCUMENT_ID)
+        if (intent.action == ACTION_OPEN_DOCUMENT && documentId != null) {
+            vm.onShortcutOpened(documentId)
+        } else {
+            intent.pdfUris().takeIf { it.isNotEmpty() }?.let(vm::onFilesSelected)
+        }
+    }
+
+    private fun Intent.pdfUris(): List<Uri> = when (action) {
+        Intent.ACTION_SEND_MULTIPLE ->
+            IntentCompat.getParcelableArrayListExtra(this, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
+        Intent.ACTION_SEND ->
+            listOfNotNull(data ?: IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java))
+        else -> listOfNotNull(data)
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -43,8 +44,9 @@ fun AppRoot(
     val backStack = rememberNavBackStack(DocumentsRoute)
     val snackbarHostState = remember { SnackbarHostState() }
     val importError = stringResource(R.string.error_reading_pdf)
-    val documentPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let(vm::onFileSelected)
+    val resources = LocalResources.current
+    val documentPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        if (uris.isNotEmpty()) vm.onFilesSelected(uris)
     }
     val passwordPrompt by vm.passwordPrompt.collectAsStateWithLifecycle()
 
@@ -54,6 +56,12 @@ fun AppRoot(
                 is MainEvent.OpenDocument -> {
                     backStack.retainAll { it == DocumentsRoute }
                     backStack.add(DetailsRoute(event.id))
+                }
+                is MainEvent.DocumentsImported -> {
+                    backStack.retainAll { it == DocumentsRoute }
+                    snackbarHostState.showSnackbar(
+                        resources.getQuantityString(R.plurals.documents_imported, event.count, event.count)
+                    )
                 }
                 MainEvent.ImportFailed -> snackbarHostState.showSnackbar(importError)
             }

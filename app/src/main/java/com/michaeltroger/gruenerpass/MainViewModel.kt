@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -38,6 +38,7 @@ data class MainUiState(
 
 sealed interface MainEvent {
     data class OpenDocument(val id: String) : MainEvent
+    data class DocumentsImported(val count: Int) : MainEvent
     data object ImportFailed : MainEvent
 }
 
@@ -63,33 +64,39 @@ class MainViewModel @Inject constructor(
     private val _events = Channel<MainEvent>(Channel.BUFFERED)
     val events: Flow<MainEvent> = _events.receiveAsFlow()
 
+    /** a password, or null when the password dialog was dismissed */
+    private val passwords = Channel<String?>(Channel.CONFLATED)
+
+    // only accessed on the main thread
+    private val importQueue = ArrayDeque<Uri>()
+    private var importJob: Job? = null
     private var timeoutJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            // pending files are only imported once the app is unlocked
-            combine(lockedRepo.isAppLocked, pdfImporter.hasPendingFile()) { isLocked, hasPendingFile ->
-                !isLocked && hasPendingFile
-            }.filter { it }.collect {
-                importPendingFile(password = null)
-            }
-        }
         onUserInteraction()
     }
 
-    fun onFileSelected(uri: Uri) = viewModelScope.launch {
-        if (pdfImporter.preparePendingFile(uri) is PdfImportResult.ParsingError) {
-            _events.send(MainEvent.ImportFailed)
+    fun onFilesSelected(uris: List<Uri>) {
+        importQueue += uris
+        if (importJob?.isActive != true) {
+            importJob = viewModelScope.launch { importQueuedFiles() }
         }
     }
 
-    fun onPasswordEntered(password: String) = viewModelScope.launch {
-        importPendingFile(password)
+    fun onShortcutOpened(id: String) = viewModelScope.launch {
+        if (documentRepository.exists(id)) {
+            // make sure the document is part of the visible documents
+            documentFilter.clear()
+            _events.send(MainEvent.OpenDocument(id))
+        }
+    }
+
+    fun onPasswordEntered(password: String) {
+        passwords.trySend(password)
     }
 
     fun onPasswordDialogDismissed() {
-        _passwordPrompt.value = PasswordPrompt.NONE
-        pdfImporter.deletePendingFile()
+        passwords.trySend(null)
     }
 
     fun onUserInteraction() {
@@ -104,22 +111,66 @@ class MainViewModel @Inject constructor(
         lockedRepo.unlockApp()
     }
 
-    private suspend fun importPendingFile(password: String?) {
-        val result = pdfImporter.importPendingFile(password)
-        _passwordPrompt.value = when {
-            result !is PdfImportResult.PasswordRequired -> PasswordPrompt.NONE
-            password == null -> PasswordPrompt.REQUIRED
-            else -> PasswordPrompt.WRONG
-        }
-        when (result) {
-            is PdfImportResult.Success -> {
-                documentRepository.add(result.pendingCertificate)
-                // make sure the new document is part of the visible documents
-                documentFilter.clear()
-                _events.send(MainEvent.OpenDocument(result.pendingCertificate.fileName))
+    private suspend fun importQueuedFiles() {
+        val imported = mutableListOf<String>()
+        var hasFailures = false
+        while (importQueue.isNotEmpty()) {
+            when (val result = importFile(importQueue.removeFirst())) {
+                ImportResult.Failed -> hasFailures = true
+                ImportResult.Skipped -> Unit
+                is ImportResult.Imported -> imported += result.id
             }
-            PdfImportResult.ParsingError -> _events.send(MainEvent.ImportFailed)
-            PdfImportResult.PasswordRequired, PdfImportResult.NoFileToImport -> Unit
+        }
+        // not suspending, so files selected meanwhile can't end up in the queue of a finished job
+        if (imported.isNotEmpty()) {
+            // make sure the new documents are part of the visible documents
+            documentFilter.clear()
+            _events.trySend(
+                imported.singleOrNull()?.let(MainEvent::OpenDocument) ?: MainEvent.DocumentsImported(imported.size)
+            )
+        }
+        // one message for the whole batch, after the imported documents are shown
+        if (hasFailures) _events.trySend(MainEvent.ImportFailed)
+    }
+
+    private sealed interface ImportResult {
+        data class Imported(val id: String) : ImportResult
+        data object Failed : ImportResult
+        /** e.g. the password dialog was dismissed */
+        data object Skipped : ImportResult
+    }
+
+    /**
+     * Imports a single file, asking for its password if needed.
+     */
+    @Suppress("ReturnCount")
+    private suspend fun importFile(uri: Uri): ImportResult {
+        // files are only imported once the app is unlocked
+        lockedRepo.isAppLocked.first { !it }
+        // e.g. a second tap on OK for the previous file
+        passwords.tryReceive()
+        if (pdfImporter.preparePendingFile(uri) is PdfImportResult.ParsingError) return ImportResult.Failed
+        var password: String? = null
+        while (true) {
+            val result = pdfImporter.importPendingFile(password)
+            _passwordPrompt.value = when {
+                result !is PdfImportResult.PasswordRequired -> PasswordPrompt.NONE
+                password == null -> PasswordPrompt.REQUIRED
+                else -> PasswordPrompt.WRONG
+            }
+            when (result) {
+                is PdfImportResult.Success -> {
+                    documentRepository.add(result.pendingCertificate)
+                    return ImportResult.Imported(result.pendingCertificate.fileName)
+                }
+                PdfImportResult.ParsingError -> return ImportResult.Failed
+                PdfImportResult.NoFileToImport -> return ImportResult.Skipped
+                PdfImportResult.PasswordRequired -> password = passwords.receive() ?: run {
+                    _passwordPrompt.value = PasswordPrompt.NONE
+                    pdfImporter.deletePendingFile()
+                    return ImportResult.Skipped
+                }
+            }
         }
     }
 

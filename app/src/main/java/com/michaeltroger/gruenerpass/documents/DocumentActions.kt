@@ -4,6 +4,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -12,6 +14,8 @@ import com.michaeltroger.gruenerpass.db.Tag
 import com.michaeltroger.gruenerpass.documents.tags.AssignTagsDialog
 import com.michaeltroger.gruenerpass.ui.components.ConfirmDialog
 import com.michaeltroger.gruenerpass.ui.components.TextInputDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 sealed interface DocumentDialog {
     val document: Document
@@ -31,6 +35,7 @@ fun DocumentMenuItems(
     onDismissMenu: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     DropdownMenuItem(
         text = { Text(stringResource(R.string.rename)) },
         leadingIcon = { Icon(painterResource(R.drawable.edit_24px), contentDescription = null) },
@@ -55,6 +60,17 @@ fun DocumentMenuItems(
             context.sharePdfs(listOf(document))
         },
     )
+    if (remember { context.canAddToHomeScreen() }) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.add_to_home_screen)) },
+            leadingIcon = { Icon(painterResource(R.drawable.add_to_home_screen_24), contentDescription = null) },
+            onClick = {
+                onDismissMenu()
+                // the launcher can take a while to answer
+                scope.launch(Dispatchers.IO) { context.addToHomeScreen(document) }
+            },
+        )
+    }
     DropdownMenuItem(
         text = { Text(stringResource(R.string.delete)) },
         leadingIcon = { Icon(painterResource(R.drawable.delete_24), contentDescription = null) },

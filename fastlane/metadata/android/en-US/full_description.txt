@@ -25,7 +25,9 @@ More Features
 - PDFs can be sorted by name, file size, or import date
 - PDFs can be individually named
 - Assign tags to documents and filter documents by tags
-- PDFs can be shared from other apps
+- PDFs can be shared from other apps, also several at once
+- Documents can be added to the home screen
+- Encrypted backups of all documents and tags
 - PDFs can be shared with other apps (indirectly allows printing)
 - Dark Mode support (document stays in original color, optionally inverted)
 - Also supports password protected PDFs
