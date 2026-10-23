@@ -32,6 +32,7 @@ Mehr Funktionen
 - Option um Dokumentenfarben zu invertieren im Dark Mode
 - Option um den dunklen oder hellen Theme-Mode zu erzwingen (überschreibt System-Einstellung)
 - Option um Barcodes in halber Größe anzuzeigen
+- Option um Barcode und PDF gleichzeitig im geteilten Bildschirm anzuzeigen
 
 Privatsphäre
 Diese App schätzt Ihre Privatsphäre, indem sie vollständig offline funktioniert. Keine Werbung, kein Tracking.

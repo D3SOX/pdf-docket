@@ -53,6 +53,8 @@
     <string name="preference_theme_dark">Escuro</string>
     <string name="preference_half_size_barcodes">Exibir códigos de barras em tamanho médio</string>
     <string name="preference_half_size_barcodes_description">Isso pode melhorar a legibilidade de alguns scanners de código de barras.</string>
+    <string name="preference_split_screen">Tela dividida</string>
+    <string name="preference_split_screen_description">Exibir o código de barras e o PDF ao mesmo tempo.</string>
     <string name="preference_barcode_generation">Criar novo código de barras</string>
     <string name="preference_barcode_generation_description">Quando desativado (recomendado), o app recorta o código de barras original, o que é melhor para a verificação de bilhetes. Quando ativado, o app cria um novo código de barras nítido.</string>
     <string name="privacy_policy">Política de privacidade</string>

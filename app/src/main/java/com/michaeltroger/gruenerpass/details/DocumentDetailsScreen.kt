@@ -7,6 +7,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +34,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -117,7 +120,7 @@ fun DocumentDetailsScreen(
                     }
                 },
                 actions = {
-                    if (currentHasBarcode) {
+                    if (currentHasBarcode && !settings.splitScreen) {
                         IconButton(onClick = { showPdf = !showPdf }) {
                             if (showPdf) {
                                 Icon(painterResource(R.drawable.qr_code_24), stringResource(R.string.show_barcode))
@@ -128,8 +131,9 @@ fun DocumentDetailsScreen(
                     }
                     DetailsOverflowMenu(
                         document = current,
-                        halfSizeBarcodes = settings.halfSizeBarcodes,
+                        settings = settings,
                         onToggleHalfSizeBarcodes = vm::onToggleHalfSizeBarcodes,
+                        onToggleSplitScreen = vm::onToggleSplitScreen,
                         onDialog = { dialog = it },
                     )
                 },
@@ -182,8 +186,9 @@ fun DocumentDetailsScreen(
 @Composable
 private fun DetailsOverflowMenu(
     document: Document,
-    halfSizeBarcodes: Boolean,
+    settings: AppSettings,
     onToggleHalfSizeBarcodes: () -> Unit,
+    onToggleSplitScreen: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -196,8 +201,13 @@ private fun DetailsOverflowMenu(
             HorizontalDivider()
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.preference_half_size_barcodes)) },
-                trailingIcon = { Checkbox(checked = halfSizeBarcodes, onCheckedChange = null) },
+                trailingIcon = { Checkbox(checked = settings.halfSizeBarcodes, onCheckedChange = null) },
                 onClick = onToggleHalfSizeBarcodes,
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.preference_split_screen)) },
+                trailingIcon = { Checkbox(checked = settings.splitScreen, onCheckedChange = null) },
+                onClick = onToggleSplitScreen,
             )
         }
     }
@@ -218,34 +228,79 @@ private fun DocumentPage(
         value = vm.scanBarcodes(document.id, settings).also(onScanned)
     }
     val result = scan
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when {
-            result == null -> CircularProgressIndicator()
-            !showPdf && result.barcodes.isNotEmpty() -> PagesPager(
-                pageCount = result.barcodes.size,
-                isActive = isActive,
-                pageLabel = {
-                    if (result.hasSeveralBarcodesPerPage) {
-                        stringResource(R.string.barcode_position, it + 1, result.barcodes.size)
-                    } else {
-                        stringResource(R.string.page_position, result.barcodes[it].pageIndex + 1, result.pageCount)
-                    }
-                },
-            ) {
-                BarcodeView(result.barcodes[it], settings.halfSizeBarcodes)
+    if (result == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+    val barcodes = @Composable { BarcodesPager(result, isActive, settings.halfSizeBarcodes) }
+    val pdf = @Composable { PdfPager(document.id, result.pageCount, isActive, invertColors, vm) }
+    when {
+        result.barcodes.isEmpty() -> pdf()
+        settings.splitScreen -> SplitLayout(first = barcodes, second = pdf)
+        showPdf -> pdf()
+        else -> barcodes()
+    }
+}
+
+/**
+ * Shows [first] above [second], or next to each other in landscape.
+ */
+@Composable
+private fun SplitLayout(first: @Composable () -> Unit, second: @Composable () -> Unit) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth > maxHeight) {
+            Row(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f)) { first() }
+                VerticalDivider()
+                Box(Modifier.weight(1f)) { second() }
             }
-            else -> PagesPager(
-                pageCount = result.pageCount,
-                isActive = isActive,
-                pageLabel = { stringResource(R.string.page_position, it + 1, result.pageCount) },
-            ) { pageIndex ->
-                PdfPageView(
-                    load = { vm.page(document.id, pageIndex) },
-                    key = "${document.id}-$pageIndex",
-                    invertColors = invertColors,
-                )
+        } else {
+            Column(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f)) { first() }
+                HorizontalDivider()
+                Box(Modifier.weight(1f)) { second() }
             }
         }
+    }
+}
+
+@Composable
+private fun BarcodesPager(scan: BarcodeScan, isActive: Boolean, halfSize: Boolean) {
+    PagesPager(
+        pageCount = scan.barcodes.size,
+        isActive = isActive,
+        pageLabel = {
+            if (scan.hasSeveralBarcodesPerPage) {
+                stringResource(R.string.barcode_position, it + 1, scan.barcodes.size)
+            } else {
+                stringResource(R.string.page_position, scan.barcodes[it].pageIndex + 1, scan.pageCount)
+            }
+        },
+    ) {
+        BarcodeView(scan.barcodes[it], halfSize)
+    }
+}
+
+@Composable
+private fun PdfPager(
+    documentId: String,
+    pageCount: Int,
+    isActive: Boolean,
+    invertColors: Boolean,
+    vm: DocumentDetailsViewModel,
+) {
+    PagesPager(
+        pageCount = pageCount,
+        isActive = isActive,
+        pageLabel = { stringResource(R.string.page_position, it + 1, pageCount) },
+    ) { pageIndex ->
+        PdfPageView(
+            load = { vm.page(documentId, pageIndex) },
+            key = "$documentId-$pageIndex",
+            invertColors = invertColors,
+        )
     }
 }
 

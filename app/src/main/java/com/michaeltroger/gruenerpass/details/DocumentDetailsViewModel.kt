@@ -41,6 +41,10 @@ class DocumentDetailsViewModel @AssistedInject constructor(
         settingsRepository.update { it.copy(halfSizeBarcodes = !it.halfSizeBarcodes) }
     }
 
+    fun onToggleSplitScreen() = viewModelScope.launch {
+        settingsRepository.update { it.copy(splitScreen = !it.splitScreen) }
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(initialDocumentId: String): DocumentDetailsViewModel

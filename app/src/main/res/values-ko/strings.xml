@@ -51,6 +51,8 @@
     <string name="preference_theme_dark">다크</string>
     <string name="preference_half_size_barcodes">바코드를 절반 크기로 표시</string>
     <string name="preference_half_size_barcodes_description">일부 바코드 스캐너의 인식률을 높일 수 있습니다.</string>
+    <string name="preference_split_screen">화면 분할</string>
+    <string name="preference_split_screen_description">바코드와 PDF를 동시에 표시합니다.</string>
     <string name="preference_barcode_generation">새 바코드 생성</string>
     <string name="preference_barcode_generation_description">비활성화(권장) 시, 앱은 티켓 확인에 가장 적합한 원본 바코드를 잘라냅니다. 활성화 시, 앱은 대신 선명한 새 바코드를 생성합니다.</string>
     <string name="menu_item_manage_tags">태그 관리</string>

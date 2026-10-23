@@ -51,6 +51,8 @@
     <string name="preference_theme_dark">ダーク</string>
     <string name="preference_half_size_barcodes">バーコードを半分のサイズで表示</string>
     <string name="preference_half_size_barcodes_description">一部のバーコードスキャナーでの読み取りやすさが向上する場合があります。</string>
+    <string name="preference_split_screen">分割画面</string>
+    <string name="preference_split_screen_description">バーコードとPDFを同時に表示します。</string>
     <string name="preference_barcode_generation">新しいバーコードを作成</string>
     <string name="preference_barcode_generation_description">無効（推奨）の場合、アプリは元のバーコードを切り取ります。これはチケットの確認に最適です。有効にすると、アプリは代わりに鮮明な新しいバーコードを作成します。</string>
     <string name="menu_item_manage_tags">タグを管理</string>
