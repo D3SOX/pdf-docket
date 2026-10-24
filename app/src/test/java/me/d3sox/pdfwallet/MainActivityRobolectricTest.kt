@@ -155,7 +155,10 @@ class MainActivityRobolectricTest {
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.onAllNodes(hasText("2 selected")).fetchSemanticsNodes().isEmpty()
         }
-        val documents = repository.documents.first().associateBy { it.name }
+        val documents = repository.documents.first { updated ->
+            val tagIds = updated.associate { document -> document.name to document.tags.map { it.id }.toSet() }
+            tagIds["Ticket A"] == setOf(travel, work) && tagIds["Ticket B"] == setOf(work)
+        }.associateBy { it.name }
         documents.getValue("Ticket A").tags.map { it.id }.toSet() shouldBe setOf(travel, work)
         documents.getValue("Ticket B").tags.map { it.id } shouldBe listOf(work)
         documents.getValue("Other document").tags shouldBe emptyList()
