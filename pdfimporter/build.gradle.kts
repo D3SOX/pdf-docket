@@ -2,7 +2,7 @@ plugins {
     id("greenpass.lib-conventions")
 }
 
-android.namespace = "com.michaeltroger.gruenerpass.pdfimporter"
+android.namespace = "me.d3sox.pdfwallet.pdfimporter"
 
 dependencies {
     implementation(project(":coroutines"))

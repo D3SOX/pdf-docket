@@ -2,7 +2,7 @@ plugins {
     id("greenpass.lib-conventions")
 }
 
-android.namespace = "com.michaeltroger.gruenerpass.coroutines"
+android.namespace = "me.d3sox.pdfwallet.coroutines"
 
 dependencies {
     implementation(platform(libs.org.jetbrains.kotlinx.coroutines.bom))

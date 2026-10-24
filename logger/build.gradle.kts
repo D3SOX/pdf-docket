@@ -2,4 +2,4 @@ plugins {
     id("greenpass.lib-conventions")
 }
 
-android.namespace = "com.michaeltroger.gruenerpass.logger"
+android.namespace = "me.d3sox.pdfwallet.logger"

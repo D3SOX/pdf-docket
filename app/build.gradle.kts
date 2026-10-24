@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.michaeltroger.gruenerpass"
+    namespace = "me.d3sox.pdfwallet"
 
     defaultConfig {
         applicationId = "me.d3sox.pdfwallet"
@@ -12,7 +12,7 @@ android {
         versionCode = 856
         versionName = "1.3.0"
 
-        testInstrumentationRunner = "com.michaeltroger.gruenerpass.HiltTestRunner"
+        testInstrumentationRunner = "me.d3sox.pdfwallet.HiltTestRunner"
     }
 
     sourceSets {
