@@ -27,7 +27,12 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="adjustResize" />
+        <!-- Keep the released component so existing home screen shortcuts and PDF handlers still work. -->
+        <activity-alias
+            android:name="com.michaeltroger.gruenerpass.MainActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -56,7 +61,7 @@
                     android:mimeType="application/pdf"
                     android:scheme="content" />
             </intent-filter>
-        </activity>
+        </activity-alias>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.pdffileprovider"

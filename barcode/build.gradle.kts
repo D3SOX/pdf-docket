@@ -2,7 +2,7 @@ plugins {
     id("greenpass.lib-conventions")
 }
 
-android.namespace = "com.michaeltroger.gruenerpass.barcode"
+android.namespace = "me.d3sox.pdfwallet.barcode"
 
 dependencies {
     implementation(project(":coroutines"))
