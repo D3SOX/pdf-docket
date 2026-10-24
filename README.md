@@ -26,6 +26,7 @@ This fork keeps the app open source under the GPLv3. It rebuilds the interface w
 - Detect QR, Aztec, DataMatrix, PDF417, UPC-A, UPC-E, EAN-8, EAN-13, Code 39, Code 93, Code 128, ITF and Codabar barcodes and show them in fullscreen.
 - Swipe between documents and switch between the barcode and the PDF, or show both in split screen.
 - Tag, search and sort documents by import date, name or file size.
+- Select several documents to tag, share or delete them together.
 - Add a document to the home screen to open it with one tap.
 - Back up all documents and tags to a password-encrypted file and restore them on another device.
 - Open password protected PDFs and lock the app with biometrics or the device PIN.

@@ -32,4 +32,13 @@ interface TagDao {
         deleteCrossRefsForCertificate(certificateId)
         insertCrossRefs(tagIds.map { CertificateTagCrossRef(certificateId, it) })
     }
+
+    @Query("DELETE FROM CertificateTagCrossRef WHERE certificateId IN (:certificateIds) AND tagId IN (:tagIds)")
+    suspend fun deleteTags(certificateIds: List<String>, tagIds: Set<Long>)
+
+    @Transaction
+    suspend fun updateTags(certificateIds: List<String>, addedTagIds: Set<Long>, removedTagIds: Set<Long>) {
+        deleteTags(certificateIds, removedTagIds)
+        insertCrossRefs(certificateIds.flatMap { id -> addedTagIds.map { CertificateTagCrossRef(id, it) } })
+    }
 }

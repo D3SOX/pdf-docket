@@ -1,5 +1,13 @@
 <resources>
     <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="select_document">Select document</string>
+    <string name="select_all">Select all</string>
+    <string name="close_selection">Clear selection</string>
+    <plurals name="documents_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
     <string name="document_name">Document name</string>
     <string name="add">Add</string>
     <string name="warning">Warning</string>
