@@ -27,6 +27,10 @@ class DocumentEditor @Inject constructor(
 
     fun setTags(id: String, tagIds: Set<Long>) = scope.launch { repository.setTags(id, tagIds) }
 
+    fun updateTags(ids: List<String>, addedTagIds: Set<Long>, removedTagIds: Set<Long>) = scope.launch {
+        repository.updateTags(ids, addedTagIds, removedTagIds)
+    }
+
     fun createTag(name: String, assignTo: Document? = null) = scope.launch {
         val tagId = repository.createTag(name)
         if (assignTo != null && tagId > 0) {

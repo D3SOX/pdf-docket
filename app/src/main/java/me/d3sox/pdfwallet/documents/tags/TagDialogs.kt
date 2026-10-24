@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -17,24 +18,84 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
+import me.d3sox.pdfwallet.documents.Document
 import me.d3sox.pdfwallet.ui.components.ConfirmDialog
 import me.d3sox.pdfwallet.ui.components.TextInputDialog
 
 private val transparentListItem
     @Composable get() = ListItemDefaults.colors(containerColor = Color.Transparent)
+
+@Composable
+fun BulkTagsDialog(
+    tags: List<Tag>,
+    documents: List<Document>,
+    onConfirm: (Set<Long>, Set<Long>) -> Unit,
+    onCreateTag: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var changes by rememberSaveable { mutableStateOf(emptyMap<Long, Boolean>()) }
+    var showCreateDialog by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.dialog_assign_tags_title)) },
+        text = {
+            TagList(tags) { tag ->
+                val assignedCount = documents.count { document -> document.tags.any { it.id == tag.id } }
+                val state = when (changes[tag.id]) {
+                    true -> ToggleableState.On
+                    false -> ToggleableState.Off
+                    null -> when (assignedCount) {
+                        0 -> ToggleableState.Off
+                        documents.size -> ToggleableState.On
+                        else -> ToggleableState.Indeterminate
+                    }
+                }
+                ListItem(
+                    headlineContent = { Text(tag.name) },
+                    leadingContent = { TriStateCheckbox(state = state, onClick = null) },
+                    colors = transparentListItem,
+                    modifier = Modifier.triStateToggleable(
+                        state = state,
+                        role = Role.Checkbox,
+                        onClick = { changes = changes + (tag.id to (state != ToggleableState.On)) },
+                    ),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                val validChanges = changes.filterKeys { id -> tags.any { it.id == id } }
+                onConfirm(validChanges.filterValues { it }.keys, validChanges.filterValues { !it }.keys)
+                onDismiss()
+            }) { Text(stringResource(R.string.save)) }
+        },
+        dismissButton = {
+            Row {
+                AddTagButton { showCreateDialog = true }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            }
+        },
+    )
+    if (showCreateDialog) {
+        CreateTagDialog(onCreateTag = onCreateTag, onDismiss = { showCreateDialog = false })
+    }
+}
 
 @Composable
 fun AssignTagsDialog(

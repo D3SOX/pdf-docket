@@ -100,6 +100,40 @@ class DocumentRepositoryTest {
     }
 
     @Test
+    fun updateTags_preservesMixedTagsAndUnselectedDocuments() = runTest {
+        listOf("a.pdf", "b.pdf", "c.pdf").forEach { addDocument(it) }
+        val travel = repository.createTag("Travel")
+        val work = repository.createTag("Work")
+        val ticket = repository.createTag("Ticket")
+        repository.setTags("a.pdf", setOf(travel, work))
+        repository.setTags("b.pdf", setOf(work))
+        repository.setTags("c.pdf", setOf(work))
+
+        repository.updateTags(listOf("a.pdf", "b.pdf"), addedTagIds = setOf(ticket), removedTagIds = setOf(work))
+
+        val documents = repository.documents.first().associateBy { it.id }
+        documents.getValue("a.pdf").tags.map { it.id }.toSet() shouldBe setOf(travel, ticket)
+        documents.getValue("b.pdf").tags.map { it.id } shouldContainExactly listOf(ticket)
+        documents.getValue("c.pdf").tags.map { it.id } shouldContainExactly listOf(work)
+
+        // Re-applying an assignment must not create duplicate tag links.
+        repository.updateTags(listOf("a.pdf", "b.pdf"), addedTagIds = setOf(ticket), removedTagIds = emptySet())
+        repository.documents.first().first { it.id == "b.pdf" }.tags.map { it.id } shouldContainExactly listOf(ticket)
+    }
+
+    @Test
+    fun delete_removesOnlySelectedDocuments() = runTest {
+        listOf("a.pdf", "b.pdf", "c.pdf").forEach { addDocument(it) }
+
+        repository.delete(listOf("a.pdf", "c.pdf"))
+
+        repository.documents.first().map { it.id } shouldContainExactly listOf("b.pdf")
+        repository.file("a.pdf").exists().shouldBeFalse()
+        repository.file("c.pdf").exists().shouldBeFalse()
+        repository.file("b.pdf").exists() shouldBe true
+    }
+
+    @Test
     fun renameTag_keepsNamesUnique() = runTest {
         val travel = repository.createTag("Travel")
         repository.createTag("Work")

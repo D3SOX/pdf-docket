@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.d3sox.pdfwallet.R
+import me.d3sox.pdfwallet.documents.tags.BulkTagsDialog
 import me.d3sox.pdfwallet.documents.tags.ManageTagsDialog
 import me.d3sox.pdfwallet.settings.AppSettings
 import me.d3sox.pdfwallet.settings.SortOrder
@@ -67,6 +68,7 @@ import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
 import me.d3sox.pdfwallet.ui.components.ConfirmDialog
 
 private enum class ListDialog { MANAGE_TAGS, DELETE_VISIBLE, LOCK_SCREEN_WARNING }
+private enum class SelectionDialog { TAGS, DELETE }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,19 +85,45 @@ fun DocumentsScreen(
     var isSearching by rememberSaveable { mutableStateOf(query.isNotEmpty()) }
     var documentDialog by remember { mutableStateOf<DocumentDialog?>(null) }
     var listDialog by rememberSaveable { mutableStateOf<ListDialog?>(null) }
+    var selectedIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var selectionDialog by rememberSaveable { mutableStateOf<SelectionDialog?>(null) }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val list = documentList
     val context = LocalContext.current
+    val selectedDocuments = list?.visible.orEmpty().filter { it.id in selectedIds }
+    val isSelecting = selectedDocuments.isNotEmpty()
+    val clearSelection = {
+        selectedIds = emptyList()
+        selectionDialog = null
+    }
+    val selectAll = { selectedIds = list?.visible.orEmpty().map { it.id } }
+    LaunchedEffect(list?.visible) {
+        list?.let { documents ->
+            val visibleIds = documents.visible.map { it.id }.toSet()
+            selectedIds = selectedIds.filter { it in visibleIds }
+            if (selectedIds.isEmpty()) selectionDialog = null
+        }
+    }
 
     val closeSearch = {
         isSearching = false
         vm.onQueryChange("")
     }
     BackHandler(enabled = isSearching, onBack = closeSearch)
+    BackHandler(enabled = isSelecting, onBack = clearSelection)
 
     Scaffold(
         topBar = {
-            DocumentsTopBar(
+            if (isSelecting) {
+                SelectionTopBar(
+                    count = selectedDocuments.size,
+                    onClose = clearSelection,
+                    onSelectAll = selectAll,
+                    onTags = { selectionDialog = SelectionDialog.TAGS },
+                    onShare = { context.sharePdfs(selectedDocuments) },
+                    onDelete = { selectionDialog = SelectionDialog.DELETE },
+                )
+            } else DocumentsTopBar(
                 isSearching = isSearching,
                 query = query,
                 hasDocuments = !list?.all.isNullOrEmpty(),
@@ -109,6 +137,7 @@ fun DocumentsScreen(
                 onManageTags = { listDialog = ListDialog.MANAGE_TAGS },
                 onExport = { list?.visible?.takeIf { it.isNotEmpty() }?.let(context::sharePdfs) },
                 onDelete = { listDialog = ListDialog.DELETE_VISIBLE },
+                onSelectAll = selectAll,
                 onLock = vm::onLock,
                 onOpenSettings = onOpenSettings,
                 onOpenAbout = onOpenAbout,
@@ -116,7 +145,7 @@ fun DocumentsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddDocument) {
+            if (!isSelecting) FloatingActionButton(onClick = onAddDocument) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add))
             }
         },
@@ -137,6 +166,10 @@ fun DocumentsScreen(
                 },
                 onOpenDocument = onOpenDocument,
                 onDialog = { documentDialog = it },
+                selectedIds = selectedIds.toSet(),
+                onToggleSelection = { id ->
+                    selectedIds = if (id in selectedIds) selectedIds - id else selectedIds + id
+                },
             )
         }
     }
@@ -154,6 +187,34 @@ fun DocumentsScreen(
         vm = vm,
         onDismiss = { listDialog = null },
     )
+    if (isSelecting) {
+        when (selectionDialog) {
+            null -> Unit
+            SelectionDialog.TAGS -> BulkTagsDialog(
+                tags = list?.tags.orEmpty(),
+                documents = selectedDocuments,
+                onConfirm = { added, removed ->
+                    vm.editor.updateTags(selectedDocuments.map { it.id }, added, removed)
+                    clearSelection()
+                },
+                onCreateTag = { vm.editor.createTag(it) },
+                onDismiss = { selectionDialog = null },
+            )
+            SelectionDialog.DELETE -> ConfirmDialog(
+                text = pluralStringResource(
+                    R.plurals.dialog_delete_filtered_confirmation_text,
+                    selectedDocuments.size,
+                    selectedDocuments.size,
+                ),
+                confirmLabel = stringResource(R.string.delete),
+                onConfirm = {
+                    vm.editor.delete(selectedDocuments.map { it.id })
+                    clearSelection()
+                },
+                onDismiss = { selectionDialog = null },
+            )
+        }
+    }
 }
 
 @Composable
@@ -216,6 +277,7 @@ private fun DocumentsTopBar(
     onManageTags: () -> Unit,
     onExport: () -> Unit,
     onDelete: () -> Unit,
+    onSelectAll: () -> Unit,
     onLock: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -261,6 +323,7 @@ private fun DocumentsTopBar(
                 onManageTags = onManageTags,
                 onExport = onExport,
                 onDelete = onDelete,
+                onSelectAll = onSelectAll,
                 onLock = onLock,
                 onOpenSettings = onOpenSettings,
                 onOpenAbout = onOpenAbout,
@@ -338,6 +401,7 @@ private fun OverflowMenu(
     onManageTags: () -> Unit,
     onExport: () -> Unit,
     onDelete: () -> Unit,
+    onSelectAll: () -> Unit,
     onLock: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -358,6 +422,7 @@ private fun OverflowMenu(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             Item(R.string.menu_item_manage_tags, onManageTags)
             if (hasDocuments) {
+                Item(R.string.select_all, onSelectAll)
                 Item(if (isFiltered) R.string.export_filtered else R.string.export_all, onExport)
                 Item(if (isFiltered) R.string.delete_filtered else R.string.delete_all, onDelete)
             }
@@ -381,6 +446,8 @@ private fun DocumentList(
     onClearFilters: () -> Unit,
     onOpenDocument: (String) -> Unit,
     onDialog: (DocumentDialog) -> Unit,
+    selectedIds: Set<String>,
+    onToggleSelection: (String) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(
@@ -391,7 +458,7 @@ private fun DocumentList(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        if (list.tags.isNotEmpty()) {
+        if (list.tags.isNotEmpty() && selectedIds.isEmpty()) {
             item(key = "tags", contentType = "tags") {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
@@ -452,8 +519,13 @@ private fun DocumentList(
             DocumentCard(
                 document = document,
                 loadThumbnail = loadThumbnail,
-                onClick = { onOpenDocument(document.id) },
+                onClick = {
+                    if (selectedIds.isEmpty()) onOpenDocument(document.id) else onToggleSelection(document.id)
+                },
                 onDialog = onDialog,
+                selectionMode = selectedIds.isNotEmpty(),
+                isSelected = document.id in selectedIds,
+                onLongClick = { onToggleSelection(document.id) },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .animateItem(),

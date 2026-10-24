@@ -65,6 +65,9 @@ class DocumentRepository @Inject constructor(
 
     suspend fun setTags(id: String, tagIds: Set<Long>) = tagDao.setTags(id, tagIds)
 
+    suspend fun updateTags(ids: List<String>, addedTagIds: Set<Long>, removedTagIds: Set<Long>) =
+        tagDao.updateTags(ids, addedTagIds, removedTagIds)
+
     suspend fun createTag(name: String): Long = tagDao.insert(Tag(name = name))
 
     suspend fun renameTag(id: Long, name: String) = tagDao.rename(id, name)
