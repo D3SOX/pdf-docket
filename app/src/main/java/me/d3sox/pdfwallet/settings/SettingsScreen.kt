@@ -298,7 +298,7 @@ private val TagFilterMode.label: Int
 
 private const val BACKUP_MIME_TYPE = "application/octet-stream"
 
-private fun backupFileName() = "pdfwallet-backup-${LocalDate.now()}.pdfwallet"
+private fun backupFileName() = "pdf-docket-backup-${LocalDate.now()}.pdfdocket"
 
 private fun Resources.message(message: BackupMessage): String = when (message) {
     BackupMessage.Created -> getString(R.string.backup_created)

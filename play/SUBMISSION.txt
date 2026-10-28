@@ -17,7 +17,7 @@ Play Console and has one manually uploaded release.
   b. Fill in the store listing, either manually or with the upload_listing
      lane (step 3), the content rating questionnaire, the target audience,
      the data safety form (data-safety.json) and the privacy policy URL.
-  c. Download pdfwallet-<version>.aab from the latest GitHub release and
+  c. Download pdf-docket-<version>.aab from the latest GitHub release and
      upload it manually to a testing track (Alpha / closed testing).
 
 2. SIGNING
@@ -65,7 +65,7 @@ Local CLI (Ruby 3.4 and Bundler):
   export PLAY_JSON_KEY=/secure/path/play-service-account.json
   bundle exec fastlane android verify_play
   bundle exec fastlane android upload_listing
-  bundle exec fastlane android publish_play aab:/path/pdfwallet.aab notes:/path/notes.txt
+  bundle exec fastlane android publish_play aab:/path/pdf-docket.aab notes:/path/notes.txt
 
 Releases are created by bumping versionCode and versionName in
 app/build.gradle.kts and pushing a matching version tag (git tag v1.1.2 &&

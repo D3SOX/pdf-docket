@@ -25,7 +25,7 @@ platform :android do
     notes = File.read(File.expand_path(options.fetch(:notes), root)).strip
     UI.user_error!("Release notes must contain 1–500 characters") unless (1..500).cover?(notes.length)
 
-    Dir.mktmpdir("pdfwallet-play-notes") do |metadata|
+    Dir.mktmpdir("pdf-docket-play-notes") do |metadata|
       directory = File.join(metadata, "en-US", "changelogs")
       FileUtils.mkdir_p(directory)
       File.write(File.join(directory, "default.txt"), notes)

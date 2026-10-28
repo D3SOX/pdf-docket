@@ -50,8 +50,8 @@ jobs:
         mkdir credentials
         echo "$RELEASE_KEYSTORE" | base64 -d > credentials/keystore.jks
         ./gradlew assembleRelease bundleRelease
-        cp app/build/outputs/apk/release/app-release.apk "pdfwallet-$VERSION_NAME.apk"
-        cp app/build/outputs/bundle/release/app-release.aab "pdfwallet-$VERSION_NAME.aab"
+        cp app/build/outputs/apk/release/app-release.apk "pdf-docket-$VERSION_NAME.apk"
+        cp app/build/outputs/bundle/release/app-release.aab "pdf-docket-$VERSION_NAME.aab"
 
     - name: Remove credentials
       if: always()
@@ -61,7 +61,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        gh release create "$GITHUB_REF_NAME" "pdfwallet-$VERSION_NAME.apk" "pdfwallet-$VERSION_NAME.aab" \
+        gh release create "$GITHUB_REF_NAME" "pdf-docket-$VERSION_NAME.apk" "pdf-docket-$VERSION_NAME.aab" \
           --title "$VERSION_NAME" \
           --verify-tag \
           --generate-notes \

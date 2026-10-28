@@ -63,7 +63,7 @@ jobs:
         run: |
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'A release tag is required.'; exit 1; }
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir play-release --pattern '*.aab'
-          mv play-release/*.aab play-release/pdfwallet.aab
+          mv play-release/*.aab play-release/pdf-docket.aab
           previous=$(git describe --tags --abbrev=0 "$RELEASE_TAG^" 2>/dev/null || true)
           range=${previous:+$previous..}$RELEASE_TAG
           git log --no-merges --format='• %s' "$range" | head -c 500 > play-release/notes.txt
@@ -71,7 +71,7 @@ jobs:
           cat play-release/notes.txt
       - name: Submit to the testing track
         if: ${{ !inputs.verify_only }}
-        run: bundle exec fastlane android publish_play aab:play-release/pdfwallet.aab notes:play-release/notes.txt
+        run: bundle exec fastlane android publish_play aab:play-release/pdf-docket.aab notes:play-release/notes.txt
       - name: Record submission
         if: ${{ success() && !inputs.verify_only }}
         env:

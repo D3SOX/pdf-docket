@@ -50,7 +50,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        if gh release download --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --output pdfwallet.apk; then
+        if gh release download --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --output pdf-docket.apk; then
           echo "found=true" >> "$GITHUB_OUTPUT"
         else
           echo "found=false" >> "$GITHUB_OUTPUT"
@@ -71,7 +71,7 @@ jobs:
         echo "::add-mask::$store_pass"
         echo "::add-mask::$key_pass"
         FDROID_KEYSTORE_PASS="$store_pass" FDROID_KEY_PASS="$key_pass" \
-          fdroid/build-repo.sh pdfwallet.apk credentials/keystore.jks
+          fdroid/build-repo.sh pdf-docket.apk credentials/keystore.jks
 
     - name: Remove credentials
       if: always()
