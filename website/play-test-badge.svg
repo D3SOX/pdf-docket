@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="646" height="250" viewBox="0 0 646 250" role="img" aria-label="Join the test on Google Play">
   <!-- same canvas and padding as the F-Droid and Obtainium badges, so they line up -->
-  <rect x="41.5" y="41.5" width="563" height="167" rx="24" fill="#000" stroke="#a6a6a6" stroke-width="3"/>
+  <rect x="43" y="43" width="560" height="164" rx="22" fill="#000" stroke="#a6a6a6" stroke-width="4"/>
   <path d="M84 80 L162 125 L84 170 Z M84 80 L136 141 M84 170 L136 109" fill="none" stroke="#b1d18a" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
   <text x="188" y="106" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="27">JOIN THE TEST ON</text>
   <text x="186" y="164" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="58" font-weight="bold" textLength="390" lengthAdjust="spacingAndGlyphs">Google Play</text>
