@@ -4,7 +4,7 @@ An Android app that stores your PDF tickets, passes and certificates and shows t
 
 <p>
   <a href="https://f-droid.org/packages/me.d3sox.pdfwallet/"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a><!--
-  --><a href="https://fdroid.link/#https://pdfwallet.d3sox.me/repo?fingerprint=5DE94793532B65A47FF529D0BA9254338AA3879BF3C696AEFA3FAF56D05D08BB"><img src="website/fdroid-repo-badge.svg" alt="Add the repository to F-Droid" height="80"></a><!--
+  --><a href="https://fdroid.link/#https://pdfwallet.d3sox.me/repo?fingerprint=5DE94793532B65A47FF529D0BA9254338AA3879BF3C696AEFA3FAF56D05D08BB"><img src="website/fdroid-repo-badge.svg" alt="Add our F-Droid repo" height="80"></a><!--
   --><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/D3SOX/pdfwallet"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="80"></a><!--
   --><a href="https://pdfwallet.d3sox.me/#play-test"><img src="website/play-test-badge.svg" alt="Join the test on Google Play" height="80"></a>
 </p>

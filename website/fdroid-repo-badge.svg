@@ -1,8 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="646" height="250" viewBox="0 0 646 250" role="img" aria-label="Add the repository to F-Droid">
+<svg xmlns="http://www.w3.org/2000/svg" width="646" height="250" viewBox="0 0 646 250" role="img" aria-label="Add our F-Droid repo">
   <!-- same canvas and padding as the F-Droid and Obtainium badges, so they line up -->
   <rect x="41.5" y="41.5" width="563" height="167" rx="24" fill="#000" stroke="#a6a6a6" stroke-width="3"/>
-  <circle cx="123" cy="125" r="38" fill="none" stroke="#8ab000" stroke-width="7"/>
-  <path d="M123 104 V146 M102 125 H144" stroke="#8ab000" stroke-width="7" stroke-linecap="round"/>
-  <text x="188" y="106" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="27">ADD THE REPO TO</text>
-  <text x="186" y="164" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="58" font-weight="bold">F-Droid</text>
+  <path d="M90 72 L99 85 M156 72 L147 85" stroke="#8ab000" stroke-width="5" stroke-linecap="round"/>
+  <rect x="84" y="83" width="78" height="31" rx="7" fill="#8ab000"/>
+  <circle cx="104" cy="98.5" r="6" fill="#fff"/>
+  <circle cx="142" cy="98.5" r="6" fill="#fff"/>
+  <rect x="84" y="119" width="78" height="57" rx="7" fill="#1976d2"/>
+  <path d="M123 131 V164 M106.5 147.5 H139.5" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  <text x="188" y="106" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="27" textLength="128" lengthAdjust="spacingAndGlyphs">ADD OUR</text>
+  <text x="186" y="164" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="56" font-weight="bold" textLength="395" lengthAdjust="spacingAndGlyphs">F-Droid repo</text>
 </svg>
