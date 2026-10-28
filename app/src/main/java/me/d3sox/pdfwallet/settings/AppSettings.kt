@@ -23,6 +23,7 @@ data class AppSettings(
     val halfSizeBarcodes: Boolean = false,
     val splitScreen: Boolean = false,
     val syncPages: Boolean = true,
+    val reopenAtLastPosition: Boolean = true,
     val showPageNumbers: Boolean = true,
     val generateNewBarcode: Boolean = false,
     val fullBrightness: Boolean = false,

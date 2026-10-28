@@ -58,6 +58,8 @@
     <string name="preference_split_screen_description">Εμφάνιση του barcode και του PDF ταυτόχρονα.</string>
     <string name="preference_sync_pages">Συγχρονισμός PDF και barcode</string>
     <string name="preference_sync_pages_description">Εμφάνιση της σελίδας PDF του τρέχοντος barcode και αντίστροφα.</string>
+    <string name="preference_reopen_at_last_position">Συνέχεια από εκεί που σταμάτησες</string>
+    <string name="preference_reopen_at_last_position_description">Άνοιγμα των εγγράφων στο barcode και τη σελίδα που είδες τελευταία.</string>
     <string name="preference_page_numbers">Αριθμοί σελίδων</string>
     <string name="preference_page_numbers_description">Εμφάνιση των αριθμών σελίδων στις κουκκίδες δίπλα σε έγγραφα με πολλές σελίδες.</string>
     <string name="preference_barcode_generation">Δημιουργία νέου barcode</string>

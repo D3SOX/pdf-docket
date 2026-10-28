@@ -58,6 +58,8 @@
     <string name="preference_split_screen_description">Kuva triipkood ja PDF korraga.</string>
     <string name="preference_sync_pages">Sünkrooni PDF ja triipkood</string>
     <string name="preference_sync_pages_description">Näita praeguse triipkoodi PDF-lehte ja vastupidi.</string>
+    <string name="preference_reopen_at_last_position">Jätka sealt, kus pooleli jäi</string>
+    <string name="preference_reopen_at_last_position_description">Ava dokumendid viimati vaadatud triipkoodi ja lehe juures.</string>
     <string name="preference_page_numbers">Leheküljenumbrid</string>
     <string name="preference_page_numbers_description">Näita leheküljenumbreid punktides mitmeleheküljeliste dokumentide kõrval.</string>
     <string name="preference_barcode_generation">Loo uus vöötkood</string>

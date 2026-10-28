@@ -61,6 +61,8 @@
     <string name="preference_split_screen_description">عرض الرمز الشريطي وملف PDF في نفس الوقت.</string>
     <string name="preference_sync_pages">مزامنة PDF والرمز الشريطي</string>
     <string name="preference_sync_pages_description">عرض صفحة PDF الخاصة بالرمز الشريطي الحالي والعكس.</string>
+    <string name="preference_reopen_at_last_position">المتابعة من حيث توقفت</string>
+    <string name="preference_reopen_at_last_position_description">فتح المستندات عند آخر رمز شريطي وصفحة تم عرضهما.</string>
     <string name="preference_page_numbers">أرقام الصفحات</string>
     <string name="preference_page_numbers_description">عرض أرقام الصفحات داخل النقاط بجانب المستندات متعددة الصفحات.</string>
     <string name="preference_barcode_generation">إنشاء رمز شريطي جديد</string>

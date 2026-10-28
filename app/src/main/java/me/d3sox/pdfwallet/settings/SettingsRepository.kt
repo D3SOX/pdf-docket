@@ -23,6 +23,7 @@ private object Keys {
     val halfSizeBarcodes = booleanPreferencesKey("halfSizeBarcodes")
     val splitScreen = booleanPreferencesKey("splitScreen")
     val syncPages = booleanPreferencesKey("syncPages")
+    val reopenAtLastPosition = booleanPreferencesKey("reopenAtLastPosition")
     val showPageNumbers = booleanPreferencesKey("showPageNumbers")
     val generateNewBarcode = booleanPreferencesKey("generateNewBarcode")
     val fullBrightness = booleanPreferencesKey("fullBrightness")
@@ -60,6 +61,7 @@ class SettingsRepository @Inject constructor(
             halfSizeBarcodes = this[Keys.halfSizeBarcodes] ?: defaults.halfSizeBarcodes,
             splitScreen = this[Keys.splitScreen] ?: defaults.splitScreen,
             syncPages = this[Keys.syncPages] ?: defaults.syncPages,
+            reopenAtLastPosition = this[Keys.reopenAtLastPosition] ?: defaults.reopenAtLastPosition,
             showPageNumbers = this[Keys.showPageNumbers] ?: defaults.showPageNumbers,
             generateNewBarcode = this[Keys.generateNewBarcode] ?: defaults.generateNewBarcode,
             fullBrightness = this[Keys.fullBrightness] ?: defaults.fullBrightness,
@@ -80,6 +82,7 @@ class SettingsRepository @Inject constructor(
         this[Keys.halfSizeBarcodes] = settings.halfSizeBarcodes
         this[Keys.splitScreen] = settings.splitScreen
         this[Keys.syncPages] = settings.syncPages
+        this[Keys.reopenAtLastPosition] = settings.reopenAtLastPosition
         this[Keys.showPageNumbers] = settings.showPageNumbers
         this[Keys.generateNewBarcode] = settings.generateNewBarcode
         this[Keys.fullBrightness] = settings.fullBrightness

@@ -59,6 +59,8 @@
     <string name="preference_split_screen_description">Показывать штрихкод и PDF одновременно.</string>
     <string name="preference_sync_pages">Синхронизировать PDF и штрихкод</string>
     <string name="preference_sync_pages_description">Показывать страницу PDF текущего штрихкода и наоборот.</string>
+    <string name="preference_reopen_at_last_position">Открывать с места остановки</string>
+    <string name="preference_reopen_at_last_position_description">Открывать документы на последнем просмотренном штрихкоде и странице.</string>
     <string name="preference_page_numbers">Номера страниц</string>
     <string name="preference_page_numbers_description">Показывать номера страниц в точках рядом с многостраничными документами.</string>
     <string name="preference_barcode_generation">Создать новый штрихкод</string>

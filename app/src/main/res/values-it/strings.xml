@@ -58,6 +58,8 @@
     <string name="preference_split_screen_description">Mostra il codice a barre e il PDF contemporaneamente.</string>
     <string name="preference_sync_pages">Sincronizza PDF e codice a barre</string>
     <string name="preference_sync_pages_description">Mostra la pagina del PDF del codice a barre attuale e viceversa.</string>
+    <string name="preference_reopen_at_last_position">Riprendi da dove avevi lasciato</string>
+    <string name="preference_reopen_at_last_position_description">Apri i documenti al codice a barre e alla pagina visualizzati per ultimi.</string>
     <string name="preference_page_numbers">Numeri di pagina</string>
     <string name="preference_page_numbers_description">Mostra i numeri di pagina nei punti accanto ai documenti con più pagine.</string>
     <string name="preference_barcode_generation">Crea nuovo barcode</string>

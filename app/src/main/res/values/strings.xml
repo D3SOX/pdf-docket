@@ -65,6 +65,8 @@
     <string name="preference_split_screen_description">Show the barcode and the PDF at the same time.</string>
     <string name="preference_sync_pages">Sync PDF and barcode</string>
     <string name="preference_sync_pages_description">Show the PDF page of the current barcode, and the other way around.</string>
+    <string name="preference_reopen_at_last_position">Reopen where you left off</string>
+    <string name="preference_reopen_at_last_position_description">Open documents at the barcode and page you last viewed.</string>
     <string name="preference_page_numbers">Page numbers</string>
     <string name="preference_page_numbers_description">Show the page numbers in the dots next to documents with several pages.</string>
     <string name="preference_barcode_generation">Create new barcode</string>

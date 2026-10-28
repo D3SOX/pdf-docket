@@ -58,6 +58,8 @@
     <string name="preference_split_screen_description">Barcode und PDF gleichzeitig anzeigen.</string>
     <string name="preference_sync_pages">PDF und Barcode synchronisieren</string>
     <string name="preference_sync_pages_description">Die PDF-Seite des aktuellen Barcodes zeigen und umgekehrt.</string>
+    <string name="preference_reopen_at_last_position">Dort weitermachen, wo du aufgehört hast</string>
+    <string name="preference_reopen_at_last_position_description">Dokumente beim zuletzt angesehenen Barcode und der zuletzt angesehenen Seite öffnen.</string>
     <string name="preference_page_numbers">Seitenzahlen</string>
     <string name="preference_page_numbers_description">Seitenzahlen in den Punkten neben Dokumenten mit mehreren Seiten anzeigen.</string>
     <string name="preference_barcode_generation">Neuen Barcode erstellen</string>

@@ -56,6 +56,8 @@
     <string name="preference_split_screen_description">바코드와 PDF를 동시에 표시합니다.</string>
     <string name="preference_sync_pages">PDF와 바코드 동기화</string>
     <string name="preference_sync_pages_description">현재 바코드의 PDF 페이지를 표시하고, 그 반대도 마찬가지입니다.</string>
+    <string name="preference_reopen_at_last_position">마지막 위치에서 다시 열기</string>
+    <string name="preference_reopen_at_last_position_description">마지막으로 본 바코드와 페이지에서 문서를 엽니다.</string>
     <string name="preference_page_numbers">페이지 번호</string>
     <string name="preference_page_numbers_description">여러 페이지로 된 문서 옆의 점에 페이지 번호를 표시합니다.</string>
     <string name="preference_barcode_generation">새 바코드 생성</string>

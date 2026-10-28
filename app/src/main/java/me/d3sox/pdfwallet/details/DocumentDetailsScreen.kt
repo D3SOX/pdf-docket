@@ -258,8 +258,10 @@ private fun DocumentPage(
             onScanned(it)
         }
     }
-    val start by produceState<StartPosition?>(null, document.id) {
+    // positions are always saved, so turning the setting on later reopens where documents were actually left
+    val start by produceState<StartPosition?>(null, document.id, settings.reopenAtLastPosition) {
         value = vm.position(document.id)
+            ?.takeIf { settings.reopenAtLastPosition }
             ?.let { StartPosition(it.barcode, it.page, restored = true) }
             ?: StartPosition(barcode = 0, page = 0, restored = false)
     }

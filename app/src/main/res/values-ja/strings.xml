@@ -56,6 +56,8 @@
     <string name="preference_split_screen_description">バーコードとPDFを同時に表示します。</string>
     <string name="preference_sync_pages">PDFとバーコードを同期</string>
     <string name="preference_sync_pages_description">表示中のバーコードのPDFページを表示し、その逆も行います。</string>
+    <string name="preference_reopen_at_last_position">前回の位置から再開</string>
+    <string name="preference_reopen_at_last_position_description">最後に表示したバーコードとページで文書を開きます。</string>
     <string name="preference_page_numbers">ページ番号</string>
     <string name="preference_page_numbers_description">複数ページの文書の横にある点にページ番号を表示します。</string>
     <string name="preference_barcode_generation">新しいバーコードを作成</string>

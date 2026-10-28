@@ -170,6 +170,14 @@ fun SettingsScreen(
                         onCheckedChange = { checked -> vm.update { it.copy(syncPages = checked) } },
                     )
                     switchItem(
+                        title = R.string.preference_reopen_at_last_position,
+                        summary = R.string.preference_reopen_at_last_position_description,
+                        icon = R.drawable.history_24px,
+                        color = IconColor.BLUE,
+                        checked = settings.reopenAtLastPosition,
+                        onCheckedChange = { checked -> vm.update { it.copy(reopenAtLastPosition = checked) } },
+                    )
+                    switchItem(
                         title = R.string.preference_barcode_generation,
                         summary = R.string.preference_barcode_generation_description,
                         icon = R.drawable.construction_24px,
