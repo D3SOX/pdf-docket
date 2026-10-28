@@ -1,13 +1,13 @@
-This app is a simple to use PDF Wallet. That means it takes over the task of storing and displaying your most important PDF certificates. It includes a convenient fullscreen barcode rendering, if a barcode is present in the PDF.
+PDF Docket stores and displays your most important PDFs, such as tickets, passes and certificates. It includes a convenient fullscreen barcode rendering, if a barcode is present in the PDF.
 
 Brief Instruction
-- Open "PDF Wallet Revived"
+- Open "PDF Docket"
 - Import PDF
 - Done
 
 Alternative Brief Instruction
 - Go to your file browser, email, web browser or PDF reader app
-- Open/Share the PDF with "PDF Wallet Revived"
+- Open/Share the PDF with "PDF Docket"
 - Done
 
 Description

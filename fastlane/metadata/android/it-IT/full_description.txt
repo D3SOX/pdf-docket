@@ -1,13 +1,13 @@
-Questa app è un semplice Portafoglio PDF. Pensato per memorizzare e visualizzare i tuoi certificati PDF più importanti. Include una comoda visualizzazione a schermo intero dei codici a barre, se presenti nel PDF.
+PDF Docket memorizza e visualizza i tuoi PDF più importanti, come biglietti, pass e certificati. Include una comoda visualizzazione a schermo intero dei codici a barre, se presenti nel PDF.
 
 Breve Istruzione
-- Apri “PDF Wallet Revived”
+- Apri “PDF Docket”
 - Importa un PDF
 - Fatto
 
 Istruzioni Alternative
 - Vai al tuo file browser, email, browser web o app di lettura PDF
-- Apri / Condividi il PDF con “PDF Wallet Revived”
+- Apri / Condividi il PDF con “PDF Docket”
 - Fatto
 
 Descrizione

@@ -1,13 +1,13 @@
-Diese App ist ein einfach zu bedienendes PDF-Wallet. Sie übernimmt damit die Aufgabe Ihre wichtigsten PDF-Zertifikate aufzubewahren und anzuzeigen. Sie inkludiert eine bequeme, formatfüllende Barcode Anzeige, falls ein Barcode im PDF vorhanden ist.
+PDF Docket bewahrt Ihre wichtigsten PDFs wie Tickets, Ausweise und Zertifikate auf und zeigt sie an. Sie inkludiert eine bequeme, formatfüllende Barcode Anzeige, falls ein Barcode im PDF vorhanden ist.
 
 Kurzanleitung
-- "PDF Wallet Revived" öffnen
+- "PDF Docket" öffnen
 - PDF importieren
 - Fertig
 
 Kurzanleitung Alternativ
 - Dateibrowser, E-Mail-App, Webbrowser, Adobe Reader oder ähnliche App öffnen
-- PDF mit "PDF Wallet Revived" öffnen/teilen
+- PDF mit "PDF Docket" öffnen/teilen
 - Fertig
 
 Beschreibung

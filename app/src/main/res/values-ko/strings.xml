@@ -127,5 +127,5 @@
     </plurals>
     <string name="error_creating_backup">백업을 만들 수 없습니다</string>
     <string name="error_reading_backup">백업을 읽을 수 없습니다</string>
-    <string name="error_not_a_backup">이 파일은 PDF Wallet Revived 백업이 아닙니다</string>
+    <string name="error_not_a_backup">이 파일은 PDF Docket 백업이 아닙니다</string>
 </resources>

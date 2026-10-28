@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PDF Wallet Revived</string>
-    <string name="source_code_uri">https://github.com/D3SOX/pdfwallet</string>
-    <string name="issues_uri">https://github.com/D3SOX/pdfwallet/issues</string>
-    <string name="changelog_uri">https://github.com/D3SOX/pdfwallet/releases</string>
-    <string name="privacy_policy_uri">https://pdfwallet.d3sox.me/privacy.html</string>
+    <string name="app_name">PDF Docket</string>
+    <string name="source_code_uri">https://github.com/D3SOX/pdf-docket</string>
+    <string name="issues_uri">https://github.com/D3SOX/pdf-docket/issues</string>
+    <string name="changelog_uri">https://github.com/D3SOX/pdf-docket/releases</string>
+    <string name="privacy_policy_uri">https://pdf-docket.d3sox.me/privacy.html</string>
     <string name="license_uri">https://www.gnu.org/licenses/gpl-3.0.html</string>
 </resources>

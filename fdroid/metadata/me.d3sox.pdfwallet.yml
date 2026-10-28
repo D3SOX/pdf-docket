@@ -3,8 +3,8 @@ Categories:
   - Office
 License: GPL-3.0-only
 AuthorName: D3SOX
-WebSite: https://pdfwallet.d3sox.me/
-SourceCode: https://github.com/D3SOX/pdfwallet
-IssueTracker: https://github.com/D3SOX/pdfwallet/issues
-Changelog: https://github.com/D3SOX/pdfwallet/releases
-AutoName: PDF Wallet Revived
+WebSite: https://pdf-docket.d3sox.me/
+SourceCode: https://github.com/D3SOX/pdf-docket
+IssueTracker: https://github.com/D3SOX/pdf-docket/issues
+Changelog: https://github.com/D3SOX/pdf-docket/releases
+AutoName: PDF Docket

@@ -9,7 +9,7 @@
   "account_creation": false,
   "encryption_in_transit": "Not applicable. The app has no internet permission and sends no data.",
   "data_deletion": "Uninstalling the app or clearing its storage deletes all documents, tags and settings.",
-  "privacy_policy": "https://pdfwallet.d3sox.me/privacy.html",
+  "privacy_policy": "https://pdf-docket.d3sox.me/privacy.html",
   "notes": [
     "Imported PDFs, names, tags and settings stay in the app's private storage on the device.",
     "Biometric authentication runs through Android's BiometricPrompt. The app receives no biometric data.",

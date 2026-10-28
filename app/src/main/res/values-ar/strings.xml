@@ -142,5 +142,5 @@
     </plurals>
     <string name="error_creating_backup">تعذّر إنشاء النسخة الاحتياطية</string>
     <string name="error_reading_backup">تعذّرت قراءة النسخة الاحتياطية</string>
-    <string name="error_not_a_backup">هذا الملف ليس نسخة احتياطية من PDF Wallet Revived</string>
+    <string name="error_not_a_backup">هذا الملف ليس نسخة احتياطية من PDF Docket</string>
 </resources>

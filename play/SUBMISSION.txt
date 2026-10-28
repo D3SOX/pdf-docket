@@ -1,10 +1,10 @@
-PDF Wallet Revived: Google Play submission
+PDF Docket: Google Play submission
 
 Application ID: me.d3sox.pdfwallet
 Listing texts and graphics: fastlane/metadata/android (title, short and full
 description per locale, icon.png 512x512, featureGraphic.png 1024x500 and
 phone screenshots in a 1:2 aspect ratio).
-Privacy policy: https://pdfwallet.d3sox.me/privacy.html
+Privacy policy: https://pdf-docket.d3sox.me/privacy.html
 Data safety answers: data-safety.json in this directory (no data collected).
 Price and category proposal: free, Productivity. Contains no ads.
 
@@ -46,19 +46,19 @@ and policy declarations stay untouched.
 
   a. Enable the Google Play Developer API in a Google Cloud project, create a
      service account with a JSON key, and invite it in the Play Console with
-     release permissions for PDF Wallet Revived. play-listing.yml also needs
+     release permissions for PDF Docket. play-listing.yml also needs
      the "Manage store presence" permission.
-  b. gh secret set PLAY_SERVICE_ACCOUNT_JSON -R D3SOX/pdfwallet < key.json
+  b. gh secret set PLAY_SERVICE_ACCOUNT_JSON -R D3SOX/pdf-docket < key.json
      Keep the key file outside the repository and delete local copies.
   c. Check access without uploading:
-     gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<tag> -f verify_only=true
-  d. gh variable set PLAY_PUBLISHING -R D3SOX/pdfwallet --body true
+     gh workflow run publish-play-store.yml -R D3SOX/pdf-docket -f tag=<tag> -f verify_only=true
+  d. gh variable set PLAY_PUBLISHING -R D3SOX/pdf-docket --body true
 
 Retry the upload of a published release:
-  gh workflow run publish-play-store.yml -R D3SOX/pdfwallet -f tag=<tag>
+  gh workflow run publish-play-store.yml -R D3SOX/pdf-docket -f tag=<tag>
 
 Upload the store listing texts and graphics after changing them:
-  gh workflow run play-listing.yml -R D3SOX/pdfwallet
+  gh workflow run play-listing.yml -R D3SOX/pdf-docket
 
 Local CLI (Ruby 3.4 and Bundler):
   bundle install

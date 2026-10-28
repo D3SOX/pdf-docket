@@ -133,5 +133,5 @@
     </plurals>
     <string name="error_creating_backup">Impossible de créer la sauvegarde</string>
     <string name="error_reading_backup">Impossible de lire la sauvegarde</string>
-    <string name="error_not_a_backup">Ce fichier n\'est pas une sauvegarde PDF Wallet Revived</string>
+    <string name="error_not_a_backup">Ce fichier n\'est pas une sauvegarde PDF Docket</string>
 </resources>

@@ -1,1 +1,1 @@
-Simple PDF Wallet for your most important PDFs
+Keep PDF tickets and passes at hand and show their barcodes in fullscreen

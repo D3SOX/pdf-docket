@@ -1,13 +1,13 @@
-Este aplicativo é uma Carteira de PDFs simples de usar. Isso significa que ele assume a tarefa de guardar e exibir os seus certificados em PDF mais importantes. Inclui uma visualização prática em ecrã/ tela inteira do código de barras, se o PDF contiver um.
+O PDF Docket guarda e exibe os seus PDFs mais importantes, como bilhetes, passes e certificados. Inclui uma visualização prática em ecrã/ tela inteira do código de barras, se o PDF contiver um.
 
 Instruções rápidas
-- Abra o “PDF Wallet Revived”
+- Abra o “PDF Docket”
 - Importe o PDF
 - Pronto
 
 Instruções rápidas alternativas
 - Vá ao seu gestor de ficheiros/arquivos, e-mail, navegador ou app de leitura de PDF
-- Abra ou partilhe/envie o PDF com o “PDF Wallet Revived”
+- Abra ou partilhe/envie o PDF com o “PDF Docket”
 - Pronto
 
 Descrição

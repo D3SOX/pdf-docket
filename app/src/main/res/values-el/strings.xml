@@ -131,5 +131,5 @@
     </plurals>
     <string name="error_creating_backup">Δεν ήταν δυνατή η δημιουργία του αντιγράφου ασφαλείας</string>
     <string name="error_reading_backup">Δεν ήταν δυνατή η ανάγνωση του αντιγράφου ασφαλείας</string>
-    <string name="error_not_a_backup">Αυτό το αρχείο δεν είναι αντίγραφο ασφαλείας του PDF Wallet Revived</string>
+    <string name="error_not_a_backup">Αυτό το αρχείο δεν είναι αντίγραφο ασφαλείας του PDF Docket</string>
 </resources>

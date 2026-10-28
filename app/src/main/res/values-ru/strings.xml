@@ -136,5 +136,5 @@
     </plurals>
     <string name="error_creating_backup">Не удалось создать резервную копию</string>
     <string name="error_reading_backup">Не удалось прочитать резервную копию</string>
-    <string name="error_not_a_backup">Этот файл не является резервной копией PDF Wallet Revived</string>
+    <string name="error_not_a_backup">Этот файл не является резервной копией PDF Docket</string>
 </resources>

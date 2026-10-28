@@ -131,5 +131,5 @@
     </plurals>
     <string name="error_creating_backup">Varukoopia loomine ebaõnnestus</string>
     <string name="error_reading_backup">Varukoopia lugemine ebaõnnestus</string>
-    <string name="error_not_a_backup">See fail ei ole rakenduse PDF Wallet Revived varukoopia</string>
+    <string name="error_not_a_backup">See fail ei ole rakenduse PDF Docket varukoopia</string>
 </resources>

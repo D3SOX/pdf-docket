@@ -34,4 +34,4 @@ Thank you for your interest in contributing to this project!
 - Open a pull request with new or improved translations
 
 ## Need support?
-Ask in the [issue tracker](https://github.com/D3SOX/pdfwallet/issues).
+Ask in the [issue tracker](https://github.com/D3SOX/pdf-docket/issues).
