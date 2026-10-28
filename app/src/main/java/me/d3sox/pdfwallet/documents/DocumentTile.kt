@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +13,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
@@ -23,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,6 +59,8 @@ import me.d3sox.pdfwallet.documents.tags.iconDrawable
 
 private const val PREVIEW_ASPECT_RATIO = 4f / 3f
 private val LIST_PREVIEW_WIDTH = 96.dp
+private const val MAX_TAG_CHIPS = 3
+private val TAG_CHIP_MAX_WIDTH = 120.dp
 
 /**
  * A grid tile with a preview of the first page above the document name and tags,
@@ -96,13 +103,22 @@ fun DocumentTile(
         if (asListItem) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Preview(document.id, loadThumbnail, Modifier.width(LIST_PREVIEW_WIDTH))
-                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 1)
+                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 1, showTags = true)
             }
         } else {
-            Preview(document.id, loadThumbnail, Modifier.fillMaxWidth())
+            // the tags are on the preview, so they don't change the height of the tile
+            Box {
+                Preview(document.id, loadThumbnail, Modifier.fillMaxWidth())
+                TagChips(
+                    document.tags,
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp),
+                )
+            }
             Row(verticalAlignment = Alignment.Top) {
                 // reserves the same height in every tile, so the grid rows line up
-                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 2)
+                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 2, showTags = false)
             }
         }
     }
@@ -115,6 +131,7 @@ private fun RowScope.NameTagsAndActions(
     selectionMode: Boolean,
     isSelected: Boolean,
     minNameLines: Int,
+    showTags: Boolean,
 ) {
     Column(
         modifier = Modifier
@@ -128,7 +145,8 @@ private fun RowScope.NameTagsAndActions(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
-        TagsLine(document.tags)
+        // an empty line would push the name off center
+        if (showTags && document.tags.isNotEmpty()) TagsLine(document.tags)
     }
     if (selectionMode) {
         Checkbox(checked = isSelected, onCheckedChange = null, modifier = Modifier.padding(12.dp))
@@ -138,6 +156,52 @@ private fun RowScope.NameTagsAndActions(
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
         DocumentMenu(document = document, expanded = showMenu, onDismiss = { showMenu = false }, onDialog = onDialog)
+    }
+}
+
+/**
+ * The first [MAX_TAG_CHIPS] tags as chips, and how many more there are.
+ */
+@Composable
+private fun TagChips(tags: List<Tag>, modifier: Modifier) {
+    Column(
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier,
+    ) {
+        tags.take(MAX_TAG_CHIPS).forEach { tag ->
+            TagChip(tag.name, tag.iconDrawable)
+        }
+        if (tags.size > MAX_TAG_CHIPS) {
+            TagChip("+${tags.size - MAX_TAG_CHIPS}", icon = null)
+        }
+    }
+}
+
+@Composable
+private fun TagChip(text: String, icon: Int?) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f),
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .widthIn(max = TAG_CHIP_MAX_WIDTH)
+                .padding(horizontal = 8.dp, vertical = 3.dp),
+        ) {
+            if (icon != null) {
+                Icon(
+                    painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .size(14.dp),
+                )
+            }
+            Text(text, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
