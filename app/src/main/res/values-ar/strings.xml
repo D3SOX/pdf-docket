@@ -2,7 +2,6 @@
 <resources>
     <string name="delete">حذف</string>
     <string name="document_name">اسم المستند</string>
-    <string name="add">إضافة</string>
     <string name="warning">تحذير</string>
     <string name="error_reading_pdf">خطأ في قراءة ملف PDF. جرب ملفًا آخر أو موقعًا آخر</string>
     <string name="dialog_password_protection_title">فك تشفير ملف PDF المحمي بكلمة مرور</string>
@@ -89,7 +88,10 @@
     <string name="more_options">مزيد من الخيارات</string>
     <string name="close_search">إغلاق البحث</string>
     <string name="show_barcode">إظهار الرمز الشريطي</string>
-    <string name="show_pdf">إظهار PDF</string>
+    <string name="filter_by_tag">تصفية حسب العلامة</string>
+    <string name="view_barcode">الرمز الشريطي</string>
+    <string name="view_pdf">PDF</string>
+    <string name="view_both">كلاهما</string>
     <string name="document_position">المستند %1$d/%2$d</string>
     <string name="page_position">الصفحة %1$d/%2$d</string>
     <string name="barcode_position">الرمز الشريطي %1$d/%2$d</string>

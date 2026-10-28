@@ -15,7 +15,7 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val THUMBNAIL_WIDTH_PX = 256
+private const val THUMBNAIL_WIDTH_PX = 512
 private const val MAX_CACHED_BARCODE_RESULTS = 32
 
 data class PageBarcode(val pageIndex: Int, val bitmap: Bitmap)

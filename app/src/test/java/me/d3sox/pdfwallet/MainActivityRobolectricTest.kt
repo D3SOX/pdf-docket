@@ -38,8 +38,9 @@ import javax.inject.Inject
 @HiltAndroidTest
 @UninstallModules(DatabaseModule::class, CoroutineDispatchersModule::class)
 @RunWith(RobolectricTestRunner::class)
-// hiding overlay windows needs a permission that Robolectric doesn't grant on Android 12+
-@Config(application = HiltTestApplication::class, sdk = [30])
+// hiding overlay windows needs a permission that Robolectric doesn't grant on Android 12+,
+// and a phone-sized screen keeps every seeded document in view
+@Config(application = HiltTestApplication::class, sdk = [30], qualifiers = "w411dp-h891dp")
 class MainActivityRobolectricTest {
 
     @get:Rule(order = 0)
@@ -87,7 +88,8 @@ class MainActivityRobolectricTest {
         composeRule.onNodeWithText("Ticket B").performClick()
         composeRule.onNodeWithText("1 selected").assertIsDisplayed()
         composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
-        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.import_pdf))
+            .assertIsDisplayed()
     }
 
     @Test

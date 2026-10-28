@@ -9,7 +9,6 @@
         <item quantity="other">%d selected</item>
     </plurals>
     <string name="document_name">Document name</string>
-    <string name="add">Add</string>
     <string name="warning">Warning</string>
     <string name="error_reading_pdf">Error while reading the PDF. Try another file or file location</string>
     <string name="dialog_password_protection_title">Decrypt password protected PDF</string>
@@ -93,7 +92,10 @@
     <string name="more_options">More options</string>
     <string name="close_search">Close search</string>
     <string name="show_barcode">Show barcode</string>
-    <string name="show_pdf">Show PDF</string>
+    <string name="filter_by_tag">Filter by tag</string>
+    <string name="view_barcode">Barcode</string>
+    <string name="view_pdf">PDF</string>
+    <string name="view_both">Both</string>
     <string name="document_position">Document %1$d/%2$d</string>
     <string name="page_position">Page %1$d/%2$d</string>
     <string name="barcode_position">Barcode %1$d/%2$d</string>

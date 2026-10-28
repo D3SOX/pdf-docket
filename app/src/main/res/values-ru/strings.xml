@@ -2,7 +2,6 @@
 <resources>
     <string name="delete">Удалить</string>
     <string name="document_name">Название документа</string>
-    <string name="add">Добавить</string>
     <string name="warning">Внимание</string>
     <string name="error_reading_pdf">Ошибка чтения PDF. Попробуйте другой файл или местоположение</string>
     <string name="dialog_password_protection_title">Расшифровать PDF, защищенный паролем</string>
@@ -87,7 +86,10 @@
     <string name="more_options">Другие параметры</string>
     <string name="close_search">Закрыть поиск</string>
     <string name="show_barcode">Показать штрихкод</string>
-    <string name="show_pdf">Показать PDF</string>
+    <string name="filter_by_tag">Фильтр по тегу</string>
+    <string name="view_barcode">Штрихкод</string>
+    <string name="view_pdf">PDF</string>
+    <string name="view_both">Оба</string>
     <string name="document_position">Документ %1$d/%2$d</string>
     <string name="page_position">Страница %1$d/%2$d</string>
     <string name="barcode_position">Штрихкод %1$d/%2$d</string>

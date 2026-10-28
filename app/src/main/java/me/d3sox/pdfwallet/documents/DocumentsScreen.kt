@@ -11,21 +11,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,11 +58,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.d3sox.pdfwallet.R
+import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.BulkTagsDialog
 import me.d3sox.pdfwallet.documents.tags.ManageTagsDialog
 import me.d3sox.pdfwallet.settings.AppSettings
@@ -129,6 +135,9 @@ fun DocumentsScreen(
                 hasDocuments = !list?.all.isNullOrEmpty(),
                 settings = settings,
                 isFiltered = list?.isFiltered == true,
+                tags = list?.tags.orEmpty(),
+                selectedTagIds = list?.selectedTagIds.orEmpty(),
+                onToggleTag = vm::onToggleTag,
                 onQueryChange = vm::onQueryChange,
                 onOpenSearch = { isSearching = true },
                 onCloseSearch = closeSearch,
@@ -145,8 +154,15 @@ fun DocumentsScreen(
             )
         },
         floatingActionButton = {
-            if (!isSelecting) FloatingActionButton(onClick = onAddDocument) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add))
+            if (!isSelecting) {
+                val label = stringResource(R.string.import_pdf)
+                ExtendedFloatingActionButton(
+                    onClick = onAddDocument,
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text(label) },
+                    // the label text isn't exposed to accessibility services on its own
+                    modifier = Modifier.semantics { contentDescription = label },
+                )
             }
         },
         snackbarHost = { SnackbarHost(LocalSnackbarHostState.current) },
@@ -159,7 +175,6 @@ fun DocumentsScreen(
                 list = list,
                 contentPadding = innerPadding,
                 loadThumbnail = vm::thumbnail,
-                onToggleTag = vm::onToggleTag,
                 onClearFilters = {
                     vm.onClearFilters()
                     isSearching = false
@@ -269,6 +284,9 @@ private fun DocumentsTopBar(
     hasDocuments: Boolean,
     settings: AppSettings,
     isFiltered: Boolean,
+    tags: List<Tag>,
+    selectedTagIds: Set<Long>,
+    onToggleTag: (Long) -> Unit,
     onQueryChange: (String) -> Unit,
     onOpenSearch: () -> Unit,
     onCloseSearch: () -> Unit,
@@ -312,6 +330,9 @@ private fun DocumentsTopBar(
                 IconButton(onClick = onOpenSearch) {
                     Icon(painterResource(R.drawable.search_24), contentDescription = stringResource(R.string.search))
                 }
+            }
+            if (hasDocuments && tags.isNotEmpty()) {
+                TagFilterMenu(tags, selectedTagIds, onToggleTag)
             }
             if (hasDocuments) {
                 SortMenu(settings.sortOrder, onSortOrderSelected)
@@ -365,6 +386,28 @@ private val SortOrder.label: Int
         SortOrder.SIZE_DESC -> R.string.sort_size_desc
         SortOrder.SIZE_ASC -> R.string.sort_size_asc
     }
+
+@Composable
+private fun TagFilterMenu(tags: List<Tag>, selectedIds: Set<Long>, onToggle: (Long) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            BadgedBox(badge = { if (selectedIds.isNotEmpty()) Badge { Text(selectedIds.size.toString()) } }) {
+                Icon(painterResource(R.drawable.tag_24), contentDescription = stringResource(R.string.filter_by_tag))
+            }
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            tags.forEach { tag ->
+                DropdownMenuItem(
+                    text = { Text(tag.name) },
+                    trailingIcon = { Checkbox(checked = tag.id in selectedIds, onCheckedChange = null) },
+                    // stays open to pick several tags
+                    onClick = { onToggle(tag.id) },
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun SortMenu(selected: SortOrder, onSelect: (SortOrder) -> Unit) {
@@ -442,62 +485,36 @@ private fun DocumentList(
     list: DocumentList,
     contentPadding: PaddingValues,
     loadThumbnail: suspend (String) -> android.graphics.Bitmap?,
-    onToggleTag: (Long) -> Unit,
     onClearFilters: () -> Unit,
     onOpenDocument: (String) -> Unit,
     onDialog: (DocumentDialog) -> Unit,
     selectedIds: Set<String>,
     onToggleSelection: (String) -> Unit,
 ) {
-    LazyColumn(
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 160.dp),
         contentPadding = PaddingValues(
-            top = contentPadding.calculateTopPadding(),
-            // keep the last card clear of the floating action button
+            start = 16.dp,
+            end = 16.dp,
+            top = contentPadding.calculateTopPadding() + 8.dp,
+            // keep the last tiles clear of the floating action button
             bottom = contentPadding.calculateBottomPadding() + 88.dp,
         ),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        if (list.tags.isNotEmpty() && selectedIds.isEmpty()) {
-            item(key = "tags", contentType = "tags") {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(list.tags, key = { it.id }) { tag ->
-                        val isSelected = tag.id in list.selectedTagIds
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { onToggleTag(tag.id) },
-                            label = { Text(tag.name) },
-                            leadingIcon = if (isSelected) {
-                                {
-                                    Icon(
-                                        Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(FilterChipDefaults.IconSize),
-                                    )
-                                }
-                            } else {
-                                null
-                            },
-                        )
-                    }
-                }
-            }
-        }
         if (list.isFiltered) {
-            item(key = "count", contentType = "count") {
+            fullWidthItem(key = "count") {
                 Text(
                     text = stringResource(R.string.showing_count, list.visible.size, list.all.size),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
         }
         if (list.visible.isEmpty()) {
-            item(key = "no_results", contentType = "no_results") {
+            fullWidthItem(key = "no_results") {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
@@ -516,7 +533,7 @@ private fun DocumentList(
             }
         }
         items(list.visible, key = { it.id }, contentType = { "document" }) { document ->
-            DocumentCard(
+            DocumentTile(
                 document = document,
                 loadThumbnail = loadThumbnail,
                 onClick = {
@@ -526,13 +543,14 @@ private fun DocumentList(
                 selectionMode = selectedIds.isNotEmpty(),
                 isSelected = document.id in selectedIds,
                 onLongClick = { onToggleSelection(document.id) },
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .animateItem(),
+                modifier = Modifier.animateItem(),
             )
         }
     }
 }
+
+private fun LazyGridScope.fullWidthItem(key: String, content: @Composable () -> Unit) =
+    item(key = key, contentType = key, span = { GridItemSpan(maxLineSpan) }) { content() }
 
 @Composable
 private fun EmptyState(onAddDocument: () -> Unit, modifier: Modifier = Modifier) {

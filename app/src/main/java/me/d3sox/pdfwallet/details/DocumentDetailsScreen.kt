@@ -2,9 +2,6 @@ package me.d3sox.pdfwallet.details
 
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,13 +9,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -33,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
@@ -49,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -58,7 +54,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.keepScreenOn
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,9 +68,7 @@ import me.d3sox.pdfwallet.render.BarcodeScan
 import me.d3sox.pdfwallet.render.PageBarcode
 import me.d3sox.pdfwallet.settings.AppSettings
 import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
-import kotlinx.coroutines.delay
 
-private const val PILL_VISIBILITY_MS = 2_000L
 private const val HALF_SIZE = 0.5f
 private const val BARCODE_PADDING_DIVISOR = 8
 
@@ -124,37 +117,55 @@ fun DocumentDetailsScreen(
     val current = documents[pagerState.currentPage.coerceIn(documents.indices)]
     val scans = remember { mutableStateMapOf<String, BarcodeScan>() }
     var showPdf by rememberSaveable { mutableStateOf(false) }
+    val viewMode = when {
+        settings.splitScreen -> ViewMode.BOTH
+        showPdf -> ViewMode.PDF
+        else -> ViewMode.BARCODE
+    }
     var dialog by remember { mutableStateOf<DocumentDialog?>(null) }
     val currentHasBarcode = scans[current.id]?.barcodes?.isNotEmpty() == true
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(current.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = {
+                    Column {
+                        Text(current.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (documents.size > 1) {
+                            Text(
+                                text = stringResource(
+                                    R.string.document_position,
+                                    pagerState.currentPage + 1,
+                                    documents.size,
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
-                    if (currentHasBarcode && !settings.splitScreen) {
-                        IconButton(onClick = { showPdf = !showPdf }) {
-                            if (showPdf) {
-                                Icon(painterResource(R.drawable.qr_code_24), stringResource(R.string.show_barcode))
-                            } else {
-                                Icon(painterResource(R.drawable.picture_as_pdf_24), stringResource(R.string.show_pdf))
-                            }
-                        }
-                    }
                     DetailsOverflowMenu(
                         document = current,
                         settings = settings,
                         onToggleHalfSizeBarcodes = vm::onToggleHalfSizeBarcodes,
-                        onToggleSplitScreen = vm::onToggleSplitScreen,
                         onDialog = { dialog = it },
                     )
                 },
             )
+        },
+        bottomBar = {
+            if (currentHasBarcode) {
+                ViewModeBar(selected = viewMode) { mode ->
+                    showPdf = mode == ViewMode.PDF
+                    vm.onSplitScreenChange(mode == ViewMode.BOTH)
+                }
+            }
         },
         snackbarHost = { SnackbarHost(LocalSnackbarHostState.current) },
     ) { innerPadding ->
@@ -174,20 +185,11 @@ fun DocumentDetailsScreen(
                 DocumentPage(
                     document = document,
                     isActive = index == pagerState.currentPage,
-                    showPdf = showPdf,
+                    viewMode = viewMode,
                     settings = settings,
                     invertColors = isDarkTheme && settings.invertPdfColors,
                     vm = vm,
                     onScanned = { scans[document.id] = it },
-                )
-            }
-            if (documents.size > 1) {
-                PositionPill(
-                    text = stringResource(R.string.document_position, pagerState.currentPage + 1, documents.size),
-                    key = pagerState.currentPage,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 16.dp),
                 )
             }
         }
@@ -207,7 +209,6 @@ private fun DetailsOverflowMenu(
     document: Document,
     settings: AppSettings,
     onToggleHalfSizeBarcodes: () -> Unit,
-    onToggleSplitScreen: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -223,11 +224,6 @@ private fun DetailsOverflowMenu(
                 trailingIcon = { Checkbox(checked = settings.halfSizeBarcodes, onCheckedChange = null) },
                 onClick = onToggleHalfSizeBarcodes,
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.preference_split_screen)) },
-                trailingIcon = { Checkbox(checked = settings.splitScreen, onCheckedChange = null) },
-                onClick = onToggleSplitScreen,
-            )
         }
     }
 }
@@ -237,7 +233,7 @@ private fun DetailsOverflowMenu(
 private fun DocumentPage(
     document: Document,
     isActive: Boolean,
-    showPdf: Boolean,
+    viewMode: ViewMode,
     settings: AppSettings,
     invertColors: Boolean,
     vm: DocumentDetailsViewModel,
@@ -257,8 +253,8 @@ private fun DocumentPage(
     val pdf = @Composable { PdfPager(document.id, result.pageCount, isActive, invertColors, vm) }
     when {
         result.barcodes.isEmpty() -> pdf()
-        settings.splitScreen -> SplitLayout(first = barcodes, second = pdf)
-        showPdf -> pdf()
+        viewMode == ViewMode.BOTH -> SplitLayout(first = barcodes, second = pdf)
+        viewMode == ViewMode.PDF -> pdf()
         else -> barcodes()
     }
 }
@@ -337,13 +333,14 @@ private fun PagesPager(
                 page(it)
             }
         }
-        if (isActive) {
-            PositionPill(
-                text = pageLabel(pagerState.currentPage),
-                key = pagerState.currentPage,
+        if (isActive && pageCount > 1) {
+            PageIndicator(
+                current = pagerState.currentPage,
+                count = pageCount,
+                label = pageLabel(pagerState.currentPage),
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 24.dp),
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 8.dp),
             )
         }
     }
@@ -354,18 +351,19 @@ private fun BarcodeView(barcode: PageBarcode, halfSize: Boolean) {
     val bitmap = remember(barcode) { barcode.bitmap.asImageBitmap() }
     val aspectRatio = bitmap.width.toFloat() / bitmap.height
     BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        val horizontalPadding = 24.dp
-        val verticalPadding = (maxHeight / BARCODE_PADDING_DIVISOR).coerceAtMost(48.dp)
+        val margin = 24.dp
+        // the white quiet zone that scanners need around the code
+        val quietZone = (maxHeight / BARCODE_PADDING_DIVISOR).coerceIn(16.dp, 32.dp)
         // as large as possible while keeping the aspect ratio
-        val availableWidth = (maxWidth - horizontalPadding * 2) * (if (halfSize) HALF_SIZE else 1f)
-        val availableHeight = maxHeight - verticalPadding * 2
+        val availableWidth = (maxWidth - (margin + quietZone) * 2) * (if (halfSize) HALF_SIZE else 1f)
+        val availableHeight = maxHeight - (margin + quietZone) * 2
         val width = minOf(availableWidth, availableHeight * aspectRatio)
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
                 .background(Color.White)
-                .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+                .padding(quietZone),
         ) {
             Image(
                 bitmap = bitmap,
@@ -397,27 +395,5 @@ private fun PdfPageView(
             colorFilter = if (invertColors) invertColorFilter else null,
             modifier = Modifier.fillMaxSize(),
         )
-    }
-}
-
-@Composable
-private fun PositionPill(text: String, key: Any, modifier: Modifier = Modifier) {
-    var visible by remember { mutableStateOf(true) }
-    LaunchedEffect(key) {
-        visible = true
-        delay(PILL_VISIBILITY_MS)
-        visible = false
-    }
-    AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut(), modifier = modifier) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.9f),
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            )
-        }
     }
 }

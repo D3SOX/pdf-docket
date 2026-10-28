@@ -2,7 +2,6 @@
 <resources>
     <string name="delete">Elimina</string>
     <string name="document_name">Nome documento</string>
-    <string name="add">Aggiungi</string>
     <string name="warning">Attenzione</string>
     <string name="error_reading_pdf">Errore nella lettura del PDF. Prova un altro file o percorso</string>
     <string name="dialog_password_protection_title">Decifra PDF protetto da password</string>
@@ -86,7 +85,10 @@
     <string name="more_options">Altre opzioni</string>
     <string name="close_search">Chiudi ricerca</string>
     <string name="show_barcode">Mostra codice a barre</string>
-    <string name="show_pdf">Mostra PDF</string>
+    <string name="filter_by_tag">Filtra per tag</string>
+    <string name="view_barcode">Codice</string>
+    <string name="view_pdf">PDF</string>
+    <string name="view_both">Entrambi</string>
     <string name="document_position">Documento %1$d/%2$d</string>
     <string name="page_position">Pagina %1$d/%2$d</string>
     <string name="barcode_position">Codice a barre %1$d/%2$d</string>

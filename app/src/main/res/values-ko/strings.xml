@@ -1,7 +1,6 @@
 <resources>
     <string name="delete">삭제</string>
     <string name="document_name">문서 이름</string>
-    <string name="add">추가</string>
     <string name="warning">경고</string>
     <string name="error_reading_pdf">PDF를 읽는 중 오류가 발생했습니다. 다른 파일이나 파일 위치를 시도해 주세요</string>
     <string name="dialog_password_protection_title">암호로 보호된 PDF 해독</string>
@@ -84,7 +83,10 @@
     <string name="more_options">더보기</string>
     <string name="close_search">검색 닫기</string>
     <string name="show_barcode">바코드 표시</string>
-    <string name="show_pdf">PDF 표시</string>
+    <string name="filter_by_tag">태그로 필터링</string>
+    <string name="view_barcode">바코드</string>
+    <string name="view_pdf">PDF</string>
+    <string name="view_both">모두</string>
     <string name="document_position">문서 %1$d/%2$d</string>
     <string name="page_position">페이지 %1$d/%2$d</string>
     <string name="barcode_position">바코드 %1$d/%2$d</string>

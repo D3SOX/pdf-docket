@@ -1,7 +1,6 @@
 <resources>
     <string name="delete">削除</string>
     <string name="document_name">ドキュメント名</string>
-    <string name="add">追加</string>
     <string name="warning">警告</string>
     <string name="error_reading_pdf">PDFの読み取り中にエラーが発生しました。別のファイルまたはファイルの場所を試してください。</string>
     <string name="dialog_password_protection_title">パスワードで保護されたPDFを復号化</string>
@@ -84,7 +83,10 @@
     <string name="more_options">その他のオプション</string>
     <string name="close_search">検索を閉じる</string>
     <string name="show_barcode">バーコードを表示</string>
-    <string name="show_pdf">PDFを表示</string>
+    <string name="filter_by_tag">タグで絞り込む</string>
+    <string name="view_barcode">バーコード</string>
+    <string name="view_pdf">PDF</string>
+    <string name="view_both">両方</string>
     <string name="document_position">ドキュメント %1$d/%2$d</string>
     <string name="page_position">ページ %1$d/%2$d</string>
     <string name="barcode_position">バーコード %1$d/%2$d</string>
