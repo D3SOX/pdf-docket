@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -106,9 +107,14 @@ fun DocumentTile(
                 NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 1, showTags = true)
             }
         } else {
-            // the tags are on the preview, so they don't change the height of the tile
-            Box {
-                Preview(document.id, loadThumbnail, Modifier.fillMaxWidth())
+            // the tags are on the preview, which keeps its size, so they don't change the height of the tile
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(PREVIEW_ASPECT_RATIO)
+                    .clipToBounds()
+            ) {
+                Preview(document.id, loadThumbnail, Modifier.fillMaxSize())
                 TagChips(
                     document.tags,
                     Modifier

@@ -309,7 +309,8 @@ private fun DocumentPages(
     }
     LaunchedEffect(barcodePager, pdfPager) {
         snapshotFlow { barcodePager.settledPage to pdfPager.settledPage }
-            .drop(1)
+            // a restored position is already saved, otherwise the start is the latest position
+            .drop(if (start.restored) 1 else 0)
             .collect { (barcode, page) -> vm.savePosition(document.id, barcode, page) }
     }
 
