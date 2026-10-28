@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package me.d3sox.pdfwallet.details
 
 import android.view.WindowManager
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,13 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -42,6 +46,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,8 +57,9 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.keepScreenOn
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,11 +69,13 @@ import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.documents.Document
 import me.d3sox.pdfwallet.documents.DocumentDialog
 import me.d3sox.pdfwallet.documents.DocumentDialogHost
-import me.d3sox.pdfwallet.documents.DocumentMenuItems
+import me.d3sox.pdfwallet.documents.DocumentMenu
 import me.d3sox.pdfwallet.render.BarcodeScan
 import me.d3sox.pdfwallet.render.PageBarcode
 import me.d3sox.pdfwallet.settings.AppSettings
 import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
+import me.d3sox.pdfwallet.ui.components.checkable
+import kotlinx.coroutines.flow.drop
 
 private const val HALF_SIZE = 0.5f
 private const val BARCODE_PADDING_DIVISOR = 8
@@ -176,7 +184,8 @@ fun DocumentDetailsScreen(
                 // e.g. while queuing at a gate
                 .keepScreenOn()
         ) {
-            HorizontalPager(
+            // documents are swiped vertically, their pages and barcodes horizontally
+            VerticalPager(
                 state = pagerState,
                 key = { documents[it].id },
                 modifier = Modifier.fillMaxSize(),
@@ -184,7 +193,6 @@ fun DocumentDetailsScreen(
                 val document = documents[index]
                 DocumentPage(
                     document = document,
-                    isActive = index == pagerState.currentPage,
                     viewMode = viewMode,
                     settings = settings,
                     invertColors = isDarkTheme && settings.invertPdfColors,
@@ -216,14 +224,20 @@ private fun DetailsOverflowMenu(
         IconButton(onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DocumentMenuItems(document = document, onDialog = onDialog, onDismissMenu = { expanded = false })
-            HorizontalDivider()
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.preference_half_size_barcodes)) },
-                trailingIcon = { Checkbox(checked = settings.halfSizeBarcodes, onCheckedChange = null) },
-                onClick = onToggleHalfSizeBarcodes,
-            )
+        DocumentMenu(
+            document = document,
+            expanded = expanded,
+            onDismiss = { expanded = false },
+            onDialog = onDialog,
+        ) {
+            group {
+                checkable(
+                    text = { stringResource(R.string.preference_half_size_barcodes) },
+                    checked = settings.halfSizeBarcodes,
+                    onCheckedChange = { onToggleHalfSizeBarcodes() },
+                    icon = { painterResource(R.drawable.barcode_reader_24px) },
+                )
+            }
         }
     }
 }
@@ -232,7 +246,6 @@ private fun DetailsOverflowMenu(
 @Suppress("LongParameterList")
 private fun DocumentPage(
     document: Document,
-    isActive: Boolean,
     viewMode: ViewMode,
     settings: AppSettings,
     invertColors: Boolean,
@@ -240,17 +253,71 @@ private fun DocumentPage(
     onScanned: (BarcodeScan) -> Unit,
 ) {
     val scan by produceState<BarcodeScan?>(null, document.id, settings.barcodeSearchMode, settings.generateNewBarcode) {
-        value = vm.scanBarcodes(document.id, settings).also(onScanned)
+        vm.scanBarcodes(document.id, settings).collect {
+            value = it
+            onScanned(it)
+        }
     }
+    val start by produceState<StartPosition?>(null, document.id) {
+        value = vm.position(document.id)
+            ?.let { StartPosition(it.barcode, it.page, restored = true) }
+            ?: StartPosition(barcode = 0, page = 0, restored = false)
+    }
+
     val result = scan
-    if (result == null) {
+    val from = start
+    // Documents without barcodes only show the PDF once all pages are searched,
+    // and reopened documents once the barcode they were left at is found
+    if (result == null || from == null || !result.hasBarcodeFor(from)) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+            LoadingIndicator()
         }
         return
     }
-    val barcodes = @Composable { BarcodesPager(result, isActive, settings.halfSizeBarcodes) }
-    val pdf = @Composable { PdfPager(document.id, result.pageCount, isActive, invertColors, vm) }
+    DocumentPages(document, { scan ?: result }, from, viewMode, settings, invertColors, vm)
+}
+
+private data class StartPosition(val barcode: Int, val page: Int, val restored: Boolean)
+
+private fun BarcodeScan.hasBarcodeFor(start: StartPosition) = complete || barcodes.size > start.barcode
+
+@Composable
+@Suppress("LongParameterList")
+private fun DocumentPages(
+    document: Document,
+    scan: () -> BarcodeScan,
+    start: StartPosition,
+    viewMode: ViewMode,
+    settings: AppSettings,
+    invertColors: Boolean,
+    vm: DocumentDetailsViewModel,
+) {
+    // Kept here, so both pagers keep their position when switching the view mode
+    // documents without barcodes have an empty barcode pager, which still starts at 0
+    val barcodePager = rememberPagerState(
+        initialPage = start.barcode.coerceIn(0, maxOf(0, scan().barcodes.lastIndex)),
+    ) {
+        scan().barcodes.size
+    }
+    val pdfPager = rememberPagerState(initialPage = start.page.coerceIn(0, maxOf(0, scan().pageCount - 1))) {
+        scan().pageCount
+    }
+    if (settings.syncPages) {
+        SyncPagers(barcodePager, pdfPager, alignAtStart = !start.restored) { scan().barcodes.map { it.pageIndex } }
+    }
+    LaunchedEffect(barcodePager, pdfPager) {
+        snapshotFlow { barcodePager.settledPage to pdfPager.settledPage }
+            .drop(1)
+            .collect { (barcode, page) -> vm.savePosition(document.id, barcode, page) }
+    }
+
+    val result = scan()
+    val indicator = when {
+        settings.showPageNumbers -> PageIndicatorStyle.NUMBERED_DOTS
+        else -> PageIndicatorStyle.DOTS
+    }
+    val barcodes = @Composable { BarcodesPager(result, barcodePager, indicator, settings.halfSizeBarcodes) }
+    val pdf = @Composable { PdfPager(document.id, pdfPager, indicator, invertColors, vm) }
     when {
         result.barcodes.isEmpty() -> pdf()
         viewMode == ViewMode.BOTH -> SplitLayout(first = barcodes, second = pdf)
@@ -259,33 +326,11 @@ private fun DocumentPage(
     }
 }
 
-/**
- * Shows [first] above [second], or next to each other in landscape.
- */
 @Composable
-private fun SplitLayout(first: @Composable () -> Unit, second: @Composable () -> Unit) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        if (maxWidth > maxHeight) {
-            Row(Modifier.fillMaxSize()) {
-                Box(Modifier.weight(1f)) { first() }
-                VerticalDivider()
-                Box(Modifier.weight(1f)) { second() }
-            }
-        } else {
-            Column(Modifier.fillMaxSize()) {
-                Box(Modifier.weight(1f)) { first() }
-                HorizontalDivider()
-                Box(Modifier.weight(1f)) { second() }
-            }
-        }
-    }
-}
-
-@Composable
-private fun BarcodesPager(scan: BarcodeScan, isActive: Boolean, halfSize: Boolean) {
+private fun BarcodesPager(scan: BarcodeScan, state: PagerState, indicator: PageIndicatorStyle, halfSize: Boolean) {
     PagesPager(
-        pageCount = scan.barcodes.size,
-        isActive = isActive,
+        state = state,
+        indicator = indicator,
         pageLabel = {
             if (scan.hasSeveralBarcodesPerPage) {
                 stringResource(R.string.barcode_position, it + 1, scan.barcodes.size)
@@ -301,15 +346,15 @@ private fun BarcodesPager(scan: BarcodeScan, isActive: Boolean, halfSize: Boolea
 @Composable
 private fun PdfPager(
     documentId: String,
-    pageCount: Int,
-    isActive: Boolean,
+    state: PagerState,
+    indicator: PageIndicatorStyle,
     invertColors: Boolean,
     vm: DocumentDetailsViewModel,
 ) {
     PagesPager(
-        pageCount = pageCount,
-        isActive = isActive,
-        pageLabel = { stringResource(R.string.page_position, it + 1, pageCount) },
+        state = state,
+        indicator = indicator,
+        pageLabel = { stringResource(R.string.page_position, it + 1, state.pageCount) },
     ) { pageIndex ->
         PdfPageView(
             load = { vm.page(documentId, pageIndex) },
@@ -321,26 +366,25 @@ private fun PdfPager(
 
 @Composable
 private fun PagesPager(
-    pageCount: Int,
-    isActive: Boolean,
+    state: PagerState,
+    indicator: PageIndicatorStyle,
     pageLabel: @Composable (Int) -> String,
     page: @Composable (Int) -> Unit,
 ) {
-    val pagerState = rememberPagerState { pageCount }
-    Box(Modifier.fillMaxSize()) {
-        VerticalPager(state = pagerState, modifier = Modifier.fillMaxSize()) {
+    // the indicator sits below the pages, so it never covers a part of them
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        HorizontalPager(state = state, modifier = Modifier.weight(1f)) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 page(it)
             }
         }
-        if (isActive && pageCount > 1) {
+        if (state.pageCount > 1) {
             PageIndicator(
-                current = pagerState.currentPage,
-                count = pageCount,
-                label = pageLabel(pagerState.currentPage),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp),
+                current = state.currentPage,
+                count = state.pageCount,
+                label = pageLabel(state.currentPage),
+                numbered = indicator == PageIndicatorStyle.NUMBERED_DOTS,
+                modifier = Modifier.padding(vertical = 8.dp),
             )
         }
     }
@@ -387,7 +431,7 @@ private fun PdfPageView(
     }
     val image = bitmap
     if (image == null) {
-        CircularProgressIndicator()
+        LoadingIndicator()
     } else {
         ZoomImage(
             painter = remember(image) { BitmapPainter(image) },

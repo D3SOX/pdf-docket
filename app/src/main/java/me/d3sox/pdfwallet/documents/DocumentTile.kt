@@ -1,6 +1,5 @@
 package me.d3sox.pdfwallet.documents
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,15 +7,18 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,20 +36,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import android.graphics.Bitmap
 import me.d3sox.pdfwallet.R
+import me.d3sox.pdfwallet.db.Tag
+import me.d3sox.pdfwallet.documents.tags.iconDrawable
 
 private const val PREVIEW_ASPECT_RATIO = 4f / 3f
+private val LIST_PREVIEW_WIDTH = 96.dp
 
 /**
- * A grid tile with a preview of the first page above the document name and tags.
+ * A grid tile with a preview of the first page above the document name and tags,
+ * or a list item with the preview next to them.
  */
 @Composable
+@Suppress("LongParameterList")
 fun DocumentTile(
     document: Document,
     loadThumbnail: suspend (String) -> Bitmap?,
@@ -57,8 +70,8 @@ fun DocumentTile(
     selectionMode: Boolean = false,
     isSelected: Boolean = false,
     onLongClick: () -> Unit = {},
+    asListItem: Boolean = false,
 ) {
-    var showMenu by remember { mutableStateOf(false) }
     OutlinedCard(
         colors = if (isSelected) {
             CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -80,55 +93,61 @@ fun DocumentTile(
             )
             .semantics { if (selectionMode) selected = isSelected },
     ) {
-        Preview(document.id, loadThumbnail)
-        Row(verticalAlignment = Alignment.Top) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 12.dp, top = 10.dp, bottom = 12.dp),
-            ) {
-                Text(
-                    text = document.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    // reserves the same height in every tile, so the grid rows line up
-                    minLines = 2,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = document.tags.joinToString(" · ") { it.name },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+        if (asListItem) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Preview(document.id, loadThumbnail, Modifier.width(LIST_PREVIEW_WIDTH))
+                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 1)
             }
-            if (selectionMode) {
-                Checkbox(checked = isSelected, onCheckedChange = null, modifier = Modifier.padding(12.dp))
-            } else Box {
-                IconButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
-                }
-                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                    DocumentMenuItems(
-                        document = document,
-                        onDialog = onDialog,
-                        onDismissMenu = { showMenu = false },
-                    )
-                }
+        } else {
+            Preview(document.id, loadThumbnail, Modifier.fillMaxWidth())
+            Row(verticalAlignment = Alignment.Top) {
+                // reserves the same height in every tile, so the grid rows line up
+                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 2)
             }
         }
     }
 }
 
 @Composable
-private fun Preview(id: String, loadThumbnail: suspend (String) -> Bitmap?) {
+private fun RowScope.NameTagsAndActions(
+    document: Document,
+    onDialog: (DocumentDialog) -> Unit,
+    selectionMode: Boolean,
+    isSelected: Boolean,
+    minNameLines: Int,
+) {
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .padding(start = 12.dp, top = 10.dp, bottom = 12.dp),
+    ) {
+        Text(
+            text = document.name,
+            style = MaterialTheme.typography.titleSmall,
+            minLines = minNameLines,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        TagsLine(document.tags)
+    }
+    if (selectionMode) {
+        Checkbox(checked = isSelected, onCheckedChange = null, modifier = Modifier.padding(12.dp))
+    } else Box {
+        var showMenu by remember { mutableStateOf(false) }
+        IconButton(onClick = { showMenu = true }) {
+            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
+        }
+        DocumentMenu(document = document, expanded = showMenu, onDismiss = { showMenu = false }, onDialog = onDialog)
+    }
+}
+
+@Composable
+private fun Preview(id: String, loadThumbnail: suspend (String) -> Bitmap?, modifier: Modifier) {
     val thumbnail by produceState<ImageBitmap?>(null, id) {
         value = loadThumbnail(id)?.asImageBitmap()
     }
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .aspectRatio(PREVIEW_ASPECT_RATIO)
             .background(Color.White),
     ) {
@@ -142,4 +161,31 @@ private fun Preview(id: String, loadThumbnail: suspend (String) -> Bitmap?) {
             )
         }
     }
+}
+
+/**
+ * The tag names in one line, each after its icon.
+ */
+@Composable
+private fun TagsLine(tags: List<Tag>) {
+    val icons = tags.map { it.iconDrawable }.distinct()
+    Text(
+        text = buildAnnotatedString {
+            tags.forEachIndexed { index, tag ->
+                if (index > 0) append(" · ")
+                appendInlineContent(tag.iconDrawable.toString())
+                append(" ")
+                append(tag.name)
+            }
+        },
+        inlineContent = icons.associate { icon ->
+            icon.toString() to InlineTextContent(Placeholder(1.2.em, 1.2.em, PlaceholderVerticalAlign.TextCenter)) {
+                Icon(painterResource(icon), contentDescription = null)
+            }
+        },
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }

@@ -1,19 +1,19 @@
 package me.d3sox.pdfwallet.documents
 
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.AssignTagsDialog
 import me.d3sox.pdfwallet.ui.components.ConfirmDialog
+import me.d3sox.pdfwallet.ui.components.ExpressiveMenu
+import me.d3sox.pdfwallet.ui.components.MenuScope
 import me.d3sox.pdfwallet.ui.components.TextInputDialog
+import me.d3sox.pdfwallet.ui.components.action
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -26,59 +26,39 @@ sealed interface DocumentDialog {
 }
 
 /**
- * Menu entries for a single document. [onDialog] opens the matching [DocumentDialog].
+ * The menu for a single document, followed by the groups of [extraGroups].
+ * [onDialog] opens the matching [DocumentDialog].
  */
 @Composable
-fun DocumentMenuItems(
+fun DocumentMenu(
     document: Document,
+    expanded: Boolean,
+    onDismiss: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
-    onDismissMenu: () -> Unit,
+    extraGroups: MenuScope.() -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.rename)) },
-        leadingIcon = { Icon(painterResource(R.drawable.edit_24px), contentDescription = null) },
-        onClick = {
-            onDismissMenu()
-            onDialog(DocumentDialog.Rename(document))
-        },
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.tags)) },
-        leadingIcon = { Icon(painterResource(R.drawable.tag_24), contentDescription = null) },
-        onClick = {
-            onDismissMenu()
-            onDialog(DocumentDialog.AssignTags(document))
-        },
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.share)) },
-        leadingIcon = { Icon(painterResource(R.drawable.share_24px), contentDescription = null) },
-        onClick = {
-            onDismissMenu()
-            context.sharePdfs(listOf(document))
-        },
-    )
-    if (remember { context.canAddToHomeScreen() }) {
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.add_to_home_screen)) },
-            leadingIcon = { Icon(painterResource(R.drawable.add_to_home_screen_24), contentDescription = null) },
-            onClick = {
-                onDismissMenu()
-                // the launcher can take a while to answer
-                scope.launch(Dispatchers.IO) { context.addToHomeScreen(document) }
-            },
-        )
+    val canAddToHomeScreen = remember { context.canAddToHomeScreen() }
+    ExpressiveMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        group {
+            action(R.string.rename, R.drawable.edit_24px, onDismiss) { onDialog(DocumentDialog.Rename(document)) }
+            action(R.string.tags, R.drawable.tag_24, onDismiss) { onDialog(DocumentDialog.AssignTags(document)) }
+        }
+        group {
+            action(R.string.share, R.drawable.share_24px, onDismiss) { context.sharePdfs(listOf(document)) }
+            if (canAddToHomeScreen) {
+                action(R.string.add_to_home_screen, R.drawable.add_to_home_screen_24, onDismiss) {
+                    // the launcher can take a while to answer
+                    scope.launch(Dispatchers.IO) { context.addToHomeScreen(document) }
+                }
+            }
+        }
+        group {
+            action(R.string.delete, R.drawable.delete_24, onDismiss) { onDialog(DocumentDialog.Delete(document)) }
+        }
+        extraGroups()
     }
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.delete)) },
-        leadingIcon = { Icon(painterResource(R.drawable.delete_24), contentDescription = null) },
-        onClick = {
-            onDismissMenu()
-            onDialog(DocumentDialog.Delete(document))
-        },
-    )
 }
 
 /**
@@ -106,7 +86,7 @@ fun DocumentDialogHost(
             tags = tags,
             assignedTagIds = document.tags.map { it.id }.toSet(),
             onAssignedTagsChange = { editor.setTags(document.id, it) },
-            onCreateTag = { editor.createTag(it, assignTo = document) },
+            onCreateTag = { name, icon -> editor.createTag(name, icon, assignTo = document) },
             onDismiss = onDismiss,
         )
         is DocumentDialog.Delete -> ConfirmDialog(

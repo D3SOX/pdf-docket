@@ -5,9 +5,11 @@ import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.CoroutineDispatchersModule
 import me.d3sox.pdfwallet.db.CertificateDao
+import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.db.di.DatabaseModule
 import me.d3sox.pdfwallet.documents.Document
 import me.d3sox.pdfwallet.documents.DocumentRepository
+import me.d3sox.pdfwallet.documents.tags.TagIcon
 import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -72,7 +74,7 @@ class BackupRepositoryTest {
 
     @Test
     fun restore_bringsBackDocumentsNamesDatesAndTags() = runTest {
-        documentRepository.createTag("Travel")
+        documentRepository.updateTag(Tag(documentRepository.createTag("Travel"), "Travel", TagIcon.TRAIN.name))
         documentRepository.createTag("Unused")
         addDocument("a.pdf", name = "Train ticket", tags = setOf("Travel"))
         addDocument("b.pdf", name = "Certificate")
@@ -86,7 +88,10 @@ class BackupRepositoryTest {
         // restored tags get new ids
         fun List<Document>.withoutTagIds() = map { it.copy(tags = it.tags.map { tag -> tag.copy(id = 0) }) }
         documentRepository.documents.first().withoutTagIds() shouldContainExactly original.withoutTagIds()
-        documentRepository.tags.first().map { it.name } shouldContainExactly listOf("Travel", "Unused")
+        documentRepository.tags.first().map { it.name to it.icon } shouldContainExactly listOf(
+            "Travel" to "TRAIN",
+            "Unused" to null,
+        )
         documentRepository.file("a.pdf").readText() shouldBe "content of a.pdf"
         // the decrypted copy is deleted again
         context.cacheDir.listFiles().orEmpty().filter { it.name.startsWith("restore") }.shouldBeEmpty()

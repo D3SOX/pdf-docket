@@ -10,8 +10,11 @@ import me.d3sox.pdfwallet.pdfrenderer.PdfRendererBuilder
 import me.d3sox.pdfwallet.settings.BarcodeSearchMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +23,10 @@ private const val MAX_CACHED_BARCODE_RESULTS = 32
 
 data class PageBarcode(val pageIndex: Int, val bitmap: Bitmap)
 
-data class BarcodeScan(val pageCount: Int, val barcodes: List<PageBarcode>) {
+/**
+ * [complete] is false while later pages are still being scanned.
+ */
+data class BarcodeScan(val pageCount: Int, val barcodes: List<PageBarcode>, val complete: Boolean = true) {
     val hasSeveralBarcodesPerPage: Boolean
         get() = barcodes.groupingBy { it.pageIndex }.eachCount().any { it.value > 1 }
 }
@@ -56,31 +62,38 @@ class DocumentRenderer @Inject constructor(
     suspend fun pageCount(id: String): Int = withRenderer(id) { it.getPageCount() }
 
     /**
-     * Searches every page for a barcode. Pages rendered along the way are cached for the PDF view.
+     * Searches every page for a barcode and emits the barcodes found so far after each page, so the first ones
+     * show up before long documents are fully scanned. Pages rendered along the way are cached for the PDF view.
      */
-    suspend fun scanBarcodes(id: String, mode: BarcodeSearchMode, generateNewBarcode: Boolean): BarcodeScan {
-        if (mode == BarcodeSearchMode.DISABLED) return BarcodeScan(pageCount(id), emptyList())
+    fun scanBarcodes(id: String, mode: BarcodeSearchMode, generateNewBarcode: Boolean): Flow<BarcodeScan> = flow {
+        if (mode == BarcodeSearchMode.DISABLED) {
+            emit(BarcodeScan(pageCount(id), emptyList()))
+            return@flow
+        }
         val key = "$id-$mode-$generateNewBarcode"
-        return scanMutex.withLock {
-            scans[key] ?: withRenderer(id) { renderer ->
+        scanMutex.withLock {
+            val scan = scans[key] ?: withRenderer(id) { renderer ->
                 val pageCount = renderer.getPageCount()
-                val barcodes = (0 until pageCount).flatMap { pageIndex ->
+                val barcodes = mutableListOf<PageBarcode>()
+                for (pageIndex in 0 until pageCount) {
                     val page = renderer.renderPage(
                         pageIndex = pageIndex,
                         highResolution = mode == BarcodeSearchMode.EXTENDED,
-                    ) ?: return@flatMap emptyList()
-                    val pageBarcodes = barcodeRenderer.getBarcodes(
+                    ) ?: continue
+                    barcodes += barcodeRenderer.getBarcodes(
                         document = page,
                         tryExtraHard = mode == BarcodeSearchMode.EXTENDED,
                         generateNewBarcode = generateNewBarcode,
-                    )
+                    ).map { PageBarcode(pageIndex, it) }
                     if (cache.get(pageKey(id, pageIndex)) == null) {
                         cache.put(pageKey(id, pageIndex), page.scaleToWidth(screenWidth))
                     }
-                    pageBarcodes.map { PageBarcode(pageIndex, it) }
+                    emit(BarcodeScan(pageCount, barcodes.toList(), complete = false))
                 }
                 BarcodeScan(pageCount, barcodes)
-            }.also { scans.put(key, it) }
+            }
+            scans.put(key, scan)
+            emit(scan)
         }
     }
 
@@ -98,10 +111,13 @@ class DocumentRenderer @Inject constructor(
         }
     }
 
-    private fun Bitmap.scaleToWidth(targetWidth: Int): Bitmap =
+    // Large pages take a while to scale, so this stays off the main thread
+    private suspend fun Bitmap.scaleToWidth(targetWidth: Int): Bitmap =
         if (width <= targetWidth) {
             this
         } else {
-            scale(width = targetWidth, height = (targetWidth.toFloat() / width * height).toInt())
+            withContext(Dispatchers.Default) {
+                scale(width = targetWidth, height = (targetWidth.toFloat() / width * height).toInt())
+            }
         }
 }

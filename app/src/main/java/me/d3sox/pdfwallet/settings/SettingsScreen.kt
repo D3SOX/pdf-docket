@@ -5,23 +5,21 @@ import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -36,11 +34,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.time.LocalDate
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.backup.BackupDialogs
 import me.d3sox.pdfwallet.backup.BackupMessage
@@ -48,13 +46,17 @@ import me.d3sox.pdfwallet.backup.BackupViewModel
 import me.d3sox.pdfwallet.lock.authenticate
 import me.d3sox.pdfwallet.lock.canAuthenticate
 import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
+import me.d3sox.pdfwallet.ui.components.IconColor
+import me.d3sox.pdfwallet.ui.components.SettingsGroup
+import me.d3sox.pdfwallet.ui.components.SettingsGroupScope
+import me.d3sox.pdfwallet.ui.components.SettingsRow
+import me.d3sox.pdfwallet.ui.components.SettingsSwitchRow
 import me.d3sox.pdfwallet.ui.components.SingleChoiceDialog
 import me.d3sox.pdfwallet.ui.theme.supportsDynamicColor
-import java.time.LocalDate
 
 private enum class SettingsDialog { BARCODE_MODE, THEME, TAG_FILTER_MODE }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -83,8 +85,12 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            LargeTopAppBar(
+            LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.settings)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -94,146 +100,161 @@ fun SettingsScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         LazyColumn(contentPadding = innerPadding, modifier = Modifier.fillMaxSize()) {
-            section(R.string.settings_section_security)
-            if (canAuthenticate || settings.requireAuthentication) {
-                item {
-                    SwitchItem(
-                        title = R.string.require_authentication,
-                        icon = R.drawable.security_24,
-                        checked = settings.requireAuthentication,
-                        onCheckedChange = { activity.authenticate(onSuccess = vm::onAuthenticationToggled) },
+            item {
+                SettingsGroup(stringResource(R.string.settings_section_security)) {
+                    if (canAuthenticate || settings.requireAuthentication) {
+                        switchItem(
+                            title = R.string.require_authentication,
+                            icon = R.drawable.security_24,
+                            color = IconColor.GREEN,
+                            checked = settings.requireAuthentication,
+                            onCheckedChange = { activity.authenticate(onSuccess = vm::onAuthenticationToggled) },
+                        )
+                    }
+                    switchItem(
+                        title = R.string.preference_prevent_screenshots,
+                        summary = R.string.preference_prevent_screenshots_description,
+                        icon = R.drawable.screenshot_24,
+                        color = IconColor.BLUE,
+                        checked = settings.blockScreenshots,
+                        enabled = !settings.requireAuthentication,
+                        onCheckedChange = { checked -> vm.update { it.copy(preventScreenshots = checked) } },
+                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                        switchItem(
+                            title = R.string.preference_add_show_on_locked_screen,
+                            summary = R.string.preference_add_show_on_locked_screen_description,
+                            icon = R.drawable.door_open_24,
+                            color = IconColor.ORANGE,
+                            checked = settings.showOnLockScreen,
+                            onCheckedChange = { checked -> vm.update { it.copy(showOnLockScreen = checked) } },
+                        )
+                    }
+                }
+            }
+            item {
+                SettingsGroup(stringResource(R.string.settings_section_barcodes)) {
+                    choiceItem(
+                        title = R.string.preference_barcode,
+                        value = settings.barcodeSearchMode.label,
+                        icon = R.drawable.qr_code_24,
+                        color = IconColor.BLUE,
+                        onClick = { dialog = SettingsDialog.BARCODE_MODE },
+                    )
+                    switchItem(
+                        title = R.string.preference_half_size_barcodes,
+                        summary = R.string.preference_half_size_barcodes_description,
+                        icon = R.drawable.barcode_reader_24px,
+                        color = IconColor.TEAL,
+                        checked = settings.halfSizeBarcodes,
+                        onCheckedChange = { checked -> vm.update { it.copy(halfSizeBarcodes = checked) } },
+                    )
+                    switchItem(
+                        title = R.string.preference_split_screen,
+                        summary = R.string.preference_split_screen_description,
+                        icon = R.drawable.splitscreen_24,
+                        color = IconColor.PURPLE,
+                        checked = settings.splitScreen,
+                        onCheckedChange = { checked -> vm.update { it.copy(splitScreen = checked) } },
+                    )
+                    switchItem(
+                        title = R.string.preference_sync_pages,
+                        summary = R.string.preference_sync_pages_description,
+                        icon = R.drawable.sync_24,
+                        color = IconColor.GREEN,
+                        checked = settings.syncPages,
+                        onCheckedChange = { checked -> vm.update { it.copy(syncPages = checked) } },
+                    )
+                    switchItem(
+                        title = R.string.preference_barcode_generation,
+                        summary = R.string.preference_barcode_generation_description,
+                        icon = R.drawable.construction_24px,
+                        color = IconColor.AMBER,
+                        checked = settings.generateNewBarcode,
+                        onCheckedChange = { checked -> vm.update { it.copy(generateNewBarcode = checked) } },
                     )
                 }
             }
             item {
-                SwitchItem(
-                    title = R.string.preference_prevent_screenshots,
-                    summary = R.string.preference_prevent_screenshots_description,
-                    icon = R.drawable.screenshot_24,
-                    checked = settings.blockScreenshots,
-                    enabled = !settings.requireAuthentication,
-                    onCheckedChange = { checked -> vm.update { it.copy(preventScreenshots = checked) } },
-                )
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                item {
-                    SwitchItem(
-                        title = R.string.preference_add_show_on_locked_screen,
-                        summary = R.string.preference_add_show_on_locked_screen_description,
-                        icon = R.drawable.door_open_24,
-                        checked = settings.showOnLockScreen,
-                        onCheckedChange = { checked -> vm.update { it.copy(showOnLockScreen = checked) } },
+                SettingsGroup(stringResource(R.string.settings_section_display)) {
+                    choiceItem(
+                        title = R.string.preference_force_theme,
+                        value = settings.themeMode.label,
+                        icon = R.drawable.contrast_24px,
+                        color = IconColor.PURPLE,
+                        onClick = { dialog = SettingsDialog.THEME },
                     )
-                }
-            }
-
-            section(R.string.settings_section_barcodes)
-            item {
-                ChoiceItem(
-                    title = R.string.preference_barcode,
-                    value = settings.barcodeSearchMode.label,
-                    icon = R.drawable.qr_code_24,
-                    onClick = { dialog = SettingsDialog.BARCODE_MODE },
-                )
-            }
-            item {
-                SwitchItem(
-                    title = R.string.preference_half_size_barcodes,
-                    summary = R.string.preference_half_size_barcodes_description,
-                    icon = R.drawable.barcode_reader_24px,
-                    checked = settings.halfSizeBarcodes,
-                    onCheckedChange = { checked -> vm.update { it.copy(halfSizeBarcodes = checked) } },
-                )
-            }
-            item {
-                SwitchItem(
-                    title = R.string.preference_split_screen,
-                    summary = R.string.preference_split_screen_description,
-                    icon = R.drawable.splitscreen_24,
-                    checked = settings.splitScreen,
-                    onCheckedChange = { checked -> vm.update { it.copy(splitScreen = checked) } },
-                )
-            }
-            item {
-                SwitchItem(
-                    title = R.string.preference_barcode_generation,
-                    summary = R.string.preference_barcode_generation_description,
-                    icon = R.drawable.construction_24px,
-                    checked = settings.generateNewBarcode,
-                    onCheckedChange = { checked -> vm.update { it.copy(generateNewBarcode = checked) } },
-                )
-            }
-
-            section(R.string.settings_section_display)
-            item {
-                ChoiceItem(
-                    title = R.string.preference_force_theme,
-                    value = settings.themeMode.label,
-                    icon = R.drawable.contrast_24px,
-                    onClick = { dialog = SettingsDialog.THEME },
-                )
-            }
-            if (supportsDynamicColor) {
-                item {
-                    SwitchItem(
-                        title = R.string.preference_dynamic_color,
-                        summary = R.string.preference_dynamic_color_description,
-                        icon = R.drawable.palette_24,
-                        checked = settings.dynamicColor,
-                        onCheckedChange = { checked -> vm.update { it.copy(dynamicColor = checked) } },
+                    if (supportsDynamicColor) {
+                        switchItem(
+                            title = R.string.preference_dynamic_color,
+                            summary = R.string.preference_dynamic_color_description,
+                            icon = R.drawable.palette_24,
+                            color = IconColor.PINK,
+                            checked = settings.dynamicColor,
+                            onCheckedChange = { checked -> vm.update { it.copy(dynamicColor = checked) } },
+                        )
+                    }
+                    switchItem(
+                        title = R.string.preference_invert_pdf_colors,
+                        summary = R.string.preference_invert_pdf_colors_description,
+                        icon = R.drawable.invert_colors_24px,
+                        color = IconColor.TEAL,
+                        checked = settings.invertPdfColors,
+                        onCheckedChange = { checked -> vm.update { it.copy(invertPdfColors = checked) } },
+                    )
+                    switchItem(
+                        title = R.string.preference_page_numbers,
+                        summary = R.string.preference_page_numbers_description,
+                        icon = R.drawable.format_list_numbered_24,
+                        color = IconColor.BLUE,
+                        checked = settings.showPageNumbers,
+                        onCheckedChange = { checked -> vm.update { it.copy(showPageNumbers = checked) } },
+                    )
+                    switchItem(
+                        title = R.string.preference_max_brightness,
+                        summary = R.string.preference_max_brightness_description,
+                        icon = R.drawable.brightness_high_24,
+                        color = IconColor.AMBER,
+                        checked = settings.fullBrightness,
+                        onCheckedChange = { checked -> vm.update { it.copy(fullBrightness = checked) } },
                     )
                 }
             }
             item {
-                SwitchItem(
-                    title = R.string.preference_invert_pdf_colors,
-                    summary = R.string.preference_invert_pdf_colors_description,
-                    icon = R.drawable.invert_colors_24px,
-                    checked = settings.invertPdfColors,
-                    onCheckedChange = { checked -> vm.update { it.copy(invertPdfColors = checked) } },
-                )
+                SettingsGroup(stringResource(R.string.tags)) {
+                    choiceItem(
+                        title = R.string.tag_filter_mode_description,
+                        value = settings.tagFilterMode.label,
+                        icon = R.drawable.tag_24,
+                        color = IconColor.ORANGE,
+                        onClick = { dialog = SettingsDialog.TAG_FILTER_MODE },
+                    )
+                }
             }
             item {
-                SwitchItem(
-                    title = R.string.preference_max_brightness,
-                    summary = R.string.preference_max_brightness_description,
-                    icon = R.drawable.brightness_high_24,
-                    checked = settings.fullBrightness,
-                    onCheckedChange = { checked -> vm.update { it.copy(fullBrightness = checked) } },
-                )
+                SettingsGroup(stringResource(R.string.settings_section_backup)) {
+                    choiceItem(
+                        title = R.string.create_backup,
+                        value = R.string.create_backup_summary,
+                        icon = R.drawable.save_24,
+                        color = IconColor.BLUE,
+                        onClick = backupVm::onCreateBackup,
+                    )
+                    choiceItem(
+                        title = R.string.restore_backup,
+                        value = R.string.restore_backup_summary,
+                        icon = R.drawable.settings_backup_restore_24,
+                        color = IconColor.GREEN,
+                        // backups have no registered MIME type
+                        onClick = { restorePicker.launch(arrayOf("*/*")) },
+                    )
+                }
             }
-
-            section(R.string.tags)
-            item {
-                ChoiceItem(
-                    title = R.string.tag_filter_mode_description,
-                    value = settings.tagFilterMode.label,
-                    icon = R.drawable.tag_24,
-                    onClick = { dialog = SettingsDialog.TAG_FILTER_MODE },
-                )
-            }
-
-            section(R.string.settings_section_backup)
-            item {
-                ChoiceItem(
-                    title = R.string.create_backup,
-                    value = R.string.create_backup_summary,
-                    icon = R.drawable.save_24,
-                    onClick = backupVm::onCreateBackup,
-                )
-            }
-            item {
-                ChoiceItem(
-                    title = R.string.restore_backup,
-                    value = R.string.restore_backup_summary,
-                    icon = R.drawable.settings_backup_restore_24,
-                    // backups have no registered MIME type
-                    onClick = { restorePicker.launch(arrayOf("*/*")) },
-                )
-            }
+            item { Spacer(Modifier.height(24.dp)) }
         }
     }
 
@@ -308,47 +329,37 @@ private fun Resources.message(message: BackupMessage): String = when (message) {
     BackupMessage.RestoreFailed -> getString(R.string.error_reading_backup)
 }
 
-private fun LazyListScope.section(title: Int) {
-    item(contentType = "section") {
-        Text(
-            text = stringResource(title),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
-        )
-    }
-}
-
-@Composable
 @Suppress("LongParameterList")
-private fun SwitchItem(
+private fun SettingsGroupScope.switchItem(
     title: Int,
     icon: Int,
+    color: IconColor,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     summary: Int? = null,
     enabled: Boolean = true,
-) {
-    ListItem(
-        headlineContent = { Text(stringResource(title)) },
-        supportingContent = summary?.let { { Text(stringResource(it)) } },
-        leadingContent = { Icon(painterResource(icon), contentDescription = null) },
-        trailingContent = { Switch(checked = checked, onCheckedChange = null, enabled = enabled) },
-        modifier = Modifier.toggleable(
-            value = checked,
-            enabled = enabled,
-            role = Role.Switch,
-            onValueChange = onCheckedChange,
-        ),
+) = row { shapes ->
+    SettingsSwitchRow(
+        shapes = shapes,
+        title = stringResource(title),
+        summary = summary?.let { stringResource(it) },
+        icon = icon,
+        iconColor = color,
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        enabled = enabled,
     )
 }
 
-@Composable
-private fun ChoiceItem(title: Int, value: Int, icon: Int, onClick: () -> Unit) {
-    ListItem(
-        headlineContent = { Text(stringResource(title)) },
-        supportingContent = { Text(stringResource(value)) },
-        leadingContent = { Icon(painterResource(icon), contentDescription = null) },
-        modifier = Modifier.clickable(onClick = onClick),
-    )
-}
+private fun SettingsGroupScope.choiceItem(title: Int, value: Int, icon: Int, color: IconColor, onClick: () -> Unit) =
+    row { shapes ->
+        SettingsRow(
+            shapes = shapes,
+            title = stringResource(title),
+            summary = stringResource(value),
+            icon = icon,
+            iconColor = color,
+            onClick = onClick,
+        )
+    }
+

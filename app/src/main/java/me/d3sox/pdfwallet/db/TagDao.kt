@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -15,8 +16,9 @@ interface TagDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(tag: Tag): Long
 
-    @Query("UPDATE OR IGNORE tags SET name = :name WHERE id = :id")
-    suspend fun rename(id: Long, name: String)
+    /** Keeps the tag unchanged if its new name is already taken */
+    @Update(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun update(tag: Tag)
 
     @Query("DELETE FROM tags WHERE id = :id")
     suspend fun delete(id: Long)

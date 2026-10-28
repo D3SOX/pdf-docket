@@ -22,6 +22,8 @@ private object Keys {
     val barcodeSearchMode = stringPreferencesKey("barcodeSearchMode")
     val halfSizeBarcodes = booleanPreferencesKey("halfSizeBarcodes")
     val splitScreen = booleanPreferencesKey("splitScreen")
+    val syncPages = booleanPreferencesKey("syncPages")
+    val showPageNumbers = booleanPreferencesKey("showPageNumbers")
     val generateNewBarcode = booleanPreferencesKey("generateNewBarcode")
     val fullBrightness = booleanPreferencesKey("fullBrightness")
     val showOnLockScreen = booleanPreferencesKey("showOnLockScreen")
@@ -31,6 +33,7 @@ private object Keys {
     val invertPdfColors = booleanPreferencesKey("invertPdfColors")
     val sortOrder = stringPreferencesKey("sortOrder")
     val tagFilterMode = stringPreferencesKey("tagFilterMode")
+    val documentLayout = stringPreferencesKey("documentLayout")
 }
 
 @Singleton
@@ -56,6 +59,8 @@ class SettingsRepository @Inject constructor(
             barcodeSearchMode = enumOrDefault(this[Keys.barcodeSearchMode], defaults.barcodeSearchMode),
             halfSizeBarcodes = this[Keys.halfSizeBarcodes] ?: defaults.halfSizeBarcodes,
             splitScreen = this[Keys.splitScreen] ?: defaults.splitScreen,
+            syncPages = this[Keys.syncPages] ?: defaults.syncPages,
+            showPageNumbers = this[Keys.showPageNumbers] ?: defaults.showPageNumbers,
             generateNewBarcode = this[Keys.generateNewBarcode] ?: defaults.generateNewBarcode,
             fullBrightness = this[Keys.fullBrightness] ?: defaults.fullBrightness,
             showOnLockScreen = this[Keys.showOnLockScreen] ?: defaults.showOnLockScreen,
@@ -65,6 +70,7 @@ class SettingsRepository @Inject constructor(
             invertPdfColors = this[Keys.invertPdfColors] ?: defaults.invertPdfColors,
             sortOrder = enumOrDefault(this[Keys.sortOrder], defaults.sortOrder),
             tagFilterMode = enumOrDefault(this[Keys.tagFilterMode], defaults.tagFilterMode),
+            documentLayout = enumOrDefault(this[Keys.documentLayout], defaults.documentLayout),
         )
     }
 
@@ -73,6 +79,8 @@ class SettingsRepository @Inject constructor(
         this[Keys.barcodeSearchMode] = settings.barcodeSearchMode.name
         this[Keys.halfSizeBarcodes] = settings.halfSizeBarcodes
         this[Keys.splitScreen] = settings.splitScreen
+        this[Keys.syncPages] = settings.syncPages
+        this[Keys.showPageNumbers] = settings.showPageNumbers
         this[Keys.generateNewBarcode] = settings.generateNewBarcode
         this[Keys.fullBrightness] = settings.fullBrightness
         this[Keys.showOnLockScreen] = settings.showOnLockScreen
@@ -82,6 +90,7 @@ class SettingsRepository @Inject constructor(
         this[Keys.invertPdfColors] = settings.invertPdfColors
         this[Keys.sortOrder] = settings.sortOrder.name
         this[Keys.tagFilterMode] = settings.tagFilterMode.name
+        this[Keys.documentLayout] = settings.documentLayout.name
     }
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String?, default: T): T =

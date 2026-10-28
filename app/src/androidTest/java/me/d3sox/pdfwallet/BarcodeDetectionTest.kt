@@ -9,6 +9,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -54,7 +55,7 @@ class BarcodeDetectionTest {
     }
 
     private suspend fun barcodeCount(asset: String, mode: BarcodeSearchMode = BarcodeSearchMode.EXTENDED) =
-        renderer.scanBarcodes(document(asset), mode, generateNewBarcode = false).barcodes.size
+        renderer.scanBarcodes(document(asset), mode, generateNewBarcode = false).last().barcodes.size
 
     @Test
     fun everySupportedFormat_isFound() = runTest {
@@ -75,7 +76,7 @@ class BarcodeDetectionTest {
     @Test
     fun newBarcode_isGeneratedWhenEnabled() = runTest {
         renderer.scanBarcodes(document("qr.pdf"), BarcodeSearchMode.REGULAR, generateNewBarcode = true)
-            .barcodes.size shouldBe 1
+            .last().barcodes.size shouldBe 1
     }
 
     @Test

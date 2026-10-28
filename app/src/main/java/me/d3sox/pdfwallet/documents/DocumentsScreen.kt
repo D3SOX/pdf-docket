@@ -1,10 +1,12 @@
 package me.d3sox.pdfwallet.documents
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,13 +23,16 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -53,6 +58,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -68,10 +75,16 @@ import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.BulkTagsDialog
 import me.d3sox.pdfwallet.documents.tags.ManageTagsDialog
+import me.d3sox.pdfwallet.documents.tags.iconDrawable
 import me.d3sox.pdfwallet.settings.AppSettings
+import me.d3sox.pdfwallet.settings.DocumentLayout
 import me.d3sox.pdfwallet.settings.SortOrder
 import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
 import me.d3sox.pdfwallet.ui.components.ConfirmDialog
+import me.d3sox.pdfwallet.ui.components.ExpressiveMenu
+import me.d3sox.pdfwallet.ui.components.action
+import me.d3sox.pdfwallet.ui.components.checkable
+import me.d3sox.pdfwallet.ui.components.selectable
 
 private enum class ListDialog { MANAGE_TAGS, DELETE_VISIBLE, LOCK_SCREEN_WARNING }
 private enum class SelectionDialog { TAGS, DELETE }
@@ -142,6 +155,7 @@ fun DocumentsScreen(
                 onOpenSearch = { isSearching = true },
                 onCloseSearch = closeSearch,
                 onSortOrderSelected = vm::onSortOrderSelected,
+                onToggleLayout = vm::onToggleLayout,
                 onWarning = { listDialog = ListDialog.LOCK_SCREEN_WARNING },
                 onManageTags = { listDialog = ListDialog.MANAGE_TAGS },
                 onExport = { list?.visible?.takeIf { it.isNotEmpty() }?.let(context::sharePdfs) },
@@ -179,6 +193,7 @@ fun DocumentsScreen(
                     vm.onClearFilters()
                     isSearching = false
                 },
+                asList = settings.documentLayout == DocumentLayout.LIST,
                 onOpenDocument = onOpenDocument,
                 onDialog = { documentDialog = it },
                 selectedIds = selectedIds.toSet(),
@@ -212,7 +227,7 @@ fun DocumentsScreen(
                     vm.editor.updateTags(selectedDocuments.map { it.id }, added, removed)
                     clearSelection()
                 },
-                onCreateTag = { vm.editor.createTag(it) },
+                onCreateTag = vm.editor::createTag,
                 onDismiss = { selectionDialog = null },
             )
             SelectionDialog.DELETE -> ConfirmDialog(
@@ -243,8 +258,8 @@ private fun ListDialogHost(
         null -> Unit
         ListDialog.MANAGE_TAGS -> ManageTagsDialog(
             tags = list?.tags.orEmpty(),
-            onCreateTag = { vm.editor.createTag(it) },
-            onRenameTag = vm.editor::renameTag,
+            onCreateTag = vm.editor::createTag,
+            onEditTag = vm.editor::updateTag,
             onDeleteTag = vm.editor::deleteTag,
             onDismiss = onDismiss,
         )
@@ -291,6 +306,7 @@ private fun DocumentsTopBar(
     onOpenSearch: () -> Unit,
     onCloseSearch: () -> Unit,
     onSortOrderSelected: (SortOrder) -> Unit,
+    onToggleLayout: () -> Unit,
     onWarning: () -> Unit,
     onManageTags: () -> Unit,
     onExport: () -> Unit,
@@ -306,7 +322,16 @@ private fun DocumentsTopBar(
             if (isSearching) {
                 SearchField(query, onQueryChange)
             } else {
-                Text(stringResource(R.string.app_name))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painterResource(R.drawable.app_logo),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .size(32.dp),
+                    )
+                    Text(stringResource(R.string.app_name))
+                }
             }
         },
         navigationIcon = {
@@ -339,6 +364,8 @@ private fun DocumentsTopBar(
             }
             OverflowMenu(
                 hasDocuments = hasDocuments,
+                layout = settings.documentLayout,
+                onToggleLayout = onToggleLayout,
                 isFiltered = isFiltered,
                 showLock = settings.requireAuthentication,
                 onManageTags = onManageTags,
@@ -377,6 +404,16 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
     }
 }
 
+private val SortOrder.icon: Int
+    get() = when (this) {
+        SortOrder.IMPORT_DATE_DESC -> R.drawable.mdi_sort_calendar_descending
+        SortOrder.IMPORT_DATE_ASC -> R.drawable.mdi_sort_calendar_ascending
+        SortOrder.NAME_ASC -> R.drawable.mdi_sort_alphabetical_ascending
+        SortOrder.NAME_DESC -> R.drawable.mdi_sort_alphabetical_descending
+        SortOrder.SIZE_DESC -> R.drawable.mdi_sort_numeric_descending
+        SortOrder.SIZE_ASC -> R.drawable.mdi_sort_numeric_ascending
+    }
+
 private val SortOrder.label: Int
     get() = when (this) {
         SortOrder.IMPORT_DATE_DESC -> R.string.sort_import_date_desc
@@ -396,14 +433,16 @@ private fun TagFilterMenu(tags: List<Tag>, selectedIds: Set<Long>, onToggle: (Lo
                 Icon(painterResource(R.drawable.tag_24), contentDescription = stringResource(R.string.filter_by_tag))
             }
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            tags.forEach { tag ->
-                DropdownMenuItem(
-                    text = { Text(tag.name) },
-                    trailingIcon = { Checkbox(checked = tag.id in selectedIds, onCheckedChange = null) },
-                    // stays open to pick several tags
-                    onClick = { onToggle(tag.id) },
-                )
+        ExpressiveMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            group {
+                tags.forEach { tag ->
+                    checkable(
+                        text = { tag.name },
+                        checked = tag.id in selectedIds,
+                        onCheckedChange = { onToggle(tag.id) },
+                        icon = { painterResource(tag.iconDrawable) },
+                    )
+                }
             }
         }
     }
@@ -416,20 +455,17 @@ private fun SortMenu(selected: SortOrder, onSelect: (SortOrder) -> Unit) {
         IconButton(onClick = { expanded = true }) {
             Icon(painterResource(R.drawable.sort_24px), contentDescription = stringResource(R.string.sort))
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            SortOrder.entries.forEach { order ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(order.label)) },
-                    leadingIcon = if (order == selected) {
-                        { Icon(Icons.Filled.Check, contentDescription = null) }
-                    } else {
-                        null
-                    },
-                    onClick = {
-                        expanded = false
-                        onSelect(order)
-                    },
-                )
+        ExpressiveMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            group {
+                SortOrder.entries.forEach { order ->
+                    selectable(
+                        text = { stringResource(order.label) },
+                        icon = { Icon(painterResource(order.icon), contentDescription = null) },
+                        selected = order == selected,
+                        onDismiss = { expanded = false },
+                        onClick = { onSelect(order) },
+                    )
+                }
             }
         }
     }
@@ -439,6 +475,8 @@ private fun SortMenu(selected: SortOrder, onSelect: (SortOrder) -> Unit) {
 @Suppress("LongParameterList")
 private fun OverflowMenu(
     hasDocuments: Boolean,
+    layout: DocumentLayout,
+    onToggleLayout: () -> Unit,
     isFiltered: Boolean,
     showLock: Boolean,
     onManageTags: () -> Unit,
@@ -450,31 +488,61 @@ private fun OverflowMenu(
     onOpenAbout: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    @Composable
-    fun Item(label: Int, onClick: () -> Unit) = DropdownMenuItem(
-        text = { Text(stringResource(label)) },
-        onClick = {
-            expanded = false
-            onClick()
-        },
-    )
+    val dismiss = { expanded = false }
     Box {
         IconButton(onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            Item(R.string.menu_item_manage_tags, onManageTags)
+        ExpressiveMenu(expanded = expanded, onDismissRequest = dismiss) {
             if (hasDocuments) {
-                Item(R.string.select_all, onSelectAll)
-                Item(if (isFiltered) R.string.export_filtered else R.string.export_all, onExport)
-                Item(if (isFiltered) R.string.delete_filtered else R.string.delete_all, onDelete)
+                group {
+                    if (layout == DocumentLayout.GRID) {
+                        action(R.string.list_view, R.drawable.view_list_24px, dismiss, onToggleLayout)
+                    } else {
+                        action(R.string.grid_view, R.drawable.grid_view_24px, dismiss, onToggleLayout)
+                    }
+                }
             }
-            if (showLock) {
-                Item(R.string.lock, onLock)
+            group {
+                action(R.string.menu_item_manage_tags, R.drawable.tag_24, dismiss, onManageTags)
+                if (hasDocuments) {
+                    action(R.string.select_all, R.drawable.select_all_24, dismiss, onSelectAll)
+                    action(
+                        if (isFiltered) R.string.export_filtered else R.string.export_all,
+                        R.drawable.share_24px,
+                        dismiss,
+                        onExport,
+                    )
+                    action(
+                        if (isFiltered) R.string.delete_filtered else R.string.delete_all,
+                        R.drawable.delete_24,
+                        dismiss,
+                        onDelete,
+                    )
+                }
+                if (showLock) {
+                    action(
+                        { stringResource(R.string.lock) },
+                        { rememberVectorPainter(Icons.Outlined.Lock) },
+                        dismiss,
+                        onLock,
+                    )
+                }
             }
-            HorizontalDivider()
-            Item(R.string.settings, onOpenSettings)
-            Item(R.string.about, onOpenAbout)
+            group {
+                action(
+                    { stringResource(R.string.settings) },
+                    { rememberVectorPainter(Icons.Outlined.Settings) },
+                    dismiss,
+                    onOpenSettings,
+                )
+                action(
+                    { stringResource(R.string.about) },
+                    { rememberVectorPainter(Icons.Outlined.Info) },
+                    dismiss,
+                    onOpenAbout,
+                )
+            }
         }
     }
 }
@@ -484,6 +552,7 @@ private fun OverflowMenu(
 private fun DocumentList(
     list: DocumentList,
     contentPadding: PaddingValues,
+    asList: Boolean,
     loadThumbnail: suspend (String) -> android.graphics.Bitmap?,
     onClearFilters: () -> Unit,
     onOpenDocument: (String) -> Unit,
@@ -492,7 +561,7 @@ private fun DocumentList(
     onToggleSelection: (String) -> Unit,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 160.dp),
+        columns = if (asList) GridCells.Fixed(1) else GridCells.Adaptive(minSize = 160.dp),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
@@ -501,7 +570,7 @@ private fun DocumentList(
             bottom = contentPadding.calculateBottomPadding() + 88.dp,
         ),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(if (asList) 8.dp else 12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
         if (list.isFiltered) {
@@ -543,6 +612,7 @@ private fun DocumentList(
                 selectionMode = selectedIds.isNotEmpty(),
                 isSelected = document.id in selectedIds,
                 onLongClick = { onToggleSelection(document.id) },
+                asListItem = asList,
                 modifier = Modifier.animateItem(),
             )
         }

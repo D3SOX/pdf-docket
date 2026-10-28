@@ -42,6 +42,8 @@ fun AppRoot(
     isDarkTheme: Boolean,
 ) {
     val backStack = rememberNavBackStack(DocumentsRoute)
+    // e.g. a double tap on a back arrow would otherwise also remove the document list, which crashes
+    val goBack: () -> Unit = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }
     val snackbarHostState = remember { SnackbarHostState() }
     val importError = stringResource(R.string.error_reading_pdf)
     val resources = LocalResources.current
@@ -75,11 +77,15 @@ fun AppRoot(
         }
         NavDisplay(
             backStack = backStack,
-            onBack = { backStack.removeLastOrNull() },
+            onBack = goBack,
             entryDecorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
                 rememberViewModelStoreNavEntryDecorator(),
+                remember { roundedWhileLeaving() },
             ),
+            transitionSpec = { forwardTransition() },
+            popTransitionSpec = { backTransition() },
+            predictivePopTransitionSpec = { predictiveBackTransition(it) },
             entryProvider = entryProvider {
                 entry<DocumentsRoute> {
                     DocumentsScreen(
@@ -98,14 +104,14 @@ fun AppRoot(
                         ),
                         settings = state.settings,
                         isDarkTheme = isDarkTheme,
-                        onBack = { backStack.removeLastOrNull() },
+                        onBack = goBack,
                     )
                 }
                 entry<SettingsRoute> {
-                    SettingsScreen(onBack = { backStack.removeLastOrNull() })
+                    SettingsScreen(onBack = goBack)
                 }
                 entry<AboutRoute> {
-                    AboutScreen(onBack = { backStack.removeLastOrNull() })
+                    AboutScreen(onBack = goBack)
                 }
             },
         )

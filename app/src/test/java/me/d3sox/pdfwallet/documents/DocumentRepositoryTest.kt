@@ -4,6 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.CoroutineDispatchersModule
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.db.di.DatabaseModule
+import me.d3sox.pdfwallet.documents.tags.TagIcon
+import me.d3sox.pdfwallet.documents.tags.tagIcon
 import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -91,6 +93,17 @@ class DocumentRepositoryTest {
     }
 
     @Test
+    fun updateTag_setsAndClearsTheIcon() = runTest {
+        val tagId = repository.createTag("Travel")
+
+        repository.updateTag(Tag(tagId, "Travel", TagIcon.TRAIN.name))
+        repository.tags.first().single().tagIcon shouldBe TagIcon.TRAIN
+
+        repository.updateTag(Tag(tagId, "Travel"))
+        repository.tags.first().single().tagIcon shouldBe null
+    }
+
+    @Test
     fun createTag_ignoresDuplicateNames() = runTest {
         repository.createTag("Travel")
 
@@ -134,11 +147,11 @@ class DocumentRepositoryTest {
     }
 
     @Test
-    fun renameTag_keepsNamesUnique() = runTest {
+    fun updateTag_keepsNamesUnique() = runTest {
         val travel = repository.createTag("Travel")
         repository.createTag("Work")
 
-        repository.renameTag(travel, "Work")
+        repository.updateTag(Tag(travel, "Work"))
 
         repository.tags.first().map { it.name } shouldContainExactly listOf("Travel", "Work")
     }

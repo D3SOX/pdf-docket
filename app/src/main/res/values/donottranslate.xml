@@ -6,4 +6,5 @@
     <string name="changelog_uri">https://github.com/D3SOX/pdf-docket/releases</string>
     <string name="privacy_policy_uri">https://pdf-docket.d3sox.me/privacy.html</string>
     <string name="license_uri">https://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="icon_credits" translatable="false">Some icons from Material Design Icons by Pictogrammers (Apache License 2.0)</string>
 </resources>

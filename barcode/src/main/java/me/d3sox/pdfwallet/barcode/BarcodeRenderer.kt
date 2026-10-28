@@ -3,10 +3,12 @@ package me.d3sox.pdfwallet.barcode
 import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.core.graphics.scale
-import me.d3sox.pdfwallet.coroutines.dispatcher.di.IoDispatcher
+import me.d3sox.pdfwallet.coroutines.dispatcher.di.DefaultDispatcher
 import de.markusfisch.android.zxingcpp.ZxingCpp
 import de.markusfisch.android.zxingcpp.ZxingCpp.toBitmap
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -66,7 +68,7 @@ public interface BarcodeRenderer {
 }
 
 internal class BarcodeRendererImpl @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    @DefaultDispatcher private val dispatcher: CoroutineDispatcher,
 ) : BarcodeRenderer {
 
     override suspend fun getBarcodes(
@@ -89,22 +91,11 @@ internal class BarcodeRendererImpl @Inject constructor(
         tryExtraHard: Boolean
     ): List<BarcodeHit>? = withContext(dispatcher) {
 
-        val resultSet = try {
-            getCropRectangles(tryExtraHard).flatMap { cropRect ->
-                if (!isActive) return@withContext null
-
-                ZxingCpp.readBitmap(
-                    bitmap = this@extractBarcodes,
-                    cropRect = cropRect,
-                    rotation = 0,
-                    options = readerOptions,
-                )?.map { BarcodeHit(it, cropRect) } ?: emptyList()
-            }
-        } catch (_: Exception) {
-            emptyList()
-        } catch (_: OutOfMemoryError) {
-            emptyList()
-        }
+        // The crop rectangles are independent, so they are searched in parallel
+        val resultSet = getCropRectangles(tryExtraHard).map { cropRect ->
+            async { readBarcodes(cropRect) }
+        }.awaitAll().flatten()
+        if (!isActive) return@withContext null
 
         if (resultSet.isEmpty()) return@withContext null
 
@@ -114,6 +105,19 @@ internal class BarcodeRendererImpl @Inject constructor(
             // the overlapping crop rectangles find the same barcode several times
             .distinctBy { it.result.format to it.result.rawBytes.contentHashCode() }
             .sortedWith(compareBy({ it.top }, { it.left }))
+    }
+
+    private fun Bitmap.readBarcodes(cropRect: Rect): List<BarcodeHit> = try {
+        ZxingCpp.readBitmap(
+            bitmap = this,
+            cropRect = cropRect,
+            rotation = 0,
+            options = readerOptions,
+        )?.map { BarcodeHit(it, cropRect) } ?: emptyList()
+    } catch (_: Exception) {
+        emptyList()
+    } catch (_: OutOfMemoryError) {
+        emptyList()
     }
 
     private val BarcodeHit.top: Int

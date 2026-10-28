@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,4 +25,10 @@ interface CertificateDao {
 
     @Query("DELETE FROM certificates WHERE id IN (:ids)")
     suspend fun delete(ids: List<String>)
+
+    @Query("SELECT * FROM document_positions WHERE certificateId = :id")
+    suspend fun position(id: String): DocumentPosition?
+
+    @Upsert
+    suspend fun savePosition(position: DocumentPosition)
 }

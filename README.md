@@ -13,7 +13,7 @@ F-Droid builds each release from source and publishes it a few days later. To ge
 
 To join the Google Play closed test, first [join the tester group](https://groups.google.com/g/d3sox-apps-testers), then [opt in on Google Play](https://play.google.com/apps/testing/me.d3sox.pdfwallet) with the same Google account. Please stay opted in for at least 14 days, try the app and send feedback via [GitHub Issues](https://github.com/D3SOX/pdf-docket/issues). Google Play, F-Droid and GitHub builds share one signing key, so you can switch between them without reinstalling the app.
 
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="200" alt="Document list"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="200" alt="Barcode in fullscreen"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="200" alt="Documents filtered by tag"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="200" alt="Dark mode">
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="200" alt="Document list"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="200" alt="Barcode in fullscreen"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="200" alt="Barcode and PDF in split screen"> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="200" alt="Dark mode">
 
 ## Why this fork
 
@@ -25,8 +25,10 @@ PDF Docket is a fork of the last open source version and stays under the GPLv3. 
 
 - Import one or several PDFs at once, or open them with PDF Docket from a file browser, email client or web browser.
 - Detect QR, Aztec, DataMatrix, PDF417, UPC-A, UPC-E, EAN-8, EAN-13, Code 39, Code 93, Code 128, ITF and Codabar barcodes and show them in fullscreen.
-- Swipe between documents and switch between the barcode and the PDF, or show both in split screen.
-- Tag, search and sort documents by import date, name or file size.
+- Swipe between documents and switch between the barcode and the PDF, or show both in split screen. In split screen, the PDF turns to the page of the barcode you swipe to.
+- Reopen a document at the barcode and page you left it on.
+- Tag documents and give each tag an icon.
+- Search and sort documents by import date, name or file size, and show them as a grid or a list.
 - Select several documents to tag, share or delete them together.
 - Add a document to the home screen to open it with one tap.
 - Back up all documents and tags to a password-encrypted file and restore them on another device.

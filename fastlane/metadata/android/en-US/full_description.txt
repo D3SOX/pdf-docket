@@ -20,11 +20,14 @@ Currently supported barcode formats are:
 
 More Features
 - Can detect and extract barcodes in PDFs
-- Split screen shows the barcode and the PDF at the same time
+- Split screen shows the barcode and the PDF at the same time, and the PDF turns to the page of each barcode
+- Documents reopen at the barcode and page they were left on
 - (Optional) biometric authentication
 - PDFs can be sorted by name, file size, or import date
 - PDFs can be individually named
 - Assign tags to documents and filter documents by tags
+- Tags can have icons
+- Documents can be shown as a grid or a list
 - PDFs can be shared from other apps, also several at once
 - Documents can be added to the home screen
 - Encrypted backups of all documents and tags

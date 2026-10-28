@@ -33,6 +33,7 @@ private val DOCUMENT_ID = Regex("[0-9a-f-]+\\.pdf")
 
 /**
  * Backups are encrypted ZIP files with the PDFs and a JSON file with their names, import dates and tags.
+ * Tag icons are stored separately, so older versions can still restore newer backups.
  */
 @Singleton
 class BackupRepository @Inject constructor(
@@ -93,7 +94,11 @@ class BackupRepository @Inject constructor(
         val metadata = zip.getEntry(METADATA_ENTRY)
             ?.let { entry -> zip.getInputStream(entry).use { JSONObject(it.reader().readText()) } }
             ?: throw NotABackupException()
-        metadata.getJSONArray("tags").strings().forEach { tagDao.insert(Tag(name = it)) }
+        // added in 1.5.0
+        val tagIcons = metadata.optJSONObject("tagIcons")
+        metadata.getJSONArray("tags").strings().forEach { name ->
+            tagDao.insert(Tag(name = name, icon = tagIcons?.optString(name)?.takeIf { it.isNotEmpty() }))
+        }
         val tagIds = tagDao.getAll().first().associate { it.name to it.id }
 
         var restored = 0
@@ -117,6 +122,7 @@ class BackupRepository @Inject constructor(
 
     private fun metadata(documents: List<Document>, tags: List<Tag>) = JSONObject()
         .put("tags", JSONArray(tags.map { it.name }))
+        .put("tagIcons", JSONObject(tags.mapNotNull { tag -> tag.icon?.let { tag.name to it } }.toMap()))
         .put(
             "documents",
             JSONArray(

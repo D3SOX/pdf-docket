@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import me.d3sox.pdfwallet.lock.AppLockedRepo
 import me.d3sox.pdfwallet.render.DocumentRenderer
+import me.d3sox.pdfwallet.settings.DocumentLayout
 import me.d3sox.pdfwallet.settings.SettingsRepository
 import me.d3sox.pdfwallet.settings.SortOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +38,13 @@ class DocumentsViewModel @Inject constructor(
 
     fun onSortOrderSelected(sortOrder: SortOrder) = viewModelScope.launch {
         settingsRepository.update { it.copy(sortOrder = sortOrder) }
+    }
+
+    fun onToggleLayout() = viewModelScope.launch {
+        settingsRepository.update {
+            val layout = if (it.documentLayout == DocumentLayout.GRID) DocumentLayout.LIST else DocumentLayout.GRID
+            it.copy(documentLayout = layout)
+        }
     }
 
     fun onLock() = lockedRepo.lockApp()

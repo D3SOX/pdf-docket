@@ -1,7 +1,9 @@
 package me.d3sox.pdfwallet.documents
 
 import android.content.Context
+import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.di.ApplicationScope
+import me.d3sox.pdfwallet.documents.tags.TagIcon
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -31,14 +33,16 @@ class DocumentEditor @Inject constructor(
         repository.updateTags(ids, addedTagIds, removedTagIds)
     }
 
-    fun createTag(name: String, assignTo: Document? = null) = scope.launch {
-        val tagId = repository.createTag(name)
+    fun createTag(name: String, icon: TagIcon?, assignTo: Document? = null) = scope.launch {
+        val tagId = repository.createTag(name, icon?.name)
         if (assignTo != null && tagId > 0) {
             repository.setTags(assignTo.id, assignTo.tags.map { it.id }.toSet() + tagId)
         }
     }
 
-    fun renameTag(id: Long, name: String) = scope.launch { repository.renameTag(id, name) }
+    fun updateTag(tag: Tag, name: String, icon: TagIcon?) = scope.launch {
+        repository.updateTag(tag.copy(name = name, icon = icon?.name))
+    }
 
     fun deleteTag(id: Long) = scope.launch { repository.deleteTag(id) }
 }

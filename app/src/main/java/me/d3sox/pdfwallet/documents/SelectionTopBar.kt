@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import me.d3sox.pdfwallet.R
+import me.d3sox.pdfwallet.ui.components.ExpressiveMenu
+import me.d3sox.pdfwallet.ui.components.action
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,20 +43,15 @@ fun SelectionTopBar(
                 IconButton(onClick = { expanded = true }) {
                     Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
                 }
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    listOf(
-                        R.string.select_all to onSelectAll,
-                        R.string.tags to onTags,
-                        R.string.share to onShare,
-                        R.string.delete to onDelete,
-                    ).forEach { (label, action) ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(label)) },
-                            onClick = {
-                                expanded = false
-                                action()
-                            },
-                        )
+                val dismiss = { expanded = false }
+                ExpressiveMenu(expanded = expanded, onDismissRequest = dismiss) {
+                    group {
+                        action(R.string.select_all, R.drawable.select_all_24, dismiss, onSelectAll)
+                        action(R.string.tags, R.drawable.tag_24, dismiss, onTags)
+                        action(R.string.share, R.drawable.share_24px, dismiss, onShare)
+                    }
+                    group {
+                        action(R.string.delete, R.drawable.delete_24, dismiss, onDelete)
                     }
                 }
             }
