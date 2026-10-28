@@ -1,6 +1,6 @@
 [versions]
 android-desugar-jdk-libs = "2.1.5"
-android-gradle-plugin = "9.4.1"
+android-gradle-plugin = "9.5.0"
 androidx-activity = "1.13.0"
 androidx-biometric = "1.4.0-alpha07"
 androidx-compose-bom = "2026.09.00"
