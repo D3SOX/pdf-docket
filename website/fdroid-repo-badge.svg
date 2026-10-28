@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="646" height="250" viewBox="0 0 646 250" role="img" aria-label="Add the repository to F-Droid">
+  <!-- same canvas and padding as the F-Droid and Obtainium badges, so they line up -->
+  <rect x="41.5" y="41.5" width="563" height="167" rx="24" fill="#000" stroke="#a6a6a6" stroke-width="3"/>
+  <circle cx="123" cy="125" r="38" fill="none" stroke="#8ab000" stroke-width="7"/>
+  <path d="M123 104 V146 M102 125 H144" stroke="#8ab000" stroke-width="7" stroke-linecap="round"/>
+  <text x="188" y="106" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="27">ADD THE REPO TO</text>
+  <text x="186" y="164" fill="#fff" font-family="DejaVu Sans, Verdana, sans-serif" font-size="58" font-weight="bold">F-Droid</text>
+</svg>
