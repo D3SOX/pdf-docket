@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Kustuta</string>
+    <string name="save">Salvesta</string>
+    <string name="select_document">Vali dokument</string>
+    <string name="select_all">Vali kõik</string>
+    <string name="close_selection">Tühista valik</string>
+    <plurals name="documents_selected">
+        <item quantity="one">%d valitud</item>
+        <item quantity="other">%d valitud</item>
+    </plurals>
     <string name="document_name">Dokumendi nimi</string>
     <string name="warning">Hoiatus</string>
     <string name="error_reading_pdf">Viga PDF-faili lugemisel. Proovi muu failiga või kasuta muud asukohta</string>
+    <string name="error_showing_page">Seda lehte ei saa kuvada</string>
+    <string name="error_showing_document">Seda PDF-i ei saa avada</string>
     <string name="dialog_password_protection_title">Dekrüpti salasõnaga kaitstud PDF-fail</string>
     <string name="dialog_password_protection_hint">Sisesta salasõna</string>
     <string name="ok">Sobib</string>
@@ -117,6 +127,10 @@
     <plurals name="documents_imported">
         <item quantity="one">%d dokument imporditud</item>
         <item quantity="other">%d dokumenti imporditud</item>
+    </plurals>
+    <plurals name="documents_already_imported">
+        <item quantity="one">%d dokument oli juba imporditud</item>
+        <item quantity="other">%d dokumenti olid juba imporditud</item>
     </plurals>
     <string name="settings_section_backup">Varundus</string>
     <string name="create_backup">Loo varukoopia</string>

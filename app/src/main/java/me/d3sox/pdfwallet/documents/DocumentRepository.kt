@@ -7,6 +7,7 @@ import me.d3sox.pdfwallet.db.CertificateDao
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.db.TagDao
 import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
+import me.d3sox.pdfwallet.render.BarcodeScanStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,6 +25,7 @@ class DocumentRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val certificateDao: CertificateDao,
     private val tagDao: TagDao,
+    private val scanStore: BarcodeScanStore,
 ) {
     val documents: Flow<List<Document>> = certificateDao.getAllWithTags()
         .map { list ->
@@ -42,14 +45,28 @@ class DocumentRepository @Inject constructor(
 
     fun file(id: String): File = File(context.filesDir, id)
 
-    suspend fun add(pending: PendingCertificate) {
-        certificateDao.insert(
-            Certificate(
-                id = pending.fileName,
-                name = pending.documentName,
-                importedAt = System.currentTimeMillis(),
+    /**
+     * Adds the document, unless one with the same content is already there, e.g. when a ticket is shared twice.
+     * Then the file of the pending document is deleted and the id of the existing one is returned.
+     */
+    suspend fun add(pending: PendingCertificate): String? {
+        val ids = certificateDao.ids()
+        val duplicate = withContext(dispatcher) {
+            val file = file(pending.fileName)
+            val digest by lazy { file.sha256() }
+            ids.firstOrNull { file(it).length() == file.length() && file(it).sha256().contentEquals(digest) }
+                ?.also { file.delete() }
+        }
+        if (duplicate == null) {
+            certificateDao.insert(
+                Certificate(
+                    id = pending.fileName,
+                    name = pending.documentName,
+                    importedAt = System.currentTimeMillis(),
+                )
             )
-        )
+        }
+        return duplicate
     }
 
     suspend fun exists(id: String): Boolean = certificateDao.exists(id)
@@ -61,6 +78,7 @@ class DocumentRepository @Inject constructor(
         withContext(dispatcher) {
             ids.forEach { file(it).delete() }
         }
+        scanStore.delete(ids)
     }
 
     suspend fun setTags(id: String, tagIds: Set<Long>) = tagDao.setTags(id, tagIds)
@@ -73,4 +91,17 @@ class DocumentRepository @Inject constructor(
     suspend fun updateTag(tag: Tag) = tagDao.update(tag)
 
     suspend fun deleteTag(id: Long) = tagDao.delete(id)
+}
+
+private fun File.sha256(): ByteArray {
+    val digest = MessageDigest.getInstance("SHA-256")
+    inputStream().use { input ->
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest()
 }

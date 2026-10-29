@@ -10,6 +10,8 @@
         android:name="android.permission.ACCESS_NETWORK_STATE"
         tools:node="remove"/>
 
+    <!-- largeHeap: Android 7 keeps bitmaps on the Java heap, where the high resolution pages of the barcode
+         search run out of memory without it, e.g. for A3 pages on a phone with a 96 MB heap limit. -->
     <application
         android:name=".GreenPassApplication"
         android:allowBackup="false"

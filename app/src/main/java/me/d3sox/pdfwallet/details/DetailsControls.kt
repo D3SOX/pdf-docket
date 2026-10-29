@@ -1,5 +1,6 @@
 package me.d3sox.pdfwallet.details
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
@@ -237,4 +239,16 @@ private fun PageIndicatorContent(current: Int, count: Int, label: String, number
             }
         }
     }
+}
+
+/** Shown instead of a page or document that couldn't be rendered. */
+@Composable
+internal fun RenderError(@StringRes message: Int) {
+    Text(
+        text = stringResource(message),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(24.dp),
+    )
 }

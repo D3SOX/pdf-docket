@@ -14,6 +14,7 @@ import dagger.hilt.android.testing.UninstallModules
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -54,6 +55,28 @@ class DocumentRepositoryTest {
         document.sizeBytes shouldBe "content of a.pdf".length.toLong()
         repository.exists("a.pdf") shouldBe true
         repository.exists("b.pdf") shouldBe false
+    }
+
+    @Test
+    fun add_skipsADocumentWithTheSameContent() = runTest {
+        addDocument("a.pdf")
+        addDocument("b.pdf")
+        repository.file("new.pdf").writeText("content of b.pdf")
+
+        repository.add(PendingCertificate(fileName = "new.pdf", documentName = "New")) shouldBe "b.pdf"
+
+        repository.documents.first().map { it.id } shouldContainExactlyInAnyOrder listOf("a.pdf", "b.pdf")
+        repository.file("new.pdf").exists().shouldBeFalse()
+    }
+
+    @Test
+    fun add_keepsOtherContentOfTheSameSize() = runTest {
+        addDocument("a.pdf")
+        repository.file("new.pdf").writeText("content of x.pdf")
+
+        repository.add(PendingCertificate(fileName = "new.pdf", documentName = "New")) shouldBe null
+
+        repository.documents.first().map { it.id } shouldContainExactlyInAnyOrder listOf("a.pdf", "new.pdf")
     }
 
     @Test

@@ -65,6 +65,9 @@ fun AppRoot(
                         resources.getQuantityString(R.plurals.documents_imported, event.count, event.count)
                     )
                 }
+                is MainEvent.DocumentsAlreadyImported -> snackbarHostState.showSnackbar(
+                    resources.getQuantityString(R.plurals.documents_already_imported, event.count, event.count)
+                )
                 MainEvent.ImportFailed -> snackbarHostState.showSnackbar(importError)
             }
         }

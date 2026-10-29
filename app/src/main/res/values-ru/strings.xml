@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Удалить</string>
+    <string name="save">Сохранить</string>
+    <string name="select_document">Выбрать документ</string>
+    <string name="select_all">Выбрать все</string>
+    <string name="close_selection">Снять выделение</string>
+    <plurals name="documents_selected">
+        <item quantity="one">Выбран %d</item>
+        <item quantity="few">Выбрано %d</item>
+        <item quantity="many">Выбрано %d</item>
+        <item quantity="other">Выбрано %d</item>
+    </plurals>
     <string name="document_name">Название документа</string>
     <string name="warning">Внимание</string>
     <string name="error_reading_pdf">Ошибка чтения PDF. Попробуйте другой файл или местоположение</string>
+    <string name="error_showing_page">Не удалось показать эту страницу</string>
+    <string name="error_showing_document">Не удалось открыть этот PDF</string>
     <string name="dialog_password_protection_title">Расшифровать PDF, защищенный паролем</string>
     <string name="dialog_password_protection_hint">Введите пароль</string>
     <string name="ok">ОК</string>
@@ -120,6 +132,12 @@
         <item quantity="few">Импортировано %d документа</item>
         <item quantity="many">Импортировано %d документов</item>
         <item quantity="other">Импортировано %d документа</item>
+    </plurals>
+    <plurals name="documents_already_imported">
+        <item quantity="one">%d документ уже был импортирован</item>
+        <item quantity="few">%d документа уже были импортированы</item>
+        <item quantity="many">%d документов уже были импортированы</item>
+        <item quantity="other">%d документа уже были импортированы</item>
     </plurals>
     <string name="settings_section_backup">Резервная копия</string>
     <string name="create_backup">Создать резервную копию</string>

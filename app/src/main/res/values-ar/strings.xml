@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">حذف</string>
+    <string name="save">حفظ</string>
+    <string name="select_document">تحديد المستند</string>
+    <string name="select_all">تحديد الكل</string>
+    <string name="close_selection">إلغاء التحديد</string>
+    <plurals name="documents_selected">
+        <item quantity="zero">تم تحديد %d</item>
+        <item quantity="one">تم تحديد %d</item>
+        <item quantity="two">تم تحديد %d</item>
+        <item quantity="few">تم تحديد %d</item>
+        <item quantity="many">تم تحديد %d</item>
+        <item quantity="other">تم تحديد %d</item>
+    </plurals>
     <string name="document_name">اسم المستند</string>
     <string name="warning">تحذير</string>
     <string name="error_reading_pdf">خطأ في قراءة ملف PDF. جرب ملفًا آخر أو موقعًا آخر</string>
+    <string name="error_showing_page">تعذّر عرض هذه الصفحة</string>
+    <string name="error_showing_document">تعذّر فتح ملف PDF هذا</string>
     <string name="dialog_password_protection_title">فك تشفير ملف PDF المحمي بكلمة مرور</string>
     <string name="dialog_password_protection_hint">أدخل كلمة المرور</string>
     <string name="ok">موافق</string>
@@ -124,6 +138,14 @@
         <item quantity="few">تم استيراد %d مستندات</item>
         <item quantity="many">تم استيراد %d مستندًا</item>
         <item quantity="other">تم استيراد %d مستند</item>
+    </plurals>
+    <plurals name="documents_already_imported">
+        <item quantity="zero">سبق استيراد %d مستند</item>
+        <item quantity="one">سبق استيراد %d مستند</item>
+        <item quantity="two">سبق استيراد %d مستندين</item>
+        <item quantity="few">سبق استيراد %d مستندات</item>
+        <item quantity="many">سبق استيراد %d مستندًا</item>
+        <item quantity="other">سبق استيراد %d مستند</item>
     </plurals>
     <string name="settings_section_backup">النسخ الاحتياطي</string>
     <string name="create_backup">إنشاء نسخة احتياطية</string>

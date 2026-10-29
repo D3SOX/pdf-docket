@@ -1,8 +1,17 @@
 <resources>
     <string name="delete">削除</string>
+    <string name="save">保存</string>
+    <string name="select_document">ドキュメントを選択</string>
+    <string name="select_all">すべて選択</string>
+    <string name="close_selection">選択を解除</string>
+    <plurals name="documents_selected">
+        <item quantity="other">%d 件選択中</item>
+    </plurals>
     <string name="document_name">ドキュメント名</string>
     <string name="warning">警告</string>
     <string name="error_reading_pdf">PDFの読み取り中にエラーが発生しました。別のファイルまたはファイルの場所を試してください。</string>
+    <string name="error_showing_page">このページを表示できません</string>
+    <string name="error_showing_document">このPDFを開けません</string>
     <string name="dialog_password_protection_title">パスワードで保護されたPDFを復号化</string>
     <string name="dialog_password_protection_hint">パスワードを入力</string>
     <string name="ok">OK</string>
@@ -114,6 +123,9 @@
     <string name="shortcut_document_deleted">このドキュメントは削除されました</string>
     <plurals name="documents_imported">
         <item quantity="other">%d 件のドキュメントをインポートしました</item>
+    </plurals>
+    <plurals name="documents_already_imported">
+        <item quantity="other">%d 件のドキュメントはインポート済みです</item>
     </plurals>
     <string name="settings_section_backup">バックアップ</string>
     <string name="create_backup">バックアップを作成</string>
