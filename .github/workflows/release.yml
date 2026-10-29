@@ -1,6 +1,7 @@
 name: Release
 
-# Push a version tag to release, e.g.: git tag v1.0.0 && git push origin v1.0.0
+# Push an annotated version tag to release. Its message is the changelog of the GitHub release, e.g.:
+# git tag -a v1.0.0 -F changelog.md && git push origin v1.0.0
 on:
   push:
     tags: [ 'v*.*.*' ]
@@ -28,11 +29,13 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Check that the tag matches versionName
+    - name: Check that the tag matches versionName and has release notes
       run: |
         VERSION_NAME=${GITHUB_REF_NAME#v}
         grep -q "versionName = \"$VERSION_NAME\"" app/build.gradle.kts \
           || { echo "::error::Set versionName to $VERSION_NAME and bump versionCode in app/build.gradle.kts"; exit 1; }
+        [[ $(git cat-file -t "refs/tags/$GITHUB_REF_NAME") == tag ]] \
+          || { echo "::error::Tag with a message, which becomes the release notes: git tag -a $GITHUB_REF_NAME -F changelog.md"; exit 1; }
         echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
 
     - name: Run Detekt
@@ -64,7 +67,7 @@ jobs:
         gh release create "$GITHUB_REF_NAME" "pdf-docket-$VERSION_NAME.apk" "pdf-docket-$VERSION_NAME.aab" \
           --title "$VERSION_NAME" \
           --verify-tag \
-          --generate-notes \
+          --notes-from-tag \
           --latest
 
     - name: Upload test reports

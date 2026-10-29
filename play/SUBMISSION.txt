@@ -68,6 +68,7 @@ Local CLI (Ruby 3.4 and Bundler):
   bundle exec fastlane android publish_play aab:/path/pdf-docket.aab notes:/path/notes.txt
 
 Releases are created by bumping versionCode and versionName in
-app/build.gradle.kts and pushing a matching version tag (git tag v1.1.2 &&
-git push origin v1.1.2). Google Play rejects a version code that it already
-received.
+app/build.gradle.kts and pushing a matching annotated version tag, whose
+message becomes the GitHub release notes (git tag -a v1.1.2 -F changelog.md
+&& git push origin v1.1.2). Google Play rejects a version code that it
+already received.
