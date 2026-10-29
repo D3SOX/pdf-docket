@@ -27,7 +27,12 @@ class BarcodeScanStore @Inject constructor(
     /** Returns null if the document wasn't scanned with these settings, or with an older app version. */
     suspend fun load(id: String, settingsKey: String): BarcodeScan? = withContext(Dispatchers.IO) {
         val dir = File(root, id)
-        val index = File(dir, INDEX_FILE).takeIf { it.exists() }?.readLines() ?: return@withContext null
+        // e.g. the system cleared the cache
+        val index = try {
+            File(dir, INDEX_FILE).readLines()
+        } catch (_: IOException) {
+            return@withContext null
+        }
         if (index.firstOrNull() != key(settingsKey)) return@withContext null
         val pageCount = index.getOrNull(1)?.toIntOrNull() ?: return@withContext null
         val barcodes = index.drop(2).mapIndexed { position, pageIndex ->
@@ -47,11 +52,13 @@ class BarcodeScanStore @Inject constructor(
                     barcode.bitmap.compress(Bitmap.CompressFormat.PNG, 0, it)
                 }
             }
-            // written last, so an interrupted save is never loaded
-            File(dir, INDEX_FILE).writeText(
+            // written last and renamed into place, so an interrupted save is never loaded
+            val index = File(dir, "$INDEX_FILE.tmp")
+            index.writeText(
                 (listOf(key(settingsKey), scan.pageCount.toString()) + scan.barcodes.map { it.pageIndex.toString() })
                     .joinToString("\n")
             )
+            if (!index.renameTo(File(dir, INDEX_FILE))) throw IOException("Couldn't save the barcode scan of $id")
         } catch (_: IOException) {
             // e.g. a full disk, the document is then scanned again next time
             dir.deleteRecursively()

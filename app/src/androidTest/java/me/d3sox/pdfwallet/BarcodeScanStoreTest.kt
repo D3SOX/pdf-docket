@@ -16,6 +16,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -39,12 +40,14 @@ class BarcodeScanStoreTest {
     val hiltRule = HiltAndroidRule(this)
 
     private var searchCompletes = true
+    private var searches = 0
 
     @BindValue
     @JvmField
     val barcodeRenderer: BarcodeRenderer = object : BarcodeRenderer {
         override suspend fun getBarcodes(document: Bitmap, tryExtraHard: Boolean, generateNewBarcode: Boolean) =
             PageBarcodes(listOf(Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)), complete = searchCompletes)
+                .also { searches++ }
     }
 
     @Inject lateinit var renderer: DocumentRenderer
@@ -91,7 +94,10 @@ class BarcodeScanStoreTest {
         val id = document("test-incomplete.pdf")
 
         scan(id)
+        scan(id)
 
         scanStore.load(id, "REGULAR-false").shouldBeNull()
+        // not kept in memory either, so reopening the document searches again
+        searches shouldBe 2
     }
 }

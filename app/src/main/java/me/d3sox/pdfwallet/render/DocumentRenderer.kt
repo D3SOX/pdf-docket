@@ -75,35 +75,41 @@ class DocumentRenderer @Inject constructor(
         val settingsKey = "$mode-$generateNewBarcode"
         val key = "$id-$settingsKey"
         scanMutex.withLock {
-            val scan = scans[key] ?: scanStore.load(id, settingsKey) ?: withRenderer(id) { renderer ->
-                val pageCount = renderer.getPageCount()
-                val barcodes = mutableListOf<PageBarcode>()
-                var allPagesScanned = pageCount > 0
-                for (pageIndex in 0 until pageCount) {
-                    val page = renderer.renderPage(
-                        pageIndex = pageIndex,
-                        highResolution = mode == BarcodeSearchMode.EXTENDED,
-                    )
-                    if (page == null) {
-                        allPagesScanned = false
-                        continue
+            val scan = scans[key]
+                ?: scanStore.load(id, settingsKey)?.also { scans.put(key, it) }
+                ?: withRenderer(id) { renderer ->
+                    val pageCount = renderer.getPageCount()
+                    val barcodes = mutableListOf<PageBarcode>()
+                    var allPagesScanned = pageCount > 0
+                    for (pageIndex in 0 until pageCount) {
+                        val page = renderer.renderPage(
+                            pageIndex = pageIndex,
+                            highResolution = mode == BarcodeSearchMode.EXTENDED,
+                        )
+                        if (page == null) {
+                            allPagesScanned = false
+                            continue
+                        }
+                        val found = barcodeRenderer.getBarcodes(
+                            document = page,
+                            tryExtraHard = mode == BarcodeSearchMode.EXTENDED,
+                            generateNewBarcode = generateNewBarcode,
+                        )
+                        if (!found.complete) allPagesScanned = false
+                        barcodes += found.bitmaps.map { PageBarcode(pageIndex, it) }
+                        if (cache.get(pageKey(id, pageIndex)) == null) {
+                            cache.put(pageKey(id, pageIndex), page.scaleToWidth(screenWidth))
+                        }
+                        emit(BarcodeScan(pageCount, barcodes.toList(), complete = false))
                     }
-                    val found = barcodeRenderer.getBarcodes(
-                        document = page,
-                        tryExtraHard = mode == BarcodeSearchMode.EXTENDED,
-                        generateNewBarcode = generateNewBarcode,
-                    )
-                    if (!found.complete) allPagesScanned = false
-                    barcodes += found.bitmaps.map { PageBarcode(pageIndex, it) }
-                    if (cache.get(pageKey(id, pageIndex)) == null) {
-                        cache.put(pageKey(id, pageIndex), page.scaleToWidth(screenWidth))
+                    // a page that couldn't be rendered or searched, e.g. for lack of memory, may work next time
+                    BarcodeScan(pageCount, barcodes).also {
+                        if (allPagesScanned) {
+                            scans.put(key, it)
+                            scanStore.save(id, settingsKey, it)
+                        }
                     }
-                    emit(BarcodeScan(pageCount, barcodes.toList(), complete = false))
                 }
-                // a page that couldn't be rendered or searched, e.g. for lack of memory, may work next time
-                BarcodeScan(pageCount, barcodes).also { if (allPagesScanned) scanStore.save(id, settingsKey, it) }
-            }
-            scans.put(key, scan)
             emit(scan)
         }
     }
