@@ -55,16 +55,21 @@ private data class BarcodeHit(
     val cropRect: Rect
 )
 
+/**
+ * [complete] is false if a part of the page couldn't be searched, e.g. for lack of memory.
+ */
+public data class PageBarcodes(val bitmaps: List<Bitmap>, val complete: Boolean)
+
 public interface BarcodeRenderer {
     /**
      * Returns the barcodes of the page in reading order. When a page contains different formats,
      * only the ones of the preferred format are returned, e.g. a ticket code instead of an advertisement.
      */
     public suspend fun getBarcodes(
-        document: Bitmap?,
+        document: Bitmap,
         tryExtraHard: Boolean,
         generateNewBarcode: Boolean
-    ): List<Bitmap>
+    ): PageBarcodes
 }
 
 internal class BarcodeRendererImpl @Inject constructor(
@@ -72,42 +77,36 @@ internal class BarcodeRendererImpl @Inject constructor(
 ) : BarcodeRenderer {
 
     override suspend fun getBarcodes(
-        document: Bitmap?,
+        document: Bitmap,
         tryExtraHard: Boolean,
         generateNewBarcode: Boolean,
-    ): List<Bitmap> = withContext(dispatcher) {
-        val hits = document?.extractBarcodes(tryExtraHard) ?: return@withContext emptyList()
-        hits.mapNotNull { hit ->
-            if (!isActive) return@withContext emptyList()
+    ): PageBarcodes = withContext(dispatcher) {
+        // The crop rectangles are independent, so they are searched in parallel
+        val results = document.getCropRectangles(tryExtraHard).map { cropRect ->
+            async { document.readBarcodes(cropRect) }
+        }.awaitAll()
+        val bitmaps = results.filterNotNull().flatten().preferred().mapNotNull { hit ->
+            if (!isActive) return@withContext PageBarcodes(emptyList(), complete = false)
             encodeBarcodeAsBitmap(
                 hit = hit,
                 source = document,
                 generateNewBarcode = generateNewBarcode
             )
         }
+        PageBarcodes(bitmaps, complete = results.none { it == null })
     }
 
-    private suspend fun Bitmap.extractBarcodes(
-        tryExtraHard: Boolean
-    ): List<BarcodeHit>? = withContext(dispatcher) {
-
-        // The crop rectangles are independent, so they are searched in parallel
-        val resultSet = getCropRectangles(tryExtraHard).map { cropRect ->
-            async { readBarcodes(cropRect) }
-        }.awaitAll().flatten()
-        if (!isActive) return@withContext null
-
-        if (resultSet.isEmpty()) return@withContext null
-
-        val preferredPriority = resultSet.minOf { it.result.format.priority() }
-        resultSet
-            .filter { it.result.format.priority() == preferredPriority }
+    private fun List<BarcodeHit>.preferred(): List<BarcodeHit> {
+        if (isEmpty()) return this
+        val preferredPriority = minOf { it.result.format.priority() }
+        return filter { it.result.format.priority() == preferredPriority }
             // the overlapping crop rectangles find the same barcode several times
             .distinctBy { it.result.format to it.result.rawBytes.contentHashCode() }
             .sortedWith(compareBy({ it.top }, { it.left }))
     }
 
-    private fun Bitmap.readBarcodes(cropRect: Rect): List<BarcodeHit> = try {
+    /** Returns null if the search failed. */
+    private fun Bitmap.readBarcodes(cropRect: Rect): List<BarcodeHit>? = try {
         ZxingCpp.readBitmap(
             bitmap = this,
             cropRect = cropRect,
@@ -115,9 +114,9 @@ internal class BarcodeRendererImpl @Inject constructor(
             options = readerOptions,
         )?.map { BarcodeHit(it, cropRect) } ?: emptyList()
     } catch (_: Exception) {
-        emptyList()
+        null
     } catch (_: OutOfMemoryError) {
-        emptyList()
+        null
     }
 
     private val BarcodeHit.top: Int

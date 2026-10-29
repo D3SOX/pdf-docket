@@ -78,28 +78,30 @@ class DocumentRenderer @Inject constructor(
             val scan = scans[key] ?: scanStore.load(id, settingsKey) ?: withRenderer(id) { renderer ->
                 val pageCount = renderer.getPageCount()
                 val barcodes = mutableListOf<PageBarcode>()
-                var allPagesRendered = pageCount > 0
+                var allPagesScanned = pageCount > 0
                 for (pageIndex in 0 until pageCount) {
                     val page = renderer.renderPage(
                         pageIndex = pageIndex,
                         highResolution = mode == BarcodeSearchMode.EXTENDED,
                     )
                     if (page == null) {
-                        allPagesRendered = false
+                        allPagesScanned = false
                         continue
                     }
-                    barcodes += barcodeRenderer.getBarcodes(
+                    val found = barcodeRenderer.getBarcodes(
                         document = page,
                         tryExtraHard = mode == BarcodeSearchMode.EXTENDED,
                         generateNewBarcode = generateNewBarcode,
-                    ).map { PageBarcode(pageIndex, it) }
+                    )
+                    if (!found.complete) allPagesScanned = false
+                    barcodes += found.bitmaps.map { PageBarcode(pageIndex, it) }
                     if (cache.get(pageKey(id, pageIndex)) == null) {
                         cache.put(pageKey(id, pageIndex), page.scaleToWidth(screenWidth))
                     }
                     emit(BarcodeScan(pageCount, barcodes.toList(), complete = false))
                 }
-                // a page that couldn't be rendered, e.g. for lack of memory, may work next time
-                BarcodeScan(pageCount, barcodes).also { if (allPagesRendered) scanStore.save(id, settingsKey, it) }
+                // a page that couldn't be rendered or searched, e.g. for lack of memory, may work next time
+                BarcodeScan(pageCount, barcodes).also { if (allPagesScanned) scanStore.save(id, settingsKey, it) }
             }
             scans.put(key, scan)
             emit(scan)
