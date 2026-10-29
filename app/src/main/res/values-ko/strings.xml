@@ -1,8 +1,17 @@
 <resources>
     <string name="delete">삭제</string>
+    <string name="save">저장</string>
+    <string name="select_document">문서 선택</string>
+    <string name="select_all">모두 선택</string>
+    <string name="close_selection">선택 해제</string>
+    <plurals name="documents_selected">
+        <item quantity="other">%d개 선택됨</item>
+    </plurals>
     <string name="document_name">문서 이름</string>
     <string name="warning">경고</string>
     <string name="error_reading_pdf">PDF를 읽는 중 오류가 발생했습니다. 다른 파일이나 파일 위치를 시도해 주세요</string>
+    <string name="error_showing_page">이 페이지를 표시할 수 없습니다</string>
+    <string name="error_showing_document">이 PDF를 열 수 없습니다</string>
     <string name="dialog_password_protection_title">암호로 보호된 PDF 해독</string>
     <string name="dialog_password_protection_hint">비밀번호 입력</string>
     <string name="ok">확인</string>
@@ -114,6 +123,9 @@
     <string name="shortcut_document_deleted">이 문서는 삭제되었습니다</string>
     <plurals name="documents_imported">
         <item quantity="other">문서 %d개를 가져왔습니다</item>
+    </plurals>
+    <plurals name="documents_already_imported">
+        <item quantity="other">문서 %d개는 이미 가져왔습니다</item>
     </plurals>
     <string name="settings_section_backup">백업</string>
     <string name="create_backup">백업 만들기</string>

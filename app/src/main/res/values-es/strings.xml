@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Eliminar</string>
+    <string name="save">Guardar</string>
+    <string name="select_document">Seleccionar documento</string>
+    <string name="select_all">Seleccionar todo</string>
+    <string name="close_selection">Borrar selección</string>
+    <plurals name="documents_selected">
+        <item quantity="one">%d seleccionado</item>
+        <item quantity="many">%d seleccionados</item>
+        <item quantity="other">%d seleccionados</item>
+    </plurals>
     <string name="document_name">Nombre de documento</string>
     <string name="warning">Aviso</string>
     <string name="error_reading_pdf">Error al leer el PDF. Inténtalo con otro fichero u origen</string>
+    <string name="error_showing_page">No se puede mostrar esta página</string>
+    <string name="error_showing_document">No se puede abrir este PDF</string>
     <string name="dialog_password_protection_title">Descifrar PDF protegido por contraseña</string>
     <string name="dialog_password_protection_hint">Escribe la contraseña</string>
     <string name="ok">OK</string>
@@ -118,6 +129,11 @@
         <item quantity="one">%d documento importado</item>
         <item quantity="many">%d de documentos importados</item>
         <item quantity="other">%d documentos importados</item>
+    </plurals>
+    <plurals name="documents_already_imported">
+        <item quantity="one">%d documento ya estaba importado</item>
+        <item quantity="many">%d de documentos ya estaban importados</item>
+        <item quantity="other">%d documentos ya estaban importados</item>
     </plurals>
     <string name="settings_section_backup">Copia de seguridad</string>
     <string name="create_backup">Crear copia de seguridad</string>

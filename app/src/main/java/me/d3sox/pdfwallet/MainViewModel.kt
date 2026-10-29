@@ -39,6 +39,7 @@ data class MainUiState(
 sealed interface MainEvent {
     data class OpenDocument(val id: String) : MainEvent
     data class DocumentsImported(val count: Int) : MainEvent
+    data class DocumentsAlreadyImported(val count: Int) : MainEvent
     data object ImportFailed : MainEvent
 }
 
@@ -113,28 +114,33 @@ class MainViewModel @Inject constructor(
 
     private suspend fun importQueuedFiles() {
         val imported = mutableListOf<String>()
+        val duplicates = mutableListOf<String>()
         var hasFailures = false
         while (importQueue.isNotEmpty()) {
             when (val result = importFile(importQueue.removeFirst())) {
                 ImportResult.Failed -> hasFailures = true
                 ImportResult.Skipped -> Unit
                 is ImportResult.Imported -> imported += result.id
+                is ImportResult.Duplicate -> duplicates += result.existingId
             }
         }
         // not suspending, so files selected meanwhile can't end up in the queue of a finished job
-        if (imported.isNotEmpty()) {
-            // make sure the new documents are part of the visible documents
+        // a single file opens its document, even if it was already imported
+        val event = (imported + duplicates).distinct().singleOrNull()?.let(MainEvent::OpenDocument)
+            ?: imported.takeIf { it.isNotEmpty() }?.let { MainEvent.DocumentsImported(it.size) }
+        if (event != null) {
+            // make sure the documents are part of the visible documents
             documentFilter.clear()
-            _events.trySend(
-                imported.singleOrNull()?.let(MainEvent::OpenDocument) ?: MainEvent.DocumentsImported(imported.size)
-            )
+            _events.trySend(event)
         }
-        // one message for the whole batch, after the imported documents are shown
+        // one message each for the whole batch, after the documents are shown
+        if (duplicates.isNotEmpty()) _events.trySend(MainEvent.DocumentsAlreadyImported(duplicates.size))
         if (hasFailures) _events.trySend(MainEvent.ImportFailed)
     }
 
     private sealed interface ImportResult {
         data class Imported(val id: String) : ImportResult
+        data class Duplicate(val existingId: String) : ImportResult
         data object Failed : ImportResult
         /** e.g. the password dialog was dismissed */
         data object Skipped : ImportResult
@@ -160,8 +166,8 @@ class MainViewModel @Inject constructor(
             }
             when (result) {
                 is PdfImportResult.Success -> {
-                    documentRepository.add(result.pendingCertificate)
-                    return ImportResult.Imported(result.pendingCertificate.fileName)
+                    return documentRepository.add(result.pendingCertificate)?.let(ImportResult::Duplicate)
+                        ?: ImportResult.Imported(result.pendingCertificate.fileName)
                 }
                 PdfImportResult.ParsingError -> return ImportResult.Failed
                 PdfImportResult.NoFileToImport -> return ImportResult.Skipped

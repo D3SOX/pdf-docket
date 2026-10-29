@@ -3,6 +3,7 @@ package me.d3sox.pdfwallet
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import me.d3sox.pdfwallet.render.BarcodeScanStore
 import me.d3sox.pdfwallet.render.DocumentRenderer
 import me.d3sox.pdfwallet.settings.BarcodeSearchMode
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -10,6 +11,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -30,6 +32,7 @@ class BarcodeDetectionTest {
     val hiltRule = HiltAndroidRule(this)
 
     @Inject lateinit var renderer: DocumentRenderer
+    @Inject lateinit var scanStore: BarcodeScanStore
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context: Context = instrumentation.targetContext
@@ -43,6 +46,8 @@ class BarcodeDetectionTest {
     @After
     fun tearDown() {
         copiedFiles.forEach(File::delete)
+        // the next run would otherwise load the saved scans instead of searching the pages
+        runBlocking { scanStore.delete(copiedFiles.map { it.name }) }
     }
 
     /** Copies a test asset into the app's files, where the renderer expects documents. */

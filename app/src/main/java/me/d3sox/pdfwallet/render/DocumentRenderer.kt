@@ -32,12 +32,14 @@ data class BarcodeScan(val pageCount: Int, val barcodes: List<PageBarcode>, val 
 }
 
 /**
- * Renders PDF pages, thumbnails and barcodes. Results are cached in memory, since the files never change.
+ * Renders PDF pages, thumbnails and barcodes. Results are cached in memory, since the files never change,
+ * and barcode scans are also kept on disk by [BarcodeScanStore].
  */
 @Singleton
 class DocumentRenderer @Inject constructor(
     @ApplicationContext private val context: Context,
     private val barcodeRenderer: BarcodeRenderer,
+    private val scanStore: BarcodeScanStore,
 ) {
     // Android's PdfRenderer isn't meant to be used concurrently
     private val renderDispatcher = Dispatchers.IO.limitedParallelism(1)
@@ -70,16 +72,22 @@ class DocumentRenderer @Inject constructor(
             emit(BarcodeScan(pageCount(id), emptyList()))
             return@flow
         }
-        val key = "$id-$mode-$generateNewBarcode"
+        val settingsKey = "$mode-$generateNewBarcode"
+        val key = "$id-$settingsKey"
         scanMutex.withLock {
-            val scan = scans[key] ?: withRenderer(id) { renderer ->
+            val scan = scans[key] ?: scanStore.load(id, settingsKey) ?: withRenderer(id) { renderer ->
                 val pageCount = renderer.getPageCount()
                 val barcodes = mutableListOf<PageBarcode>()
+                var allPagesRendered = pageCount > 0
                 for (pageIndex in 0 until pageCount) {
                     val page = renderer.renderPage(
                         pageIndex = pageIndex,
                         highResolution = mode == BarcodeSearchMode.EXTENDED,
-                    ) ?: continue
+                    )
+                    if (page == null) {
+                        allPagesRendered = false
+                        continue
+                    }
                     barcodes += barcodeRenderer.getBarcodes(
                         document = page,
                         tryExtraHard = mode == BarcodeSearchMode.EXTENDED,
@@ -90,7 +98,8 @@ class DocumentRenderer @Inject constructor(
                     }
                     emit(BarcodeScan(pageCount, barcodes.toList(), complete = false))
                 }
-                BarcodeScan(pageCount, barcodes)
+                // a page that couldn't be rendered, e.g. for lack of memory, may work next time
+                BarcodeScan(pageCount, barcodes).also { if (allPagesRendered) scanStore.save(id, settingsKey, it) }
             }
             scans.put(key, scan)
             emit(scan)

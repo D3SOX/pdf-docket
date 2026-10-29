@@ -14,6 +14,9 @@ interface CertificateDao {
     @Query("SELECT * FROM certificates")
     fun getAllWithTags(): Flow<List<CertificateWithTags>>
 
+    @Query("SELECT id FROM certificates")
+    suspend fun ids(): List<String>
+
     @Query("SELECT EXISTS(SELECT 1 FROM certificates WHERE id = :id)")
     suspend fun exists(id: String): Boolean
 

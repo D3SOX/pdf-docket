@@ -322,6 +322,10 @@ private fun DocumentPages(
     val barcodes = @Composable { BarcodesPager(result, barcodePager, indicator, settings.halfSizeBarcodes) }
     val pdf = @Composable { PdfPager(document.id, pdfPager, indicator, invertColors, vm) }
     when {
+        // the PDF couldn't be opened at all
+        result.pageCount == 0 -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            RenderError(R.string.error_showing_document)
+        }
         result.barcodes.isEmpty() -> pdf()
         viewMode == ViewMode.BOTH -> SplitLayout(first = barcodes, second = pdf)
         viewMode == ViewMode.PDF -> pdf()
@@ -429,18 +433,23 @@ private fun PdfPageView(
     key: String,
     invertColors: Boolean,
 ) {
-    val bitmap by produceState<ImageBitmap?>(null, key) {
-        value = load()?.asImageBitmap()
+    val page by produceState<PageImage>(PageImage.Loading, key) {
+        value = load()?.let { PageImage.Loaded(it.asImageBitmap()) } ?: PageImage.Failed
     }
-    val image = bitmap
-    if (image == null) {
-        LoadingIndicator()
-    } else {
-        ZoomImage(
-            painter = remember(image) { BitmapPainter(image) },
+    when (val image = page) {
+        PageImage.Loading -> LoadingIndicator()
+        PageImage.Failed -> RenderError(R.string.error_showing_page)
+        is PageImage.Loaded -> ZoomImage(
+            painter = remember(image) { BitmapPainter(image.bitmap) },
             contentDescription = null,
             colorFilter = if (invertColors) invertColorFilter else null,
             modifier = Modifier.fillMaxSize(),
         )
     }
+}
+
+private sealed interface PageImage {
+    data object Loading : PageImage
+    data object Failed : PageImage
+    data class Loaded(val bitmap: ImageBitmap) : PageImage
 }

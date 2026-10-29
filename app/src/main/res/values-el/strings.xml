@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Διαγραφή</string>
+    <string name="save">Αποθήκευση</string>
+    <string name="select_document">Επιλογή εγγράφου</string>
+    <string name="select_all">Επιλογή όλων</string>
+    <string name="close_selection">Εκκαθάριση επιλογής</string>
+    <plurals name="documents_selected">
+        <item quantity="one">%d επιλεγμένο</item>
+        <item quantity="other">%d επιλεγμένα</item>
+    </plurals>
     <string name="document_name">Όνομα εγγράφου</string>
     <string name="warning">Προσοχή</string>
     <string name="error_reading_pdf">Σφάλμα κατά την ανάγνωση του PDF. Δοκιμάστε ένα άλλο αρχείο ή τοποθεσία αρχείου</string>
+    <string name="error_showing_page">Δεν είναι δυνατή η εμφάνιση αυτής της σελίδας</string>
+    <string name="error_showing_document">Δεν είναι δυνατό το άνοιγμα αυτού του PDF</string>
     <string name="dialog_password_protection_title">Αποκρυπτογράφηση προστατευμένου με κωδικό πρόσβασης PDF</string>
     <string name="dialog_password_protection_hint">Εισάγετε κωδικό πρόσβασης</string>
     <string name="ok">Εντάξει</string>
@@ -117,6 +127,10 @@
     <plurals name="documents_imported">
         <item quantity="one">Εισήχθη %d έγγραφο</item>
         <item quantity="other">Εισήχθησαν %d έγγραφα</item>
+    </plurals>
+    <plurals name="documents_already_imported">
+        <item quantity="one">%d έγγραφο είχε ήδη εισαχθεί</item>
+        <item quantity="other">%d έγγραφα είχαν ήδη εισαχθεί</item>
     </plurals>
     <string name="settings_section_backup">Αντίγραφο ασφαλείας</string>
     <string name="create_backup">Δημιουργία αντιγράφου ασφαλείας</string>

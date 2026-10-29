@@ -55,7 +55,7 @@ class MainActivityRobolectricTest {
     private fun seedDocuments() = runTest {
         hiltRule.inject()
         listOf("Ticket A", "Ticket B", "Other document").forEach { name ->
-            repository.file(name).writeText("PDF placeholder")
+            repository.file(name).writeText("PDF placeholder of $name")
             repository.add(PendingCertificate(fileName = name, documentName = name))
         }
         composeRule.waitUntil(timeoutMillis = 5_000) {
@@ -164,6 +164,20 @@ class MainActivityRobolectricTest {
         documents.getValue("Ticket A").tags.map { it.id }.toSet() shouldBe setOf(travel, work)
         documents.getValue("Ticket B").tags.map { it.id } shouldBe listOf(work)
         documents.getValue("Other document").tags shouldBe emptyList()
+    }
+
+    @Test
+    fun openDocument_explainsWhenThePdfCantBeOpened() {
+        // the seeded documents are text files, not PDFs
+        seedDocuments()
+
+        composeRule.onNodeWithText("Ticket A").performClick()
+
+        val error = composeRule.activity.getString(R.string.error_showing_document)
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText(error)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText(error).assertIsDisplayed()
     }
 
     @Test
