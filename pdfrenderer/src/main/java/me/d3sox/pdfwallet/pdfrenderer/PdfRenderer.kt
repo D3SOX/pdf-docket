@@ -9,6 +9,7 @@ import android.graphics.ColorFilter
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.pdf.PdfRenderer
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,6 +21,7 @@ import kotlin.math.sqrt
 private const val REGULAR_PDF_RESOLUTION_MULTIPLIER = 2
 private const val IMPROVED_PDF_RESOLUTION_MULTIPLIER = 4
 private const val MAX_BITMAP_SIZE = 100 * 1024 * 1024
+private const val HEAP_SHARE_PER_BITMAP = 4
 private const val BYTES_PER_PIXEL = 4
 
 @Suppress("MagicNumber")
@@ -102,14 +104,15 @@ private class PdfRendererImpl(
         pageIndex: Int,
         highResolution: Boolean,
     ): Bitmap? = withContext(renderContext) {
-        if (renderer == null) {
-            try {
-                loadFile()
-            }
-            catch (ignore: Exception) {}
-            if (!isActive) return@withContext null
+        // e.g. a file or page that can't be opened, or too little memory even for the smaller bitmap
+        try {
+            if (renderer == null) loadFile()
+            renderer?.openPage(pageIndex)?.renderAndClose(highResolution) { isActive }
+        } catch (_: Exception) {
+            null
+        } catch (_: OutOfMemoryError) {
+            null
         }
-        renderer?.openPage(pageIndex)?.renderAndClose(highResolution) { isActive }
     }
 
     private fun PdfRenderer.Page.renderAndClose(highResolution: Boolean, isActive: () -> Boolean): Bitmap? = use {
@@ -120,6 +123,14 @@ private class PdfRendererImpl(
         bitmap
     }
 
+    // Before Android 8, bitmaps count against the app's Java heap, so large pages could run out of memory
+    private val maxBitmapSize: Int =
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            min(MAX_BITMAP_SIZE.toLong(), Runtime.getRuntime().maxMemory() / HEAP_SHARE_PER_BITMAP).toInt()
+        } else {
+            MAX_BITMAP_SIZE
+        }
+
     @Suppress("SwallowedException")
     private fun PdfRenderer.Page.createBitmap(highResolution: Boolean): Bitmap {
         val multiplier = when {
@@ -128,7 +139,7 @@ private class PdfRendererImpl(
             else -> REGULAR_PDF_RESOLUTION_MULTIPLIER
         }
         // Scale before allocating, so the bitmap never exceeds the size limit, even for huge pages
-        val maxScale = sqrt(MAX_BITMAP_SIZE / (width.toDouble() * height * BYTES_PER_PIXEL))
+        val maxScale = sqrt(maxBitmapSize / (width.toDouble() * height * BYTES_PER_PIXEL))
         val bitmap = try {
             createScaledBitmap(min(multiplier.toDouble(), maxScale))
         } catch (e: OutOfMemoryError) {
@@ -143,7 +154,7 @@ private class PdfRendererImpl(
 
     // The page is rendered without a transform, so its content is scaled to fit the bitmap
     private fun PdfRenderer.Page.createScaledBitmap(scale: Double): Bitmap {
-        val maxPixels = MAX_BITMAP_SIZE / BYTES_PER_PIXEL
+        val maxPixels = maxBitmapSize / BYTES_PER_PIXEL
         // Rounding a very narrow page up to 1 pixel could otherwise push the bitmap over the limit
         val bitmapWidth = (width * scale).toInt().coerceIn(1, maxPixels)
         val bitmapHeight = (height * scale).toInt().coerceIn(1, maxPixels / bitmapWidth)
