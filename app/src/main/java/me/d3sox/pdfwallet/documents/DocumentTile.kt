@@ -122,7 +122,7 @@ fun DocumentTile(
                         .padding(6.dp),
                 )
             }
-            Row(verticalAlignment = Alignment.Top) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 // reserves the same height in every tile, so the grid rows line up
                 NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 2, showTags = false)
             }
@@ -144,13 +144,16 @@ private fun RowScope.NameTagsAndActions(
             .weight(1f)
             .padding(start = 12.dp, top = 10.dp, bottom = 12.dp),
     ) {
-        Text(
-            text = document.name,
-            style = MaterialTheme.typography.titleSmall,
-            minLines = minNameLines,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Box(contentAlignment = Alignment.CenterStart) {
+            // reserves the lines, so a shorter name is centered in them
+            Text(text = "", style = MaterialTheme.typography.titleSmall, minLines = minNameLines)
+            Text(
+                text = document.name,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         // an empty line would push the name off center
         if (showTags && document.tags.isNotEmpty()) TagsLine(document.tags)
     }
