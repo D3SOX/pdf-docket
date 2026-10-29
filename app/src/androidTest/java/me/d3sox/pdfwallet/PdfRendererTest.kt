@@ -32,4 +32,14 @@ class PdfRendererTest {
             file.delete()
         }
     }
+
+    @Test
+    fun fileThatCantBeOpened_hasNoPages() = runTest {
+        val renderer = PdfRendererBuilder.create(context, fileName = "missing.pdf", renderContext = Dispatchers.IO)
+        try {
+            renderer.renderPage(pageIndex = 0, highResolution = false).shouldBeNull()
+        } finally {
+            renderer.close()
+        }
+    }
 }

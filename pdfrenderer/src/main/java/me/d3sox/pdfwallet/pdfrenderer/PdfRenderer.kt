@@ -104,15 +104,9 @@ private class PdfRendererImpl(
         pageIndex: Int,
         highResolution: Boolean,
     ): Bitmap? = withContext(renderContext) {
-        if (renderer == null) {
-            try {
-                loadFile()
-            }
-            catch (ignore: Exception) {}
-            if (!isActive) return@withContext null
-        }
-        // e.g. a damaged page, or too little memory even for the smaller bitmap
+        // e.g. a file or page that can't be opened, or too little memory even for the smaller bitmap
         try {
+            if (renderer == null) loadFile()
             renderer?.openPage(pageIndex)?.renderAndClose(highResolution) { isActive }
         } catch (_: Exception) {
             null
