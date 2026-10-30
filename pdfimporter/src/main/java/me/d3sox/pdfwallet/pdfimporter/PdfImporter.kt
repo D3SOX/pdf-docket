@@ -83,16 +83,19 @@ internal class PdfImporterImpl @Inject constructor(
         val pendingFile = pendingFile.value ?: return PdfImportResult.NoFileToImport
         return try {
             val file = fileRepo.getFile(pendingFile.fileName)
-            pdfDecryptor.decrypt(password = password, file = file)
-            if (isValidPdf(pendingFile)) {
-                PdfImportResult.Success(pendingFile)
-            } else {
-                deletePendingFile()
-                PdfImportResult.ParsingError
+            when {
+                !pdfDecryptor.decrypt(password = password, file = file) -> PdfImportResult.PasswordRequired
+                isValidPdf(pendingFile) -> PdfImportResult.Success(pendingFile)
+                else -> {
+                    deletePendingFile()
+                    PdfImportResult.ParsingError
+                }
             }
         } catch (e: Exception) {
+            // e.g. a full disk, which isn't the password's fault
             logger.logError(e.toString())
-            PdfImportResult.PasswordRequired
+            deletePendingFile()
+            PdfImportResult.ParsingError
         }
     }
 
