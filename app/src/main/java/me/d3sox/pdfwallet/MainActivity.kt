@@ -114,6 +114,8 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleIntent(intent: Intent) {
+        // reopening the app from recents after leaving it with back delivers the intent it was started with again
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
         val documentId = intent.getStringExtra(EXTRA_DOCUMENT_ID)
         if (intent.action == ACTION_OPEN_DOCUMENT && documentId != null) {
             vm.onShortcutOpened(documentId)
