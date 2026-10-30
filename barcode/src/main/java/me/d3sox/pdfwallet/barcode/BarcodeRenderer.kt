@@ -101,7 +101,7 @@ internal class BarcodeRendererImpl @Inject constructor(
         val preferredPriority = minOf { it.result.format.priority() }
         return filter { it.result.format.priority() == preferredPriority }
             // the overlapping crop rectangles find the same barcode several times
-            .distinctBy { it.result.format to it.result.rawBytes.contentHashCode() }
+            .distinctBy { it.result.format to it.result.rawBytes.toList() }
             .sortedWith(compareBy({ it.top }, { it.left }))
     }
 

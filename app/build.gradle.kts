@@ -68,5 +68,7 @@ dependencies {
     androidTestImplementation(libs.io.kotest.assertions.core)
     androidTestImplementation(libs.org.jetbrains.kotlinx.coroutines.test)
     androidTestImplementation(libs.com.google.dagger.hilt.androidtesting)
+    // to draw barcodes onto test pages
+    androidTestImplementation(libs.com.github.markusfisch.zxing.cpp)
     kspAndroidTest(libs.com.google.dagger.hilt.compiler)
 }
