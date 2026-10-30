@@ -21,7 +21,7 @@ object BitmapCache {
         object : LruCache<String, BarcodeScan>(maxMemory / 16) {
             // at least 1, so scans without barcodes are limited as well
             override fun sizeOf(key: String, scan: BarcodeScan): Int =
-                scan.barcodes.sumOf { it.bitmap.byteCount / 1024 }.coerceAtLeast(1)
+                (scan.barcodes.sumOf { it.bitmap.byteCount.toLong() } / 1024).toInt().coerceAtLeast(1)
         }
     }
 
