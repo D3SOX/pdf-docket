@@ -51,6 +51,10 @@ fun AppRoot(
         if (uris.isNotEmpty()) vm.onFilesSelected(uris)
     }
     val passwordPrompt by vm.passwordPrompt.collectAsStateWithLifecycle()
+    val isShowingDocument = backStack.lastOrNull() is DetailsRoute
+    LaunchedEffect(isShowingDocument) {
+        vm.lockTimer.onDocumentShown(isShowingDocument)
+    }
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
@@ -75,7 +79,10 @@ fun AppRoot(
 
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         if (state.isLocked) {
-            LockScreen(onAuthenticated = vm::onAuthenticated)
+            LockScreen(
+                onAuthenticated = vm::onAuthenticated,
+                onAuthenticationDisabled = vm::onAuthenticationDisabled,
+            )
             return@CompositionLocalProvider
         }
         NavDisplay(

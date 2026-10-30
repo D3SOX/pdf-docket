@@ -93,7 +93,18 @@ class MainActivity : FragmentActivity() {
 
     override fun onUserInteraction() {
         super.onUserInteraction()
-        vm.onUserInteraction()
+        vm.lockTimer.onUserInteraction()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        vm.lockTimer.onAppVisibilityChanged(true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // e.g. rotating the screen doesn't leave the app
+        if (!isChangingConfigurations) vm.lockTimer.onAppVisibilityChanged(false)
     }
 
     private fun applyWindowSettings(settings: AppSettings) {

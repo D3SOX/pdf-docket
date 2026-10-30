@@ -18,6 +18,13 @@
     <string name="cancel">キャンセル</string>
     <string name="dialog_delete_confirmation_message">本当にこのドキュメントをアプリから削除しますか？</string>
     <string name="require_authentication">認証を要求する</string>
+    <string name="preference_lock_timeout">自動ロック</string>
+    <string name="lock_timeout_immediately">アプリを離れたとき</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="other">%d 分間操作がないとき</item>
+    </plurals>
+    <string name="authentication_unavailable">デバイスに画面ロックが設定されていないため、認証できません。画面ロックを再設定するか、認証をオフにしてください。</string>
+    <string name="disable_authentication">認証をオフにする</string>
     <string name="settings">設定</string>
     <string name="authenticate">認証</string>
     <string name="report_issue_summary">アプリの使用に問題がありますか？お手伝いします</string>

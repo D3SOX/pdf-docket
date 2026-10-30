@@ -18,6 +18,13 @@
     <string name="cancel">취소</string>
     <string name="dialog_delete_confirmation_message">정말로 이 문서를 앱에서 삭제하시겠습니까?</string>
     <string name="require_authentication">인증 필요</string>
+    <string name="preference_lock_timeout">자동 잠금</string>
+    <string name="lock_timeout_immediately">앱을 나갈 때</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="other">%d분 동안 사용하지 않을 때</item>
+    </plurals>
+    <string name="authentication_unavailable">기기에 화면 잠금이 더 이상 없어 인증할 수 없습니다. 화면 잠금을 다시 설정하거나 인증을 끄세요.</string>
+    <string name="disable_authentication">인증 끄기</string>
     <string name="settings">설정</string>
     <string name="authenticate">인증</string>
     <string name="report_issue_summary">앱 사용에 문제가 있나요? 도와드리겠습니다</string>

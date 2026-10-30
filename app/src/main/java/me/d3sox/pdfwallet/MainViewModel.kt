@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import me.d3sox.pdfwallet.documents.DocumentFilter
 import me.d3sox.pdfwallet.documents.DocumentRepository
+import me.d3sox.pdfwallet.lock.AppLockTimer
 import me.d3sox.pdfwallet.lock.AppLockedRepo
 import me.d3sox.pdfwallet.pdfimporter.PdfImportResult
 import me.d3sox.pdfwallet.pdfimporter.PdfImporter
@@ -13,7 +14,6 @@ import me.d3sox.pdfwallet.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,9 +25,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.minutes
-
-private val INTERACTION_TIMEOUT = 5.minutes
 
 enum class PasswordPrompt { NONE, REQUIRED, WRONG }
 
@@ -49,7 +46,8 @@ class MainViewModel @Inject constructor(
     private val lockedRepo: AppLockedRepo,
     private val documentRepository: DocumentRepository,
     private val documentFilter: DocumentFilter,
-    settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
+    val lockTimer: AppLockTimer,
 ) : ViewModel() {
 
     /** null until the settings are loaded */
@@ -71,11 +69,6 @@ class MainViewModel @Inject constructor(
     // only accessed on the main thread
     private val importQueue = ArrayDeque<Uri>()
     private var importJob: Job? = null
-    private var timeoutJob: Job? = null
-
-    init {
-        onUserInteraction()
-    }
 
     fun onFilesSelected(uris: List<Uri>) {
         importQueue += uris
@@ -100,15 +93,13 @@ class MainViewModel @Inject constructor(
         passwords.trySend(null)
     }
 
-    fun onUserInteraction() {
-        timeoutJob?.cancel()
-        timeoutJob = viewModelScope.launch {
-            delay(INTERACTION_TIMEOUT)
-            lockedRepo.lockApp()
-        }
+    fun onAuthenticated() {
+        lockedRepo.unlockApp()
     }
 
-    fun onAuthenticated() {
+    /** e.g. the device's screen lock was removed, then authenticating is impossible */
+    fun onAuthenticationDisabled() = viewModelScope.launch {
+        settingsRepository.update { it.copy(requireAuthentication = false) }
         lockedRepo.unlockApp()
     }
 

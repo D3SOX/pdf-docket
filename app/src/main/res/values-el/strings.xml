@@ -20,6 +20,14 @@
     <string name="cancel">Ακύρωση</string>
     <string name="dialog_delete_confirmation_message">Θέλετε πράγματι να διαγράψετε το έγγραφο από την εφαρμογή;</string>
     <string name="require_authentication">Απαίτηση πιστοποίησης</string>
+    <string name="preference_lock_timeout">Αυτόματο κλείδωμα</string>
+    <string name="lock_timeout_immediately">Κατά την έξοδο από την εφαρμογή</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="one">Μετά από %d λεπτό αδράνειας</item>
+        <item quantity="other">Μετά από %d λεπτά αδράνειας</item>
+    </plurals>
+    <string name="authentication_unavailable">Η συσκευή σας δεν έχει πλέον κλείδωμα οθόνης, οπότε η ταυτοποίηση δεν είναι δυνατή. Ρυθμίστε ξανά ένα ή απενεργοποιήστε την πιστοποίηση.</string>
+    <string name="disable_authentication">Απενεργοποίηση πιστοποίησης</string>
     <string name="settings">Ρυθμίσεις</string>
     <string name="authenticate">Ταυτοποίηση</string>
     <string name="report_issue_summary">Έχετε πρόβλημα με τη χρήση της εφαρμογής; Αφήστε μας να σας βοηθήσουμε</string>

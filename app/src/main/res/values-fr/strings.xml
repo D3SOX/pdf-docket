@@ -21,6 +21,15 @@
     <string name="cancel">Annuler</string>
     <string name="dialog_delete_confirmation_message">Voulez-vous vraiment supprimer le document de l\'application ?</string>
     <string name="require_authentication">Authentification requise</string>
+    <string name="preference_lock_timeout">Verrouiller automatiquement</string>
+    <string name="lock_timeout_immediately">En quittant l\'application</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="one">Après %d minute d\'inactivité</item>
+        <item quantity="many">Après %d de minutes d\'inactivité</item>
+        <item quantity="other">Après %d minutes d\'inactivité</item>
+    </plurals>
+    <string name="authentication_unavailable">Votre appareil n\'a plus de verrouillage d\'écran, l\'authentification est donc impossible. Configurez-en un à nouveau ou désactivez l\'authentification.</string>
+    <string name="disable_authentication">Désactiver l\'authentification</string>
     <string name="settings">Paramètres</string>
     <string name="authenticate">S\'authentifier</string>
     <string name="report_issue_summary">Un problème avec l\'application ? Laissez-moi essayer de vous aider</string>

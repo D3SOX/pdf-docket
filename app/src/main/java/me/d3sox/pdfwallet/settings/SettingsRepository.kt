@@ -19,6 +19,7 @@ private val Context.settingsDataStore: DataStore<Preferences> by preferencesData
 
 private object Keys {
     val requireAuthentication = booleanPreferencesKey("requireAuthentication")
+    val lockTimeout = stringPreferencesKey("lockTimeout")
     val barcodeSearchMode = stringPreferencesKey("barcodeSearchMode")
     val halfSizeBarcodes = booleanPreferencesKey("halfSizeBarcodes")
     val splitScreen = booleanPreferencesKey("splitScreen")
@@ -57,6 +58,7 @@ class SettingsRepository @Inject constructor(
         val defaults = AppSettings()
         return AppSettings(
             requireAuthentication = this[Keys.requireAuthentication] ?: defaults.requireAuthentication,
+            lockTimeout = enumOrDefault(this[Keys.lockTimeout], defaults.lockTimeout),
             barcodeSearchMode = enumOrDefault(this[Keys.barcodeSearchMode], defaults.barcodeSearchMode),
             halfSizeBarcodes = this[Keys.halfSizeBarcodes] ?: defaults.halfSizeBarcodes,
             splitScreen = this[Keys.splitScreen] ?: defaults.splitScreen,
@@ -78,6 +80,7 @@ class SettingsRepository @Inject constructor(
 
     private fun MutablePreferences.write(settings: AppSettings) {
         this[Keys.requireAuthentication] = settings.requireAuthentication
+        this[Keys.lockTimeout] = settings.lockTimeout.name
         this[Keys.barcodeSearchMode] = settings.barcodeSearchMode.name
         this[Keys.halfSizeBarcodes] = settings.halfSizeBarcodes
         this[Keys.splitScreen] = settings.splitScreen

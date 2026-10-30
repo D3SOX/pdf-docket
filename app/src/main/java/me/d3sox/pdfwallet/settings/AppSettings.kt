@@ -1,6 +1,19 @@
 package me.d3sox.pdfwallet.settings
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
+
 enum class BarcodeSearchMode { DISABLED, REGULAR, EXTENDED }
+
+@Suppress("MagicNumber")
+enum class LockTimeout(val duration: Duration) {
+    /** locks when the app is left */
+    IMMEDIATELY(Duration.ZERO),
+    ONE_MINUTE(1.minutes),
+    FIVE_MINUTES(5.minutes),
+    FIFTEEN_MINUTES(15.minutes),
+    THIRTY_MINUTES(30.minutes),
+}
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
@@ -19,6 +32,7 @@ enum class SortOrder {
 
 data class AppSettings(
     val requireAuthentication: Boolean = false,
+    val lockTimeout: LockTimeout = LockTimeout.FIVE_MINUTES,
     val barcodeSearchMode: BarcodeSearchMode = BarcodeSearchMode.EXTENDED,
     val halfSizeBarcodes: Boolean = false,
     val splitScreen: Boolean = false,

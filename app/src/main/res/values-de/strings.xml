@@ -20,6 +20,14 @@
     <string name="cancel">Abbrechen</string>
     <string name="dialog_delete_confirmation_message">Willst du das Dokument wirklich aus der App löschen?</string>
     <string name="require_authentication">Authentifizierung erforderlich</string>
+    <string name="preference_lock_timeout">Automatisch sperren</string>
+    <string name="lock_timeout_immediately">Beim Verlassen der App</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="one">Nach %d Minute Inaktivität</item>
+        <item quantity="other">Nach %d Minuten Inaktivität</item>
+    </plurals>
+    <string name="authentication_unavailable">Dein Gerät hat keine Displaysperre mehr, daher ist keine Authentifizierung möglich. Richte wieder eine ein oder deaktiviere die Authentifizierung.</string>
+    <string name="disable_authentication">Authentifizierung deaktivieren</string>
     <string name="settings">Einstellungen</string>
     <string name="authenticate">Authentifizieren</string>
     <string name="report_issue_summary">Probleme bei Verwendung der App? Lass uns helfen</string>

@@ -20,6 +20,14 @@
     <string name="cancel">Katkesta</string>
     <string name="dialog_delete_confirmation_message">Kas sa kindlasti soovid kustutada rakendusest selle dokumendi?</string>
     <string name="require_authentication">Eelda autentimist</string>
+    <string name="preference_lock_timeout">Lukusta automaatselt</string>
+    <string name="lock_timeout_immediately">Rakendusest lahkudes</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="one">Pärast %d minutit tegevusetust</item>
+        <item quantity="other">Pärast %d minutit tegevusetust</item>
+    </plurals>
+    <string name="authentication_unavailable">Sinu seadmel pole enam ekraanilukku, seega pole autentimine võimalik. Seadista see uuesti või lülita autentimine välja.</string>
+    <string name="disable_authentication">Lülita autentimine välja</string>
     <string name="settings">Seadistused</string>
     <string name="authenticate">Autendi</string>
     <string name="report_issue_summary">Rakenduse kasutamisel tekkis mõni viga? Luba meil sind aidata</string>
