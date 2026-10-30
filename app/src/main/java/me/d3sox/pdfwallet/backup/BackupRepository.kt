@@ -3,7 +3,9 @@ package me.d3sox.pdfwallet.backup
 import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
+import androidx.room.withTransaction
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.IoDispatcher
+import me.d3sox.pdfwallet.db.AppDatabase
 import me.d3sox.pdfwallet.db.Certificate
 import me.d3sox.pdfwallet.db.CertificateDao
 import me.d3sox.pdfwallet.db.CertificateTagCrossRef
@@ -40,6 +42,7 @@ class BackupRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val documentRepository: DocumentRepository,
+    private val database: AppDatabase,
     private val certificateDao: CertificateDao,
     private val tagDao: TagDao,
 ) {
@@ -109,12 +112,15 @@ class BackupRepository @Inject constructor(
             zip.getInputStream(entry).use { input ->
                 documentRepository.file(id).outputStream().use { input.copyTo(it) }
             }
-            certificateDao.insert(
-                Certificate(id = id, name = json.getString("name"), importedAt = json.getLong("importedAt"))
-            )
-            tagDao.insertCrossRefs(
-                json.getJSONArray("tags").strings().mapNotNull(tagIds::get).map { CertificateTagCrossRef(id, it) }
-            )
+            // a document restored without its tags would be skipped when restoring again
+            database.withTransaction {
+                certificateDao.insert(
+                    Certificate(id = id, name = json.getString("name"), importedAt = json.getLong("importedAt"))
+                )
+                tagDao.insertCrossRefs(
+                    json.getJSONArray("tags").strings().mapNotNull(tagIds::get).map { CertificateTagCrossRef(id, it) }
+                )
+            }
             restored++
         }
         return restored
