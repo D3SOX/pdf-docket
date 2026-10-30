@@ -33,7 +33,6 @@ private val DARK_NAVIGATION_BAR_SCRIM = android.graphics.Color.argb(0x80, 0x1b, 
 class MainActivity : FragmentActivity() {
 
     private val vm by viewModels<MainViewModel>()
-    private var hasAppliedWindowSettings = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().setKeepOnScreenCondition { vm.uiState.value == null }
@@ -108,17 +107,11 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun applyWindowSettings(settings: AppSettings) {
-        val isSecure = window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0
-        if (settings.blockScreenshots != isSecure) {
-            if (settings.blockScreenshots) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-            } else {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-            }
-            // an existing surface doesn't reliably pick up the changed flag, a new window does
-            if (hasAppliedWindowSettings) recreate()
+        if (settings.blockScreenshots) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
-        hasAppliedWindowSettings = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(settings.showOnLockScreen)
         }
