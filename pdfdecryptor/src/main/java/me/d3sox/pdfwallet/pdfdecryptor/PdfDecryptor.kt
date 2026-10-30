@@ -11,8 +11,9 @@ import javax.inject.Inject
 public interface PdfDecryptor {
     @Throws(Exception::class, OutOfMemoryError::class)
     public suspend fun isPdfPasswordProtected(file: File): Boolean
+    /** Returns false if the password is wrong. */
     @Throws(Exception::class)
-    public suspend fun decrypt(password: String, file: File)
+    public suspend fun decrypt(password: String, file: File): Boolean
 }
 
 internal class PdfDecryptorImpl @Inject constructor(
@@ -31,19 +32,26 @@ internal class PdfDecryptorImpl @Inject constructor(
         }
     }
 
+    @Suppress("SwallowedException")
     @Throws(Exception::class)
     override suspend fun decrypt(
         password: String,
         file: File,
-    ): Unit = withContext(dispatcher) {
+    ): Boolean = withContext(dispatcher) {
         // PDFBox reads lazily from the file, so saving into it directly could corrupt the document
         val decrypted = File.createTempFile("decrypted", ".pdf", file.absoluteFile.parentFile)
         try {
-            PDDocument.load(file, password).use { document ->
-                document.isAllSecurityToBeRemoved = true
-                decrypted.outputStream().use(document::save)
+            val document = try {
+                PDDocument.load(file, password)
+            } catch (e: InvalidPasswordException) {
+                return@withContext false
+            }
+            document.use {
+                it.isAllSecurityToBeRemoved = true
+                decrypted.outputStream().use(it::save)
             }
             check(decrypted.renameTo(file)) { "Couldn't replace ${file.name} with its decrypted copy" }
+            true
         } finally {
             decrypted.delete()
         }

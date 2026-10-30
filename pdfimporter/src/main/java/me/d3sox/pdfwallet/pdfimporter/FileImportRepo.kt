@@ -28,10 +28,17 @@ internal class FileImportRepoImpl @Inject constructor(
 
     override suspend fun copyToApp(uri: Uri): PendingCertificate = withContext(dispatcher) {
         val fileName = "${UUID.randomUUID()}.pdf"
-        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-            FileOutputStream(getFile(fileName)).use { outputStream ->
-                inputStream.copyTo(outputStream)
+        var copied = false
+        try {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                FileOutputStream(getFile(fileName)).use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
             }
+            copied = true
+        } finally {
+            // e.g. a cloud provider aborted the download or the disk is full
+            if (!copied) getFile(fileName).delete()
         }
         val docName = documentNameRepo.getDocumentName(uri).removeSuffix(".pdf")
         return@withContext PendingCertificate(fileName = fileName, documentName = docName)

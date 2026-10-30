@@ -19,6 +19,14 @@
     <string name="cancel">Cancel</string>
     <string name="dialog_delete_confirmation_message">Do you really want to delete the document from the app?</string>
     <string name="require_authentication">Require authentication</string>
+    <string name="preference_lock_timeout">Lock automatically</string>
+    <string name="lock_timeout_immediately">When leaving the app</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="one">After %d minute of inactivity</item>
+        <item quantity="other">After %d minutes of inactivity</item>
+    </plurals>
+    <string name="authentication_unavailable">Your device no longer has a screen lock, so you can\'t authenticate. Set one up again or turn off authentication.</string>
+    <string name="disable_authentication">Turn off authentication</string>
     <string name="settings">Settings</string>
     <string name="authenticate">Authenticate</string>
     <string name="report_issue_summary">Any problem using the app? Let us try to help you</string>

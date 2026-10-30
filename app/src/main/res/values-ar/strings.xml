@@ -24,6 +24,18 @@
     <string name="cancel">إلغاء</string>
     <string name="dialog_delete_confirmation_message">هل تريد حقًا حذف المستند من التطبيق؟</string>
     <string name="require_authentication">تطلب المصادقة</string>
+    <string name="preference_lock_timeout">القفل تلقائيًا</string>
+    <string name="lock_timeout_immediately">عند مغادرة التطبيق</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="zero">بعد %d دقيقة من عدم النشاط</item>
+        <item quantity="one">بعد %d دقيقة من عدم النشاط</item>
+        <item quantity="two">بعد %d دقيقتين من عدم النشاط</item>
+        <item quantity="few">بعد %d دقائق من عدم النشاط</item>
+        <item quantity="many">بعد %d دقيقة من عدم النشاط</item>
+        <item quantity="other">بعد %d دقيقة من عدم النشاط</item>
+    </plurals>
+    <string name="authentication_unavailable">لم يعد لجهازك قفل شاشة، لذا لا يمكن إجراء المصادقة. أعد إعداد قفل الشاشة أو أوقف المصادقة.</string>
+    <string name="disable_authentication">إيقاف المصادقة</string>
     <string name="settings">الإعدادات</string>
     <string name="authenticate">مصادقة</string>
     <string name="report_issue_summary">هل تواجه مشكلة في استخدام التطبيق؟ دعنا نحاول مساعدتك</string>

@@ -22,6 +22,16 @@
     <string name="cancel">Отмена</string>
     <string name="dialog_delete_confirmation_message">Вы действительно хотите удалить документ из приложения?</string>
     <string name="require_authentication">Требовать аутентификацию</string>
+    <string name="preference_lock_timeout">Блокировать автоматически</string>
+    <string name="lock_timeout_immediately">При выходе из приложения</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="one">Через %d минуту бездействия</item>
+        <item quantity="few">Через %d минуты бездействия</item>
+        <item quantity="many">Через %d минут бездействия</item>
+        <item quantity="other">Через %d минуты бездействия</item>
+    </plurals>
+    <string name="authentication_unavailable">На устройстве больше нет блокировки экрана, поэтому аутентификация невозможна. Настройте её снова или отключите аутентификацию.</string>
+    <string name="disable_authentication">Отключить аутентификацию</string>
     <string name="settings">Настройки</string>
     <string name="authenticate">Аутентификация</string>
     <string name="report_issue_summary">Есть проблемы с приложением? Позвольте нам помочь вам</string>

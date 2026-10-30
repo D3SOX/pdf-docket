@@ -23,6 +23,9 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.bouncycastle.crypto.io.InvalidCipherTextIOException
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,6 +33,8 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import java.io.File
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
 private const val PASSWORD = "correct horse battery staple"
@@ -106,6 +111,26 @@ class BackupRepositoryTest {
         backupRepository.restore(backupUri, PASSWORD) shouldBe 0
 
         documentRepository.documents.first().single().name shouldBe "Renamed"
+    }
+
+    @Test
+    fun restore_failingBetweenADocumentAndItsTags_keepsNeither() = runTest {
+        // the tags of the document can't be read, like an interruption right after adding the document
+        ZipOutputStream(BackupCipher.encrypt(backup.outputStream(), PASSWORD)).use { zip ->
+            zip.putNextEntry(ZipEntry("backup.json"))
+            val document = JSONObject().put("id", "a.pdf").put("name", "Ticket").put("importedAt", 1L)
+                .put("tags", "not a list")
+            val metadata = JSONObject().put("tags", JSONArray()).put("documents", JSONArray().put(document))
+            zip.write(metadata.toString().toByteArray())
+            zip.putNextEntry(ZipEntry("documents/a.pdf"))
+            zip.write("content of a.pdf".toByteArray())
+        }
+
+        shouldThrow<JSONException> {
+            backupRepository.restore(backupUri, PASSWORD)
+        }
+        // so restoring again doesn't skip it
+        certificateDao.exists("a.pdf") shouldBe false
     }
 
     @Test

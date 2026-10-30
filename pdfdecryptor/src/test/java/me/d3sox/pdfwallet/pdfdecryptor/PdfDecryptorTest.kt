@@ -28,9 +28,19 @@ class PdfDecryptorTest {
     fun decrypt_replacesFileWithUnprotectedCopy() = runTest {
         val file = copyOf("password.pdf")
 
-        decryptor.decrypt("test", file)
+        decryptor.decrypt("test", file) shouldBe true
 
         decryptor.isPdfPasswordProtected(file) shouldBe false
+        tempFolder.root.list()!!.toList() shouldBe listOf("password.pdf")
+    }
+
+    @Test
+    fun decrypt_keepsFileOnWrongPassword() = runTest {
+        val file = copyOf("password.pdf")
+
+        decryptor.decrypt("wrong", file) shouldBe false
+
+        decryptor.isPdfPasswordProtected(file) shouldBe true
         tempFolder.root.list()!!.toList() shouldBe listOf("password.pdf")
     }
 }

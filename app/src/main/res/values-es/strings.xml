@@ -21,6 +21,15 @@
     <string name="cancel">Cancelar</string>
     <string name="dialog_delete_confirmation_message">¿Estás seguro de que quieres eliminar este documento de la app?</string>
     <string name="require_authentication">Requerir autenticación</string>
+    <string name="preference_lock_timeout">Bloquear automáticamente</string>
+    <string name="lock_timeout_immediately">Al salir de la aplicación</string>
+    <plurals name="lock_timeout_minutes">
+        <item quantity="one">Tras %d minuto de inactividad</item>
+        <item quantity="many">Tras %d de minutos de inactividad</item>
+        <item quantity="other">Tras %d minutos de inactividad</item>
+    </plurals>
+    <string name="authentication_unavailable">Tu dispositivo ya no tiene bloqueo de pantalla, así que no puedes autenticarte. Vuelve a configurar uno o desactiva la autenticación.</string>
+    <string name="disable_authentication">Desactivar la autenticación</string>
     <string name="settings">Ajustes</string>
     <string name="authenticate">Autenticar</string>
     <string name="report_issue_summary">¿Problema con la aplicación? Déjame intentar ayudarte</string>

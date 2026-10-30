@@ -123,7 +123,8 @@ fun DocumentDetailsScreen(
     val initialPage = remember { documents.indexOfFirst { it.id == vm.initialDocumentId }.coerceAtLeast(0) }
     val pagerState = rememberPagerState(initialPage = initialPage) { documents.size }
     val current = documents[pagerState.currentPage.coerceIn(documents.indices)]
-    val scans = remember { mutableStateMapOf<String, BarcodeScan>() }
+    // only whether barcodes were found, the scans themselves are cached by the renderer
+    val hasBarcodes = remember { mutableStateMapOf<String, Boolean>() }
     var showPdf by rememberSaveable { mutableStateOf(false) }
     val viewMode = when {
         settings.splitScreen -> ViewMode.BOTH
@@ -131,7 +132,7 @@ fun DocumentDetailsScreen(
         else -> ViewMode.BARCODE
     }
     var dialog by remember { mutableStateOf<DocumentDialog?>(null) }
-    val currentHasBarcode = scans[current.id]?.barcodes?.isNotEmpty() == true
+    val currentHasBarcode = hasBarcodes[current.id] == true
 
     Scaffold(
         topBar = {
@@ -197,7 +198,7 @@ fun DocumentDetailsScreen(
                     settings = settings,
                     invertColors = isDarkTheme && settings.invertPdfColors,
                     vm = vm,
-                    onScanned = { scans[document.id] = it },
+                    onScanned = { hasBarcodes[document.id] = it.barcodes.isNotEmpty() },
                 )
             }
         }

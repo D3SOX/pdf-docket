@@ -1,12 +1,17 @@
 package me.d3sox.pdfwallet
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import androidx.core.graphics.createBitmap
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import me.d3sox.pdfwallet.barcode.BarcodeRenderer
 import me.d3sox.pdfwallet.render.BarcodeScanStore
 import me.d3sox.pdfwallet.render.DocumentRenderer
 import me.d3sox.pdfwallet.settings.BarcodeSearchMode
 import dagger.hilt.android.testing.HiltAndroidRule
+import de.markusfisch.android.zxingcpp.ZxingCpp
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
@@ -32,6 +37,7 @@ class BarcodeDetectionTest {
     val hiltRule = HiltAndroidRule(this)
 
     @Inject lateinit var renderer: DocumentRenderer
+    @Inject lateinit var barcodeRenderer: BarcodeRenderer
     @Inject lateinit var scanStore: BarcodeScanStore
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -76,6 +82,24 @@ class BarcodeDetectionTest {
     @Test
     fun preferredFormat_winsOverOthersOnThePage() = runTest {
         barcodeCount("prefer_aztec.pdf") shouldBe 1
+    }
+
+    @Test
+    fun differentBarcodesWithTheSameHash_areBothFound() = runTest {
+        // "Aa" and "BB" have the same hash code
+        fun qr(text: String) = ZxingCpp.encodeAsBitmap(
+            content = text,
+            format = ZxingCpp.BarcodeFormat.QRCode,
+            width = 400,
+            height = 400,
+        )
+        val page = createBitmap(1200, 600).apply { eraseColor(Color.WHITE) }
+        Canvas(page).apply {
+            drawBitmap(qr("Aa"), 100f, 100f, null)
+            drawBitmap(qr("BB"), 700f, 100f, null)
+        }
+
+        barcodeRenderer.getBarcodes(page, tryExtraHard = false, generateNewBarcode = false).bitmaps.size shouldBe 2
     }
 
     @Test

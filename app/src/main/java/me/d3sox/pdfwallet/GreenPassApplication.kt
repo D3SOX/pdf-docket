@@ -11,7 +11,7 @@ class GreenPassApplication : Application() {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
-            BitmapCache.memoryCache.evictAll()
+            BitmapCache.evictAll()
         }
     }
 }

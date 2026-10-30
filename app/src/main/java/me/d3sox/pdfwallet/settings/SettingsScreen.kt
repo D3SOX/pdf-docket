@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
@@ -54,7 +55,7 @@ import me.d3sox.pdfwallet.ui.components.SettingsSwitchRow
 import me.d3sox.pdfwallet.ui.components.SingleChoiceDialog
 import me.d3sox.pdfwallet.ui.theme.supportsDynamicColor
 
-private enum class SettingsDialog { BARCODE_MODE, THEME, TAG_FILTER_MODE }
+private enum class SettingsDialog { LOCK_TIMEOUT, BARCODE_MODE, THEME, TAG_FILTER_MODE }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -114,6 +115,18 @@ fun SettingsScreen(
                             checked = settings.requireAuthentication,
                             onCheckedChange = { activity.authenticate(onSuccess = vm::onAuthenticationToggled) },
                         )
+                    }
+                    if (settings.requireAuthentication) {
+                        row { shapes ->
+                            SettingsRow(
+                                shapes = shapes,
+                                title = stringResource(R.string.preference_lock_timeout),
+                                summary = settings.lockTimeout.label(),
+                                icon = R.drawable.timer_24px,
+                                iconColor = IconColor.PURPLE,
+                                onClick = { dialog = SettingsDialog.LOCK_TIMEOUT },
+                            )
+                        }
                     }
                     switchItem(
                         title = R.string.preference_prevent_screenshots,
@@ -278,6 +291,14 @@ fun SettingsScreen(
 
     when (dialog) {
         null -> Unit
+        SettingsDialog.LOCK_TIMEOUT -> SingleChoiceDialog(
+            title = stringResource(R.string.preference_lock_timeout),
+            options = LockTimeout.entries,
+            selected = settings.lockTimeout,
+            label = { it.label() },
+            onSelect = { timeout -> vm.update { it.copy(lockTimeout = timeout) } },
+            onDismiss = { dialog = null },
+        )
         SettingsDialog.BARCODE_MODE -> SingleChoiceDialog(
             title = stringResource(R.string.preference_barcode),
             options = BarcodeSearchMode.entries,
@@ -303,6 +324,12 @@ fun SettingsScreen(
             onDismiss = { dialog = null },
         )
     }
+}
+
+@Composable
+private fun LockTimeout.label(): String = when (this) {
+    LockTimeout.IMMEDIATELY -> stringResource(R.string.lock_timeout_immediately)
+    else -> duration.inWholeMinutes.toInt().let { pluralStringResource(R.plurals.lock_timeout_minutes, it, it) }
 }
 
 private val BarcodeSearchMode.label: Int

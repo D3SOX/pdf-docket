@@ -93,7 +93,18 @@ class MainActivity : FragmentActivity() {
 
     override fun onUserInteraction() {
         super.onUserInteraction()
-        vm.onUserInteraction()
+        vm.lockTimer.onUserInteraction()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        vm.lockTimer.onAppVisibilityChanged(true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // e.g. rotating the screen doesn't leave the app
+        if (!isChangingConfigurations) vm.lockTimer.onAppVisibilityChanged(false)
     }
 
     private fun applyWindowSettings(settings: AppSettings) {
@@ -114,6 +125,8 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleIntent(intent: Intent) {
+        // reopening the app from recents after leaving it with back delivers the intent it was started with again
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
         val documentId = intent.getStringExtra(EXTRA_DOCUMENT_ID)
         if (intent.action == ACTION_OPEN_DOCUMENT && documentId != null) {
             vm.onShortcutOpened(documentId)

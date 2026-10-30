@@ -1,12 +1,17 @@
 package me.d3sox.pdfwallet.di
 
+import me.d3sox.pdfwallet.lock.AppLockTimer
+import me.d3sox.pdfwallet.lock.AppLockedRepo
+import me.d3sox.pdfwallet.settings.SettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.map
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -22,4 +27,9 @@ object AppModule {
     @ApplicationScope
     @Provides
     fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    @Singleton
+    @Provides
+    fun provideAppLockTimer(settingsRepository: SettingsRepository, lockedRepo: AppLockedRepo): AppLockTimer =
+        AppLockTimer(MainScope(), settingsRepository.settings.map { it.lockTimeout }, lockedRepo::lockApp)
 }
