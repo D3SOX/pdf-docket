@@ -4,20 +4,29 @@ import android.graphics.Bitmap
 import android.util.LruCache
 
 object BitmapCache {
+    // The cache sizes are measured in kilobytes rather than number of items.
+    private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
+
     @Suppress("MagicNumber")
     val memoryCache: LruCache<String, Bitmap> by lazy {
-        val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
-
         // Use 1/8th of the available memory for this memory cache.
-        val cacheSize = maxMemory / 8
-
-        object : LruCache<String, Bitmap>(cacheSize) {
-
-            override fun sizeOf(key: String, bitmap: Bitmap): Int {
-                // The cache size will be measured in kilobytes rather than
-                // number of items.
-                return bitmap.byteCount / 1024
-            }
+        object : LruCache<String, Bitmap>(maxMemory / 8) {
+            override fun sizeOf(key: String, bitmap: Bitmap): Int = bitmap.byteCount / 1024
         }
+    }
+
+    /** Barcode scans, limited by the size of their barcodes, since a document can have many large ones. */
+    @Suppress("MagicNumber")
+    val scans: LruCache<String, BarcodeScan> by lazy {
+        object : LruCache<String, BarcodeScan>(maxMemory / 16) {
+            // at least 1, so scans without barcodes are limited as well
+            override fun sizeOf(key: String, scan: BarcodeScan): Int =
+                scan.barcodes.sumOf { it.bitmap.byteCount / 1024 }.coerceAtLeast(1)
+        }
+    }
+
+    fun evictAll() {
+        memoryCache.evictAll()
+        scans.evictAll()
     }
 }

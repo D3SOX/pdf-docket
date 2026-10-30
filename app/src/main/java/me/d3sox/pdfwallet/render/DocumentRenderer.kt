@@ -2,7 +2,6 @@ package me.d3sox.pdfwallet.render
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.LruCache
 import androidx.core.graphics.scale
 import me.d3sox.pdfwallet.barcode.BarcodeRenderer
 import me.d3sox.pdfwallet.pdfrenderer.PdfRenderer
@@ -19,7 +18,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val THUMBNAIL_WIDTH_PX = 512
-private const val MAX_CACHED_BARCODE_RESULTS = 32
 
 data class PageBarcode(val pageIndex: Int, val bitmap: Bitmap)
 
@@ -44,7 +42,7 @@ class DocumentRenderer @Inject constructor(
     // Android's PdfRenderer isn't meant to be used concurrently
     private val renderDispatcher = Dispatchers.IO.limitedParallelism(1)
     private val cache = BitmapCache.memoryCache
-    private val scans = LruCache<String, BarcodeScan>(MAX_CACHED_BARCODE_RESULTS)
+    private val scans = BitmapCache.scans
     private val scanMutex = Mutex()
 
     private val screenWidth: Int get() = context.resources.displayMetrics.widthPixels
