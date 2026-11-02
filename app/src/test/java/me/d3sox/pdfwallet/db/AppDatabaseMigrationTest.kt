@@ -54,4 +54,22 @@ class AppDatabaseMigrationTest {
             database.close()
         }
     }
+
+    @Test
+    fun version2_startsTheManualOrderNewestFirst() = runTest {
+        helper.createDatabase(DATABASE_NAME, 2).use { db ->
+            db.execSQL("INSERT INTO certificates (id, name, importedAt) VALUES ('old.pdf', 'Old', 1)")
+            db.execSQL("INSERT INTO certificates (id, name, importedAt) VALUES ('new.pdf', 'New', 3)")
+            db.execSQL("INSERT INTO certificates (id, name, importedAt) VALUES ('mid.pdf', 'Mid', 2)")
+        }
+
+        val database = AppDatabase.build(InstrumentationRegistry.getInstrumentation().targetContext, DATABASE_NAME)
+        try {
+            val certificates = database.certificateDao().getAllWithTags().first().map { it.certificate }
+            certificates.map { it.id to it.position } shouldContainExactly
+                listOf("new.pdf" to 0, "mid.pdf" to 1, "old.pdf" to 2)
+        } finally {
+            database.close()
+        }
+    }
 }

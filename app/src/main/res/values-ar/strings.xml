@@ -110,6 +110,10 @@
     <string name="sort_name_desc">اسم المستند (ي–أ)</string>
     <string name="sort_size_desc">حجم الملف (الأكبر أولاً)</string>
     <string name="sort_size_asc">حجم الملف (الأصغر أولاً)</string>
+    <string name="sort_manual">ترتيب يدوي</string>
+    <string name="manual_sort_explanation">اضغط مطولًا على مستند واسحبه إلى مكان جديد. تُضاف المستندات الجديدة في الأعلى.</string>
+    <string name="move_up">نقل لأعلى</string>
+    <string name="move_down">نقل لأسفل</string>
     <string name="showing_count">عرض %1$d من %2$d</string>
     <string name="empty_state_title">لا توجد مستندات بعد</string>
     <string name="empty_state_description">استورد ملف PDF أو شاركه مع هذا التطبيق من مدير الملفات أو البريد الإلكتروني أو متصفح الويب.</string>

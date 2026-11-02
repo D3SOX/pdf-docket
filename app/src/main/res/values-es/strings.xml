@@ -101,6 +101,10 @@
     <string name="sort_name_desc">Nombre de documento (Z–A)</string>
     <string name="sort_size_desc">Tamaño de archivo (más grandes primero)</string>
     <string name="sort_size_asc">Tamaño de archivo (más pequeños primero)</string>
+    <string name="sort_manual">Orden manual</string>
+    <string name="manual_sort_explanation">Mantén pulsado un documento y arrástralo a otra posición. Los documentos nuevos se añaden arriba.</string>
+    <string name="move_up">Mover arriba</string>
+    <string name="move_down">Mover abajo</string>
     <string name="showing_count">Mostrando %1$d de %2$d</string>
     <string name="empty_state_title">Aún no hay documentos</string>
     <string name="empty_state_description">Importa un PDF o compártelo con esta app desde tu explorador de archivos, correo electrónico o navegador web.</string>

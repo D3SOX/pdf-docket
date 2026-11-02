@@ -34,6 +34,7 @@ private object Keys {
     val dynamicColor = booleanPreferencesKey("dynamicColor")
     val invertPdfColors = booleanPreferencesKey("invertPdfColors")
     val sortOrder = stringPreferencesKey("sortOrder")
+    val manualSortExplained = booleanPreferencesKey("manualSortExplained")
     val tagFilterMode = stringPreferencesKey("tagFilterMode")
     val documentLayout = stringPreferencesKey("documentLayout")
 }
@@ -73,6 +74,7 @@ class SettingsRepository @Inject constructor(
             dynamicColor = this[Keys.dynamicColor] ?: defaults.dynamicColor,
             invertPdfColors = this[Keys.invertPdfColors] ?: defaults.invertPdfColors,
             sortOrder = enumOrDefault(this[Keys.sortOrder], defaults.sortOrder),
+            manualSortExplained = this[Keys.manualSortExplained] ?: defaults.manualSortExplained,
             tagFilterMode = enumOrDefault(this[Keys.tagFilterMode], defaults.tagFilterMode),
             documentLayout = enumOrDefault(this[Keys.documentLayout], defaults.documentLayout),
         )
@@ -95,6 +97,7 @@ class SettingsRepository @Inject constructor(
         this[Keys.dynamicColor] = settings.dynamicColor
         this[Keys.invertPdfColors] = settings.invertPdfColors
         this[Keys.sortOrder] = settings.sortOrder.name
+        this[Keys.manualSortExplained] = settings.manualSortExplained
         this[Keys.tagFilterMode] = settings.tagFilterMode.name
         this[Keys.documentLayout] = settings.documentLayout.name
     }

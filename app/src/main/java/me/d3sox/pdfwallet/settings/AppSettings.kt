@@ -28,6 +28,7 @@ enum class SortOrder {
     NAME_DESC,
     SIZE_DESC,
     SIZE_ASC,
+    MANUAL,
 }
 
 data class AppSettings(
@@ -47,6 +48,8 @@ data class AppSettings(
     val dynamicColor: Boolean = false,
     val invertPdfColors: Boolean = false,
     val sortOrder: SortOrder = SortOrder.IMPORT_DATE_DESC,
+    /** whether it was explained how to change the manual sort order */
+    val manualSortExplained: Boolean = false,
     val tagFilterMode: TagFilterMode = TagFilterMode.ALL,
     val documentLayout: DocumentLayout = DocumentLayout.GRID,
 ) {

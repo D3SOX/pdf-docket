@@ -77,8 +77,11 @@ fun DocumentTile(
     modifier: Modifier = Modifier,
     selectionMode: Boolean = false,
     isSelected: Boolean = false,
+    isDragging: Boolean = false,
     onLongClick: () -> Unit = {},
     asListItem: Boolean = false,
+    // inside the clickable, which would take the pointer events after a long press otherwise
+    dragHandle: Modifier = Modifier,
 ) {
     OutlinedCard(
         colors = if (isSelected) {
@@ -91,6 +94,7 @@ fun DocumentTile(
         } else {
             CardDefaults.outlinedCardBorder()
         },
+        elevation = CardDefaults.outlinedCardElevation(defaultElevation = if (isDragging) 8.dp else 0.dp),
         modifier = modifier
             .fillMaxWidth()
             .combinedClickable(
@@ -99,6 +103,7 @@ fun DocumentTile(
                 onLongClickLabel = stringResource(R.string.select_document),
                 role = if (selectionMode) Role.Checkbox else Role.Button,
             )
+            .then(dragHandle)
             .semantics { if (selectionMode) selected = isSelected },
     ) {
         if (asListItem) {

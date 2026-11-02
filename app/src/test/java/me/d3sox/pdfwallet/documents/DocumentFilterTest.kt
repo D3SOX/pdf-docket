@@ -69,6 +69,12 @@ class DocumentFilterTest {
 
         settingsRepository.update { it.copy(sortOrder = SortOrder.NAME_DESC) }
         visibleNames() shouldContainExactly listOf("gamma", "beta", "Alpha")
+
+        settingsRepository.update { it.copy(sortOrder = SortOrder.MANUAL) }
+        // documents without a manual order yet are sorted newest first
+        visibleNames() shouldContainExactly listOf("gamma", "Alpha", "beta")
+        certificateDao.reorder(listOf("1.pdf", "3.pdf", "2.pdf"))
+        visibleNames() shouldContainExactly listOf("beta", "gamma", "Alpha")
     }
 
     @Test

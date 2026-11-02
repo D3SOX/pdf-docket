@@ -91,5 +91,6 @@ private val SortOrder.comparator: Comparator<Document>
             SortOrder.NAME_DESC -> byName.reversed()
             SortOrder.SIZE_DESC -> compareByDescending { it.sizeBytes }
             SortOrder.SIZE_ASC -> compareBy { it.sizeBytes }
+            SortOrder.MANUAL -> compareBy<Document> { it.position }.thenByDescending { it.importedAt }
         }
     }

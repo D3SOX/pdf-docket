@@ -5,15 +5,32 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.AutoMigrationSpec
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [Certificate::class, Tag::class, CertificateTagCrossRef::class, DocumentPosition::class],
-    version = 2,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    version = 3,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3, spec = AppDatabase.ManualOrderNewestFirst::class),
+    ],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun certificateDao(): CertificateDao
     abstract fun tagDao(): TagDao
+
+    /**
+     * Starts the manual order like the default sort order, so switching to it doesn't shuffle the documents.
+     */
+    class ManualOrderNewestFirst : AutoMigrationSpec {
+        override fun onPostMigrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "UPDATE certificates SET position = " +
+                    "(SELECT COUNT(*) FROM certificates AS newer WHERE newer.importedAt > certificates.importedAt)"
+            )
+        }
+    }
 
     companion object {
         /**

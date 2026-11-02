@@ -98,6 +98,10 @@
     <string name="sort_name_desc">Document name (Z–A)</string>
     <string name="sort_size_desc">File size (largest first)</string>
     <string name="sort_size_asc">File size (smallest first)</string>
+    <string name="sort_manual">Manual order</string>
+    <string name="manual_sort_explanation">Hold a document and drag it to a new place. New documents are added at the top.</string>
+    <string name="move_up">Move up</string>
+    <string name="move_down">Move down</string>
     <string name="showing_count">Showing %1$d of %2$d</string>
     <string name="empty_state_title">No documents yet</string>
     <string name="empty_state_description">Import a PDF or share one with this app from your file browser, email or web browser.</string>

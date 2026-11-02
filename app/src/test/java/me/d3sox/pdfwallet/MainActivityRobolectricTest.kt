@@ -20,12 +20,15 @@ import me.d3sox.pdfwallet.db.di.DatabaseModule
 import me.d3sox.pdfwallet.documents.DocumentFilter
 import me.d3sox.pdfwallet.documents.DocumentRepository
 import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
+import me.d3sox.pdfwallet.settings.SettingsRepository
+import me.d3sox.pdfwallet.settings.SortOrder
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import dagger.hilt.android.testing.UninstallModules
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +37,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.Shadows.shadowOf
 import javax.inject.Inject
+
+private const val DRAG_STEPS = 10
 
 @HiltAndroidTest
 @UninstallModules(DatabaseModule::class, CoroutineDispatchersModule::class)
@@ -51,6 +56,7 @@ class MainActivityRobolectricTest {
 
     @Inject lateinit var repository: DocumentRepository
     @Inject lateinit var filter: DocumentFilter
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private fun seedDocuments() = runTest {
         hiltRule.inject()
@@ -178,6 +184,72 @@ class MainActivityRobolectricTest {
             composeRule.onAllNodes(hasText(error)).fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText(error).assertIsDisplayed()
+    }
+
+    @Test
+    fun openDocument_keepsShowingItWhenAnotherOneIsImported() = runTest {
+        seedDocuments()
+        composeRule.onNodeWithText("Ticket A").performClick()
+        val context = composeRule.activity
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText(context.getString(R.string.document_position, 3, 3)))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        repository.file("New ticket").writeText("PDF placeholder of New ticket")
+        repository.add(PendingCertificate(fileName = "New ticket", documentName = "New ticket"))
+
+        // the new document is listed first, before the open one
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText(context.getString(R.string.document_position, 4, 4)))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Ticket A").assertIsDisplayed()
+    }
+
+    @Test
+    fun manualOrder_holdAndDragMovesADocumentWithoutSelectingIt() = runTest {
+        seedDocuments()
+        settingsRepository.update { it.copy(sortOrder = SortOrder.MANUAL, manualSortExplained = true) }
+        composeRule.waitForIdle()
+        val from = composeRule.onNodeWithText("Other document").fetchSemanticsNode().boundsInRoot.center
+        val to = composeRule.onNodeWithText("Ticket A").fetchSemanticsNode().boundsInRoot.center
+
+        composeRule.onNodeWithText("Other document").performTouchInput {
+            down(center)
+            advanceEventTime(viewConfiguration.longPressTimeoutMillis * 2)
+            repeat(DRAG_STEPS) { moveBy((to - from) / DRAG_STEPS.toFloat()) }
+            up()
+        }
+
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            runBlocking { repository.documents.first() }.map { it.name } ==
+                listOf("Ticket B", "Ticket A", "Other document")
+        }
+        composeRule.onAllNodes(hasText("1 selected")).fetchSemanticsNodes().isEmpty() shouldBe true
+    }
+
+    @Test
+    fun manualOrder_dragBackToTheSamePlaceKeepsLaterHoldsSelecting() = runTest {
+        seedDocuments()
+        // saving the same order again doesn't change the list then
+        repository.reorder(repository.documents.first().map { it.id })
+        settingsRepository.update { it.copy(sortOrder = SortOrder.MANUAL, manualSortExplained = true) }
+        composeRule.waitForIdle()
+        val from = composeRule.onNodeWithText("Other document").fetchSemanticsNode().boundsInRoot.center
+        val to = composeRule.onNodeWithText("Ticket A").fetchSemanticsNode().boundsInRoot.center
+
+        composeRule.onNodeWithText("Other document").performTouchInput {
+            down(center)
+            advanceEventTime(viewConfiguration.longPressTimeoutMillis * 2)
+            repeat(DRAG_STEPS) { moveBy((to - from) / DRAG_STEPS.toFloat()) }
+            repeat(DRAG_STEPS) { moveBy((from - to) / DRAG_STEPS.toFloat()) }
+            up()
+        }
+        composeRule.onNodeWithText("Ticket B").performTouchInput { longClick() }
+
+        composeRule.onNodeWithText("1 selected").assertIsDisplayed()
+        composeRule.onNodeWithText("Ticket B").assertIsSelected()
     }
 
     @Test

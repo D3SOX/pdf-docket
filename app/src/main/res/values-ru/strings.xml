@@ -104,6 +104,10 @@
     <string name="sort_name_desc">Название документа (Я–А)</string>
     <string name="sort_size_desc">Размер файла (сначала большие)</string>
     <string name="sort_size_asc">Размер файла (сначала маленькие)</string>
+    <string name="sort_manual">Ручной порядок</string>
+    <string name="manual_sort_explanation">Удерживайте документ и перетащите его на новое место. Новые документы добавляются в начало.</string>
+    <string name="move_up">Переместить вверх</string>
+    <string name="move_down">Переместить вниз</string>
     <string name="showing_count">Показано %1$d из %2$d</string>
     <string name="empty_state_title">Документов пока нет</string>
     <string name="empty_state_description">Импортируйте PDF или поделитесь им с этим приложением из файлового менеджера, почты или браузера.</string>

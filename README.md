@@ -28,7 +28,7 @@ PDF Docket is a fork of the last open source version and stays under the GPLv3. 
 - Swipe between documents and switch between the barcode and the PDF, or show both in split screen. In split screen, the PDF turns to the page of the barcode you swipe to.
 - Reopen a document at the barcode and page you left it on.
 - Tag documents and give each tag an icon.
-- Search and sort documents by import date, name or file size, and show them as a grid or a list.
+- Search and sort documents by import date, name or file size, or drag them into your own order, and show them as a grid or a list.
 - Select several documents to tag, share or delete them together.
 - Add a document to the home screen to open it with one tap.
 - Back up all documents and tags to a password-encrypted file and restore them on another device.

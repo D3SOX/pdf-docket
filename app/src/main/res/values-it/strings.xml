@@ -101,6 +101,10 @@
     <string name="sort_name_desc">Nome documento (Z–A)</string>
     <string name="sort_size_desc">Dimensione file (più grandi prima)</string>
     <string name="sort_size_asc">Dimensione file (più piccoli prima)</string>
+    <string name="sort_manual">Ordine manuale</string>
+    <string name="manual_sort_explanation">Tieni premuto un documento e trascinalo in una nuova posizione. I nuovi documenti vengono aggiunti in alto.</string>
+    <string name="move_up">Sposta su</string>
+    <string name="move_down">Sposta giù</string>
     <string name="showing_count">%1$d di %2$d visualizzati</string>
     <string name="empty_state_title">Ancora nessun documento</string>
     <string name="empty_state_description">Importa un PDF o condividilo con questa app dal file manager, dall\'email o dal browser.</string>

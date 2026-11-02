@@ -99,6 +99,10 @@
     <string name="sort_name_desc">Dokumendi nimi (Z–A)</string>
     <string name="sort_size_desc">Faili suurus (suuremad enne)</string>
     <string name="sort_size_asc">Faili suurus (väiksemad enne)</string>
+    <string name="sort_manual">Käsitsi järjestus</string>
+    <string name="manual_sort_explanation">Hoia dokumenti all ja lohista see uude kohta. Uued dokumendid lisatakse algusesse.</string>
+    <string name="move_up">Liiguta üles</string>
+    <string name="move_down">Liiguta alla</string>
     <string name="showing_count">Kuvatakse %1$d / %2$d</string>
     <string name="empty_state_title">Dokumente veel pole</string>
     <string name="empty_state_description">Impordi PDF-fail või jaga seda selle rakendusega oma failihaldurist, e-postist või veebibrauserist.</string>

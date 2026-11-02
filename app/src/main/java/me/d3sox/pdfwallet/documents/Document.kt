@@ -7,6 +7,8 @@ data class Document(
     val id: String,
     val name: String,
     val importedAt: Long,
+    /** place in the manual sort order */
+    val position: Int,
     val sizeBytes: Long,
     val tags: List<Tag>,
 )

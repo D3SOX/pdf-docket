@@ -18,4 +18,8 @@ data class Certificate(
      * Import timestamp in epoch millis
      */
     @ColumnInfo(name = "importedAt") val importedAt: Long,
+    /**
+     * Place in the manual sort order, lower values come first
+     */
+    @ColumnInfo(name = "position", defaultValue = "0") val position: Int = 0,
 )

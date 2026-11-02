@@ -23,7 +23,7 @@ More Features
 - Split screen shows the barcode and the PDF at the same time, and the PDF turns to the page of each barcode
 - Documents reopen at the barcode and page they were left on
 - (Optional) biometric authentication
-- PDFs can be sorted by name, file size, or import date
+- PDFs can be sorted by name, file size, import date, or dragged into your own order
 - PDFs can be individually named
 - Assign tags to documents and filter documents by tags
 - Tags can have icons

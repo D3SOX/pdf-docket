@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.io.github.panpf.zoomimage.compose)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.org.bouncycastle.bcprov.jdk15to18)
+    implementation(libs.sh.calvin.reorderable)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

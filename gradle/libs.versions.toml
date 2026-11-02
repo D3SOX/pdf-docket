@@ -30,6 +30,7 @@ kotlinx-serialization = "1.11.0"
 org-bouncycastle = "1.86"
 org-jetbrains-kotlinx-coroutines = "1.11.0"
 org-robolectric = "4.17"
+sh-calvin-reorderable = "3.1.0"
 
 [libraries]
 android-desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "android-desugar-jdk-libs" }
@@ -72,6 +73,7 @@ org-jetbrains-kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version
 org-jetbrains-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android" }
 org-jetbrains-kotlinx-coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "org-jetbrains-kotlinx-coroutines" }
 org-jetbrains-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test" }
+sh-calvin-reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "sh-calvin-reorderable" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "org-robolectric" }
 plugin-com-android-application = { module = "com.android.application:com.android.application.gradle.plugin", version.ref = "android-gradle-plugin" }
 plugin-com-android-library = { module = "com.android.library:com.android.library.gradle.plugin", version.ref = "android-gradle-plugin" }
