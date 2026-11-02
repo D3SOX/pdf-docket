@@ -26,8 +26,10 @@ abstract class AppDatabase : RoomDatabase() {
     class ManualOrderNewestFirst : AutoMigrationSpec {
         override fun onPostMigrate(db: SupportSQLiteDatabase) {
             db.execSQL(
-                "UPDATE certificates SET position = " +
-                    "(SELECT COUNT(*) FROM certificates AS newer WHERE newer.importedAt > certificates.importedAt)"
+                // the id orders documents imported in the same millisecond, so every position is unique
+                "UPDATE certificates SET position = (SELECT COUNT(*) FROM certificates AS newer " +
+                    "WHERE newer.importedAt > certificates.importedAt " +
+                    "OR (newer.importedAt = certificates.importedAt AND newer.id < certificates.id))"
             )
         }
     }
