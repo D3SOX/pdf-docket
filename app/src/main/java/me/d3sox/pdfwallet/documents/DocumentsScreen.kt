@@ -17,7 +17,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -51,6 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,11 +63,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -85,6 +91,8 @@ import me.d3sox.pdfwallet.ui.components.ExpressiveMenu
 import me.d3sox.pdfwallet.ui.components.action
 import me.d3sox.pdfwallet.ui.components.checkable
 import me.d3sox.pdfwallet.ui.components.selectable
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 
 private enum class ListDialog { MANAGE_TAGS, DELETE_VISIBLE, LOCK_SCREEN_WARNING }
 private enum class SelectionDialog { TAGS, DELETE }
@@ -194,6 +202,8 @@ fun DocumentsScreen(
                     isSearching = false
                 },
                 asList = settings.documentLayout == DocumentLayout.LIST,
+                canReorder = settings.sortOrder == SortOrder.MANUAL,
+                onReorder = vm.editor::reorder,
                 onOpenDocument = onOpenDocument,
                 onDialog = { documentDialog = it },
                 selectedIds = selectedIds.toSet(),
@@ -204,6 +214,7 @@ fun DocumentsScreen(
         }
     }
 
+    ManualSortExplanation(settings, onDismiss = vm::onManualSortExplained)
     DocumentDialogHost(
         dialog = documentDialog,
         documents = list?.all.orEmpty(),
@@ -412,6 +423,7 @@ private val SortOrder.icon: Int
         SortOrder.NAME_DESC -> R.drawable.mdi_sort_alphabetical_descending
         SortOrder.SIZE_DESC -> R.drawable.mdi_sort_numeric_descending
         SortOrder.SIZE_ASC -> R.drawable.mdi_sort_numeric_ascending
+        SortOrder.MANUAL -> R.drawable.drag_indicator_24px
     }
 
 private val SortOrder.label: Int
@@ -422,6 +434,7 @@ private val SortOrder.label: Int
         SortOrder.NAME_DESC -> R.string.sort_name_desc
         SortOrder.SIZE_DESC -> R.string.sort_size_desc
         SortOrder.SIZE_ASC -> R.string.sort_size_asc
+        SortOrder.MANUAL -> R.string.sort_manual
     }
 
 @Composable
@@ -553,6 +566,8 @@ private fun DocumentList(
     list: DocumentList,
     contentPadding: PaddingValues,
     asList: Boolean,
+    canReorder: Boolean,
+    onReorder: (List<String>) -> Unit,
     loadThumbnail: suspend (String) -> android.graphics.Bitmap?,
     onClearFilters: () -> Unit,
     onOpenDocument: (String) -> Unit,
@@ -560,7 +575,23 @@ private fun DocumentList(
     selectedIds: Set<String>,
     onToggleSelection: (String) -> Unit,
 ) {
+    val drag = remember { DocumentDrag() }
+    LaunchedEffect(list.visible) { drag.onSaved() }
+    val documents = drag.order ?: list.visible
+    // the drag callbacks are only taken once per item
+    val stopDrag = rememberUpdatedState { drag.stop(list.visible, selectedIds, onToggleSelection, onReorder) }
+    val haptic = LocalHapticFeedback.current
+    val gridState = rememberLazyGridState()
+    val reorderState = rememberReorderableLazyGridState(gridState) { from, to ->
+        if (drag.move(list.visible, from.key, to.key)) {
+            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
+    }
+    val moveUp = stringResource(R.string.move_up)
+    val moveDown = stringResource(R.string.move_down)
+
     LazyVerticalGrid(
+        state = gridState,
         columns = if (asList) GridCells.Fixed(1) else GridCells.Adaptive(minSize = 160.dp),
         contentPadding = PaddingValues(
             start = 16.dp,
@@ -601,20 +632,45 @@ private fun DocumentList(
                 }
             }
         }
-        items(list.visible, key = { it.id }, contentType = { "document" }) { document ->
-            DocumentTile(
-                document = document,
-                loadThumbnail = loadThumbnail,
-                onClick = {
-                    if (selectedIds.isEmpty()) onOpenDocument(document.id) else onToggleSelection(document.id)
-                },
-                onDialog = onDialog,
-                selectionMode = selectedIds.isNotEmpty(),
-                isSelected = document.id in selectedIds,
-                onLongClick = { onToggleSelection(document.id) },
-                asListItem = asList,
-                modifier = Modifier.animateItem(),
-            )
+        itemsIndexed(documents, key = { _, document -> document.id }, contentType = { _, _ -> "document" }) {
+            index, document ->
+            ReorderableItem(reorderState, key = document.id, enabled = canReorder) { isDragging ->
+                DocumentTile(
+                    document = document,
+                    loadThumbnail = loadThumbnail,
+                    onClick = {
+                        if (selectedIds.isEmpty()) onOpenDocument(document.id) else onToggleSelection(document.id)
+                    },
+                    onDialog = onDialog,
+                    selectionMode = selectedIds.isNotEmpty(),
+                    isSelected = document.id in selectedIds,
+                    isDragging = isDragging,
+                    onLongClick = {
+                        drag.onLongPress(document.id, wasSelected = document.id in selectedIds)
+                        onToggleSelection(document.id)
+                    },
+                    asListItem = asList,
+                    dragHandle = Modifier.longPressDraggableHandle(
+                        enabled = canReorder,
+                        onDragStopped = { stopDrag.value() },
+                    ),
+                    modifier = Modifier.semantics {
+                        // dragging isn't possible with a screen reader
+                        if (canReorder) {
+                            customActions = listOfNotNull(
+                                CustomAccessibilityAction(moveUp) {
+                                    onReorder(documents.moved(index, index - 1).map { it.id })
+                                    true
+                                }.takeIf { index > 0 },
+                                CustomAccessibilityAction(moveDown) {
+                                    onReorder(documents.moved(index, index + 1).map { it.id })
+                                    true
+                                }.takeIf { index < documents.lastIndex },
+                            )
+                        }
+                    },
+                )
+            }
         }
     }
 }

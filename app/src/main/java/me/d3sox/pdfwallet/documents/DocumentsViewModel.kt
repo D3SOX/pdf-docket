@@ -40,6 +40,10 @@ class DocumentsViewModel @Inject constructor(
         settingsRepository.update { it.copy(sortOrder = sortOrder) }
     }
 
+    fun onManualSortExplained() = viewModelScope.launch {
+        settingsRepository.update { it.copy(manualSortExplained = true) }
+    }
+
     fun onToggleLayout() = viewModelScope.launch {
         settingsRepository.update {
             val layout = if (it.documentLayout == DocumentLayout.GRID) DocumentLayout.LIST else DocumentLayout.GRID

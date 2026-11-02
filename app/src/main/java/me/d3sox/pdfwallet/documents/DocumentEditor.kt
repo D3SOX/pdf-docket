@@ -22,6 +22,8 @@ class DocumentEditor @Inject constructor(
         context.renameShortcut(id, name)
     }
 
+    fun reorder(ids: List<String>) = scope.launch { repository.reorder(ids) }
+
     fun delete(ids: List<String>) = scope.launch {
         repository.delete(ids)
         context.disableShortcuts(ids)

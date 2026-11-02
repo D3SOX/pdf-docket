@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -121,7 +122,9 @@ fun DocumentDetailsScreen(
     }
 
     val initialPage = remember { documents.indexOfFirst { it.id == vm.initialDocumentId }.coerceAtLeast(0) }
-    val pagerState = rememberPagerState(initialPage = initialPage) { documents.size }
+    // the pager reads the page count before the page keys are updated, so both read the same list
+    val pagerDocuments by rememberUpdatedState(documents)
+    val pagerState = rememberPagerState(initialPage = initialPage) { pagerDocuments.size }
     val current = documents[pagerState.currentPage.coerceIn(documents.indices)]
     // only whether barcodes were found, the scans themselves are cached by the renderer
     val hasBarcodes = remember { mutableStateMapOf<String, Boolean>() }
@@ -188,10 +191,10 @@ fun DocumentDetailsScreen(
             // documents are swiped vertically, their pages and barcodes horizontally
             VerticalPager(
                 state = pagerState,
-                key = { documents[it].id },
+                key = { pagerDocuments[it].id },
                 modifier = Modifier.fillMaxSize(),
             ) { index ->
-                val document = documents[index]
+                val document = pagerDocuments[index]
                 DocumentPage(
                     document = document,
                     viewMode = viewMode,

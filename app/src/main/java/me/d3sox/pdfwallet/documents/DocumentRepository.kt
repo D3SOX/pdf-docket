@@ -20,6 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Suppress("TooManyFunctions")
 class DocumentRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
@@ -34,6 +35,7 @@ class DocumentRepository @Inject constructor(
                     id = it.certificate.id,
                     name = it.certificate.name,
                     importedAt = it.certificate.importedAt,
+                    position = it.certificate.position,
                     sizeBytes = file(it.certificate.id).length(),
                     tags = it.tags.sortedBy { tag -> tag.name.lowercase() },
                 )
@@ -46,7 +48,8 @@ class DocumentRepository @Inject constructor(
     fun file(id: String): File = File(context.filesDir, id)
 
     /**
-     * Adds the document, unless one with the same content is already there, e.g. when a ticket is shared twice.
+     * Adds the document at the top of the manual order, unless one with the same content is already there,
+     * e.g. when a ticket is shared twice.
      * Then the file of the pending document is deleted and the id of the existing one is returned.
      */
     suspend fun add(pending: PendingCertificate): String? {
@@ -63,6 +66,7 @@ class DocumentRepository @Inject constructor(
                     id = pending.fileName,
                     name = pending.documentName,
                     importedAt = System.currentTimeMillis(),
+                    position = (certificateDao.minPosition() ?: 0) - 1,
                 )
             )
         }
@@ -72,6 +76,9 @@ class DocumentRepository @Inject constructor(
     suspend fun exists(id: String): Boolean = certificateDao.exists(id)
 
     suspend fun rename(id: String, name: String) = certificateDao.updateName(id, name)
+
+    /** @see CertificateDao.reorder */
+    suspend fun reorder(ids: List<String>) = certificateDao.reorder(ids)
 
     suspend fun delete(ids: List<String>) {
         certificateDao.delete(ids)

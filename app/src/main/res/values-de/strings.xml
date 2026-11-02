@@ -99,6 +99,10 @@
     <string name="sort_name_desc">Dokumentenname (Z–A)</string>
     <string name="sort_size_desc">Dateigröße (größte zuerst)</string>
     <string name="sort_size_asc">Dateigröße (kleinste zuerst)</string>
+    <string name="sort_manual">Manuelle Reihenfolge</string>
+    <string name="manual_sort_explanation">Halte ein Dokument gedrückt und ziehe es an eine neue Stelle. Neue Dokumente werden oben hinzugefügt.</string>
+    <string name="move_up">Nach oben verschieben</string>
+    <string name="move_down">Nach unten verschieben</string>
     <string name="showing_count">%1$d von %2$d angezeigt</string>
     <string name="empty_state_title">Noch keine Dokumente</string>
     <string name="empty_state_description">Importiere ein PDF oder teile eines aus deinem Dateimanager, deiner E-Mail-App oder deinem Browser mit dieser App.</string>

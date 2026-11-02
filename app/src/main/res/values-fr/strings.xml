@@ -101,6 +101,10 @@
     <string name="sort_name_desc">Nom du document (Z–A)</string>
     <string name="sort_size_desc">Taille du fichier (plus grands d\'abord)</string>
     <string name="sort_size_asc">Taille du fichier (plus petits d\'abord)</string>
+    <string name="sort_manual">Ordre manuel</string>
+    <string name="manual_sort_explanation">Maintenez un document appuyé et faites-le glisser vers un nouvel emplacement. Les nouveaux documents sont ajoutés en haut.</string>
+    <string name="move_up">Déplacer vers le haut</string>
+    <string name="move_down">Déplacer vers le bas</string>
     <string name="showing_count">%1$d sur %2$d affichés</string>
     <string name="empty_state_title">Aucun document pour l\'instant</string>
     <string name="empty_state_description">Importez un PDF ou partagez-en un avec cette application depuis votre gestionnaire de fichiers, votre messagerie ou votre navigateur web.</string>

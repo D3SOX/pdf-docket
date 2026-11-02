@@ -95,6 +95,10 @@
     <string name="sort_name_desc">ドキュメント名（Z–A）</string>
     <string name="sort_size_desc">ファイルサイズ（大きい順）</string>
     <string name="sort_size_asc">ファイルサイズ（小さい順）</string>
+    <string name="sort_manual">手動の並び順</string>
+    <string name="manual_sort_explanation">ドキュメントを長押ししてドラッグすると、新しい位置に移動できます。新しいドキュメントは先頭に追加されます。</string>
+    <string name="move_up">上へ移動</string>
+    <string name="move_down">下へ移動</string>
     <string name="showing_count">%2$d 件中 %1$d 件を表示</string>
     <string name="empty_state_title">ドキュメントはまだありません</string>
     <string name="empty_state_description">PDFをインポートするか、ファイルブラウザ、メール、ウェブブラウザからこのアプリに共有してください。</string>

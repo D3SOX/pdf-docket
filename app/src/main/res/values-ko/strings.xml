@@ -95,6 +95,10 @@
     <string name="sort_name_desc">문서 이름 (Z–A)</string>
     <string name="sort_size_desc">파일 크기 (큰 순)</string>
     <string name="sort_size_asc">파일 크기 (작은 순)</string>
+    <string name="sort_manual">수동 정렬</string>
+    <string name="manual_sort_explanation">문서를 길게 누른 채 새 위치로 드래그하세요. 새 문서는 맨 위에 추가됩니다.</string>
+    <string name="move_up">위로 이동</string>
+    <string name="move_down">아래로 이동</string>
     <string name="showing_count">%2$d개 중 %1$d개 표시</string>
     <string name="empty_state_title">아직 문서가 없습니다</string>
     <string name="empty_state_description">PDF를 가져오거나 파일 탐색기, 이메일, 웹 브라우저에서 이 앱으로 공유하세요.</string>

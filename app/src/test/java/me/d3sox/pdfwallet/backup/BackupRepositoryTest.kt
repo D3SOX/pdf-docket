@@ -78,11 +78,13 @@ class BackupRepositoryTest {
     }
 
     @Test
-    fun restore_bringsBackDocumentsNamesDatesAndTags() = runTest {
+    fun restore_bringsBackDocumentsNamesDatesTagsAndOrder() = runTest {
         documentRepository.updateTag(Tag(documentRepository.createTag("Travel"), "Travel", TagIcon.TRAIN.name))
         documentRepository.createTag("Unused")
         addDocument("a.pdf", name = "Train ticket", tags = setOf("Travel"))
         addDocument("b.pdf", name = "Certificate")
+        // differs from the import order, which would be used if the manual order got lost
+        documentRepository.reorder(listOf("a.pdf", "b.pdf"))
         val original = documentRepository.documents.first()
 
         backupRepository.export(backupUri, PASSWORD)
@@ -90,9 +92,10 @@ class BackupRepositoryTest {
         val restored = backupRepository.restore(backupUri, PASSWORD)
 
         restored shouldBe 2
-        // restored tags get new ids
-        fun List<Document>.withoutTagIds() = map { it.copy(tags = it.tags.map { tag -> tag.copy(id = 0) }) }
-        documentRepository.documents.first().withoutTagIds() shouldContainExactly original.withoutTagIds()
+        // restored tags get new ids, and restored documents new positions in the same order
+        fun List<Document>.withoutIds() =
+            map { it.copy(position = 0, tags = it.tags.map { tag -> tag.copy(id = 0) }) }
+        documentRepository.documents.first().withoutIds() shouldContainExactly original.withoutIds()
         documentRepository.tags.first().map { it.name to it.icon } shouldContainExactly listOf(
             "Travel" to "TRAIN",
             "Unused" to null,

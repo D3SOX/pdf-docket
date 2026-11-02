@@ -34,7 +34,8 @@ private const val DOCUMENTS_DIRECTORY = "documents/"
 private val DOCUMENT_ID = Regex("[0-9a-f-]+\\.pdf")
 
 /**
- * Backups are encrypted ZIP files with the PDFs and a JSON file with their names, import dates and tags.
+ * Backups are encrypted ZIP files with the PDFs and a JSON file with their names, import dates and tags,
+ * listed in the manual sort order.
  * Tag icons are stored separately, so older versions can still restore newer backups.
  */
 @Singleton
@@ -69,7 +70,8 @@ class BackupRepository @Inject constructor(
     }
 
     /**
-     * Adds the documents of the backup that aren't in the app yet. Returns how many were added.
+     * Adds the documents of the backup that aren't in the app yet, in their order below the existing ones.
+     * Returns how many were added.
      *
      * @throws NotABackupException if the file isn't a backup
      * @throws org.bouncycastle.crypto.io.InvalidCipherTextIOException if the password is wrong
@@ -105,6 +107,7 @@ class BackupRepository @Inject constructor(
         val tagIds = tagDao.getAll().first().associate { it.name to it.id }
 
         var restored = 0
+        var position = (certificateDao.maxPosition() ?: -1) + 1
         metadata.getJSONArray("documents").objects().forEach { json ->
             val id = json.getString("id")
             val entry = zip.getEntry(DOCUMENTS_DIRECTORY + id)
@@ -115,7 +118,12 @@ class BackupRepository @Inject constructor(
             // a document restored without its tags would be skipped when restoring again
             database.withTransaction {
                 certificateDao.insert(
-                    Certificate(id = id, name = json.getString("name"), importedAt = json.getLong("importedAt"))
+                    Certificate(
+                        id = id,
+                        name = json.getString("name"),
+                        importedAt = json.getLong("importedAt"),
+                        position = position++,
+                    )
                 )
                 tagDao.insertCrossRefs(
                     json.getJSONArray("tags").strings().mapNotNull(tagIds::get).map { CertificateTagCrossRef(id, it) }

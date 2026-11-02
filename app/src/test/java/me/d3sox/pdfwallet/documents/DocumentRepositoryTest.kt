@@ -58,6 +58,23 @@ class DocumentRepositoryTest {
     }
 
     @Test
+    fun add_putsNewDocumentsAtTheTopOfTheManualOrder() = runTest {
+        listOf("a.pdf", "b.pdf", "c.pdf").forEach { addDocument(it) }
+
+        repository.documents.first().map { it.id } shouldContainExactly listOf("c.pdf", "b.pdf", "a.pdf")
+    }
+
+    @Test
+    fun reorder_keepsThePlacesOfTheOtherDocuments() = runTest {
+        listOf("a.pdf", "b.pdf", "c.pdf", "d.pdf").forEach { addDocument(it) }
+
+        // only some documents are shown, e.g. because of a filter
+        repository.reorder(listOf("b.pdf", "d.pdf"))
+
+        repository.documents.first().map { it.id } shouldContainExactly listOf("b.pdf", "c.pdf", "d.pdf", "a.pdf")
+    }
+
+    @Test
     fun add_skipsADocumentWithTheSameContent() = runTest {
         addDocument("a.pdf")
         addDocument("b.pdf")
