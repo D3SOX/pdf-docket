@@ -83,6 +83,8 @@ class BackupRepositoryTest {
         documentRepository.createTag("Unused")
         addDocument("a.pdf", name = "Train ticket", tags = setOf("Travel"))
         addDocument("b.pdf", name = "Certificate")
+        // differs from the import order, which would be used if the manual order got lost
+        documentRepository.reorder(listOf("a.pdf", "b.pdf"))
         val original = documentRepository.documents.first()
 
         backupRepository.export(backupUri, PASSWORD)
