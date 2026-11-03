@@ -1,6 +1,9 @@
 [versions]
 android-desugar-jdk-libs = "2.1.5"
 android-gradle-plugin = "9.5.0"
+# R8 9.5.28, bundled with AGP 9.5.0, nondeterministically narrows parameter types (fixed in 9.6.0-alpha08),
+# so F-Droid fails to reproduce the release APK. Remove once AGP bundles a fixed R8.
+android-r8 = "9.6.0-alpha09"
 androidx-activity = "1.13.0"
 androidx-biometric = "1.4.0-alpha07"
 androidx-compose-bom = "2026.09.00"
@@ -76,6 +79,7 @@ org-jetbrains-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlin
 sh-calvin-reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "sh-calvin-reorderable" }
 org-robolectric = { module = "org.robolectric:robolectric", version.ref = "org-robolectric" }
 plugin-com-android-application = { module = "com.android.application:com.android.application.gradle.plugin", version.ref = "android-gradle-plugin" }
+android-r8 = { module = "com.android.tools:r8", version.ref = "android-r8" }
 plugin-com-android-library = { module = "com.android.library:com.android.library.gradle.plugin", version.ref = "android-gradle-plugin" }
 plugin-com-google-dagger-hilt-android = { module = "com.google.dagger.hilt.android:com.google.dagger.hilt.android.gradle.plugin", version.ref = "com-google-dagger-hilt-android" }
 plugin-com-google-devtools-ksp = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "com-google-devtools-ksp" }
