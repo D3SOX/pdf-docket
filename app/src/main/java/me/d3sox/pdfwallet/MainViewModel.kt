@@ -37,6 +37,7 @@ sealed interface MainEvent {
     data class OpenDocument(val id: String, val archived: Boolean) : MainEvent
     data class DocumentsImported(val count: Int) : MainEvent
     data class DocumentsAlreadyImported(val count: Int) : MainEvent
+    data class SourceFilesNotDeleted(val count: Int) : MainEvent
     data object ImportFailed : MainEvent
 }
 
@@ -106,17 +107,22 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun importQueuedFiles() {
-        val imported = mutableListOf<String>()
-        val duplicates = mutableListOf<String>()
-        var hasFailures = false
+        val results = mutableListOf<ImportResult>()
+        var notDeleted = 0
         while (importQueue.isNotEmpty()) {
-            when (val result = importFile(importQueue.removeFirst())) {
-                ImportResult.Failed -> hasFailures = true
-                ImportResult.Skipped -> Unit
-                is ImportResult.Imported -> imported += result.id
-                is ImportResult.Duplicate -> duplicates += result.existingId
+            val uri = importQueue.removeFirst()
+            val result = importFile(uri)
+            results += result
+            // a duplicate's document is in the app as well
+            if (result is ImportResult.Stored &&
+                settingsRepository.settings.first().deleteImportedFiles &&
+                !pdfImporter.deleteSourceFile(uri)
+            ) {
+                notDeleted++
             }
         }
+        val imported = results.filterIsInstance<ImportResult.Imported>().map { it.id }
+        val duplicates = results.filterIsInstance<ImportResult.Duplicate>().map { it.existingId }
         // not suspending, so files selected meanwhile can't end up in the queue of a finished job
         // a single file opens its document, even if it was already imported
         val event = (imported + duplicates).distinct().singleOrNull()
@@ -129,12 +135,15 @@ class MainViewModel @Inject constructor(
         }
         // one message each for the whole batch, after the documents are shown
         if (duplicates.isNotEmpty()) _events.trySend(MainEvent.DocumentsAlreadyImported(duplicates.size))
-        if (hasFailures) _events.trySend(MainEvent.ImportFailed)
+        if (notDeleted > 0) _events.trySend(MainEvent.SourceFilesNotDeleted(notDeleted))
+        if (ImportResult.Failed in results) _events.trySend(MainEvent.ImportFailed)
     }
 
     private sealed interface ImportResult {
-        data class Imported(val id: String) : ImportResult
-        data class Duplicate(val existingId: String) : ImportResult
+        /** the document is in the app */
+        sealed interface Stored : ImportResult
+        data class Imported(val id: String) : Stored
+        data class Duplicate(val existingId: String) : Stored
         data object Failed : ImportResult
         /** e.g. the password dialog was dismissed */
         data object Skipped : ImportResult

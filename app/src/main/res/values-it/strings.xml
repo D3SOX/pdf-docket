@@ -148,6 +148,14 @@
         <item quantity="many">%d di documenti erano già stati importati</item>
         <item quantity="other">%d documenti erano già stati importati</item>
     </plurals>
+    <string name="settings_section_import">Importazione</string>
+    <string name="preference_delete_imported_files">Elimina i PDF dopo l\'importazione</string>
+    <string name="preference_delete_imported_files_description">Rimuove il file originale quando è nell\'app. I file condivisi da altre app spesso non possono essere eliminati</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="one">Impossibile eliminare %d file originale</item>
+        <item quantity="many">Impossibile eliminare %d di file originali</item>
+        <item quantity="other">Impossibile eliminare %d file originali</item>
+    </plurals>
     <string name="settings_section_backup">Backup</string>
     <string name="create_backup">Crea backup</string>
     <string name="create_backup_summary">Salva tutti i documenti e i tag in un file protetto da password</string>

@@ -144,6 +144,13 @@
         <item quantity="one">%d Dokument war bereits importiert</item>
         <item quantity="other">%d Dokumente waren bereits importiert</item>
     </plurals>
+    <string name="settings_section_import">Import</string>
+    <string name="preference_delete_imported_files">PDFs nach dem Import löschen</string>
+    <string name="preference_delete_imported_files_description">Die Originaldatei entfernen, sobald sie in der App ist. Von anderen Apps geteilte Dateien lassen sich oft nicht löschen</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="one">%d Originaldatei konnte nicht gelöscht werden</item>
+        <item quantity="other">%d Originaldateien konnten nicht gelöscht werden</item>
+    </plurals>
     <string name="settings_section_backup">Backup</string>
     <string name="create_backup">Backup erstellen</string>
     <string name="create_backup_summary">Alle Dokumente und Tags in einer passwortgeschützten Datei speichern</string>

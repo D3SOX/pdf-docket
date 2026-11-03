@@ -163,6 +163,17 @@
         <item quantity="many">سبق استيراد %d مستندًا</item>
         <item quantity="other">سبق استيراد %d مستند</item>
     </plurals>
+    <string name="settings_section_import">الاستيراد</string>
+    <string name="preference_delete_imported_files">حذف ملفات PDF بعد استيرادها</string>
+    <string name="preference_delete_imported_files_description">إزالة الملف الأصلي بعد إضافته إلى التطبيق. غالبًا لا يمكن حذف الملفات التي تمت مشاركتها من تطبيقات أخرى</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="zero">تعذر حذف %d ملف أصلي</item>
+        <item quantity="one">تعذر حذف %d ملف أصلي</item>
+        <item quantity="two">تعذر حذف %d ملفين أصليين</item>
+        <item quantity="few">تعذر حذف %d ملفات أصلية</item>
+        <item quantity="many">تعذر حذف %d ملفًا أصليًا</item>
+        <item quantity="other">تعذر حذف %d ملف أصلي</item>
+    </plurals>
     <string name="settings_section_backup">النسخ الاحتياطي</string>
     <string name="create_backup">إنشاء نسخة احتياطية</string>
     <string name="create_backup_summary">حفظ جميع المستندات والعلامات في ملف محمي بكلمة مرور</string>

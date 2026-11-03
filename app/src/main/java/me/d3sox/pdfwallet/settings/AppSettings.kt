@@ -52,6 +52,7 @@ data class AppSettings(
     val manualSortExplained: Boolean = false,
     val tagFilterMode: TagFilterMode = TagFilterMode.ALL,
     val documentLayout: DocumentLayout = DocumentLayout.GRID,
+    val deleteImportedFiles: Boolean = false,
 ) {
     /**
      * Screenshots stay blocked while authentication is enabled, so app content can't leak via "recent apps".

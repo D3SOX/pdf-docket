@@ -144,6 +144,13 @@
         <item quantity="one">%d dokument oli juba imporditud</item>
         <item quantity="other">%d dokumenti olid juba imporditud</item>
     </plurals>
+    <string name="settings_section_import">Import</string>
+    <string name="preference_delete_imported_files">Kustuta PDF-id pärast importimist</string>
+    <string name="preference_delete_imported_files_description">Eemalda algne fail, kui see on rakenduses. Teistest rakendustest jagatud faile ei saa sageli kustutada</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="one">%d algset faili ei saanud kustutada</item>
+        <item quantity="other">%d algset faili ei saanud kustutada</item>
+    </plurals>
     <string name="settings_section_backup">Varundus</string>
     <string name="create_backup">Loo varukoopia</string>
     <string name="create_backup_summary">Salvesta kõik dokumendid ja sildid salasõnaga kaitstud faili</string>

@@ -144,6 +144,13 @@
         <item quantity="one">%d έγγραφο είχε ήδη εισαχθεί</item>
         <item quantity="other">%d έγγραφα είχαν ήδη εισαχθεί</item>
     </plurals>
+    <string name="settings_section_import">Εισαγωγή</string>
+    <string name="preference_delete_imported_files">Διαγραφή PDF μετά την εισαγωγή</string>
+    <string name="preference_delete_imported_files_description">Αφαίρεση του αρχικού αρχείου μόλις μπει στην εφαρμογή. Τα αρχεία που κοινοποιούνται από άλλες εφαρμογές συχνά δεν μπορούν να διαγραφούν</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="one">%d αρχικό αρχείο δεν ήταν δυνατό να διαγραφεί</item>
+        <item quantity="other">%d αρχικά αρχεία δεν ήταν δυνατό να διαγραφούν</item>
+    </plurals>
     <string name="settings_section_backup">Αντίγραφο ασφαλείας</string>
     <string name="create_backup">Δημιουργία αντιγράφου ασφαλείας</string>
     <string name="create_backup_summary">Αποθήκευση όλων των εγγράφων και ετικετών σε αρχείο με προστασία κωδικού πρόσβασης</string>

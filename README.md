@@ -23,7 +23,7 @@ PDF Docket is a fork of the last open source version and stays under the GPLv3. 
 
 ## Features
 
-- Import one or several PDFs at once, or open them with PDF Docket from a file browser, email client or web browser.
+- Import one or several PDFs at once, or open them with PDF Docket from a file browser, email client or web browser, and optionally delete the original files after importing.
 - Detect QR, Aztec, DataMatrix, PDF417, UPC-A, UPC-E, EAN-8, EAN-13, Code 39, Code 93, Code 128, ITF and Codabar barcodes and show them in fullscreen.
 - Swipe between documents and switch between the barcode and the PDF, or show both in split screen. In split screen, the PDF turns to the page of the barcode you swipe to.
 - Reopen a document at the barcode and page you left it on.

@@ -143,6 +143,13 @@
         <item quantity="one">%d document was already imported</item>
         <item quantity="other">%d documents were already imported</item>
     </plurals>
+    <string name="settings_section_import">Import</string>
+    <string name="preference_delete_imported_files">Delete PDFs after importing</string>
+    <string name="preference_delete_imported_files_description">Remove the original file once it\'s in the app. Files shared from other apps often can\'t be deleted</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="one">%d original file couldn\'t be deleted</item>
+        <item quantity="other">%d original files couldn\'t be deleted</item>
+    </plurals>
     <string name="settings_section_backup">Backup</string>
     <string name="create_backup">Create backup</string>
     <string name="create_backup_summary">Save all documents and tags to a password-protected file</string>

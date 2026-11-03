@@ -1,7 +1,9 @@
 package me.d3sox.pdfwallet.pdfimporter
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.provider.DocumentsContract
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -17,6 +19,7 @@ import javax.inject.Inject
 internal interface FileImportRepo {
     suspend fun copyToApp(uri: Uri): PendingCertificate
     fun deleteFile(fileName: String)
+    suspend fun deleteSource(uri: Uri): Boolean
     fun getFile(fileName: String): File
 }
 
@@ -51,6 +54,21 @@ internal class FileImportRepoImpl @Inject constructor(
                 getFile(fileName).delete()
             }
         }
+    }
+
+    override suspend fun deleteSource(uri: Uri): Boolean = withContext(dispatcher) {
+        // a document shared back to this app is the app's own copy
+        if (uri.scheme != ContentResolver.SCHEME_CONTENT || uri.authority == "${context.packageName}.pdffileprovider") {
+            return@withContext false
+        }
+        // e.g. the app that shared the file only granted read access
+        runCatching {
+            if (DocumentsContract.isDocumentUri(context, uri)) {
+                DocumentsContract.deleteDocument(context.contentResolver, uri)
+            } else {
+                context.contentResolver.delete(uri, null, null) > 0
+            }
+        }.getOrDefault(false)
     }
 
     override fun getFile(fileName: String): File {

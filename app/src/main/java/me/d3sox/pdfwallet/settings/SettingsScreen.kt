@@ -256,6 +256,18 @@ fun SettingsScreen(
                 }
             }
             item {
+                SettingsGroup(stringResource(R.string.settings_section_import)) {
+                    switchItem(
+                        title = R.string.preference_delete_imported_files,
+                        summary = R.string.preference_delete_imported_files_description,
+                        icon = R.drawable.delete_24,
+                        color = IconColor.RED,
+                        checked = settings.deleteImportedFiles,
+                        onCheckedChange = { checked -> vm.update { it.copy(deleteImportedFiles = checked) } },
+                    )
+                }
+            }
+            item {
                 SettingsGroup(stringResource(R.string.settings_section_backup)) {
                     choiceItem(
                         title = R.string.create_backup,
