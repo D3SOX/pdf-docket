@@ -40,6 +40,8 @@ fun Context.addToHomeScreen(document: Document) {
  * The system drops the least recent one when the limit is reached.
  */
 fun Context.addRecentShortcut(id: String, name: String) {
+    // shortcuts need a label, a file named ".pdf" is imported without a name
+    if (name.isEmpty()) return
     ShortcutManagerCompat.pushDynamicShortcut(this, documentShortcut(id, name))
 }
 
