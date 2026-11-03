@@ -79,7 +79,9 @@ import me.d3sox.pdfwallet.render.PageBarcode
 import me.d3sox.pdfwallet.settings.AppSettings
 import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
 import me.d3sox.pdfwallet.ui.components.checkable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.withContext
 
 private const val HALF_SIZE = 0.5f
 private const val BARCODE_PADDING_DIVISOR = 8
@@ -133,7 +135,9 @@ fun DocumentDetailsScreen(
     val context = LocalContext.current
     // the app icon's menu shows document names without unlocking the app
     LaunchedEffect(shown.id, settings.requireAuthentication) {
-        if (!settings.requireAuthentication) context.addRecentShortcut(shown.id, shown.name)
+        if (settings.requireAuthentication) return@LaunchedEffect
+        // a blocking call to the system
+        withContext(Dispatchers.IO) { context.addRecentShortcut(shown.id, shown.name) }
     }
     // only whether barcodes were found, the scans themselves are cached by the renderer
     val hasBarcodes = remember { mutableStateMapOf<String, Boolean>() }
