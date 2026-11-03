@@ -1,0 +1,3 @@
+- Tap a page dot to jump straight to that page.
+- Switching between list and grid view is now animated.
+- Optionally delete original PDFs after importing them. Enable this in Settings. Files shared from other apps may not allow deletion.
