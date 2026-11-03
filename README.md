@@ -46,7 +46,7 @@ The app requires JDK 21 to build and runs on Android 7.0 or later.
 ./gradlew detekt lintDebug testDebugUnitTest
 ```
 
-To publish a release, bump `versionCode` and `versionName` in `app/build.gradle.kts`, then push a matching annotated version tag. Its message becomes the changelog of the GitHub release. The release workflow builds the signed APK and App Bundle, creates the GitHub release and updates the F-Droid repository.
+To publish a release, bump `versionCode` and `versionName` in `app/build.gradle.kts` and write the F-Droid and Google Play release notes in plain text, at most 500 characters, to `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`. Then push a matching annotated version tag. Its message becomes the changelog of the GitHub release. The release workflow builds the signed APK and App Bundle, creates the GitHub release and updates the F-Droid repository.
 
 ```sh
 git tag -a v1.1.0 -F changelog.md && git push origin v1.1.0
