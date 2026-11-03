@@ -1,0 +1,4 @@
+- Archive documents without deleting them, or choose a date to archive them automatically.
+- Open the archive from the menu and move documents back whenever you need them. Backups keep archive status and dates.
+- Hold the app icon to open recently viewed documents.
+- The archive now slides in like other screens, and settings transitions are smoother.
