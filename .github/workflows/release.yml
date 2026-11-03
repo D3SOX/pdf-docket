@@ -38,7 +38,7 @@ jobs:
           || { echo "::error::Set versionName to $VERSION_NAME and bump versionCode in app/build.gradle.kts"; exit 1; }
         VERSION_CODE=$(sed -n 's/^ *versionCode = \([0-9]*\).*/\1/p' app/build.gradle.kts)
         CHANGELOG=fastlane/metadata/android/en-US/changelogs/$VERSION_CODE.txt
-        [[ -s $CHANGELOG ]] || { echo "::error::Add the F-Droid and Google Play release notes in $CHANGELOG"; exit 1; }
+        grep -q "[^[:space:]]" "$CHANGELOG" 2>/dev/null || { echo "::error::Add the F-Droid and Google Play release notes in $CHANGELOG"; exit 1; }
         (( $(wc -m < "$CHANGELOG") <= 500 )) || { echo "::error::$CHANGELOG is longer than 500 characters"; exit 1; }
         [[ $(git cat-file -t "refs/tags/$GITHUB_REF_NAME") == tag ]] \
           || { echo "::error::Tag with a message, which becomes the release notes: git tag -a $GITHUB_REF_NAME -F changelog.md"; exit 1; }
