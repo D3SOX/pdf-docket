@@ -98,12 +98,17 @@ private enum class SelectionDialog { TAGS, DELETE }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentsScreen(
+    isArchive: Boolean,
     settings: AppSettings,
     onAddDocument: () -> Unit,
     onOpenDocument: (String) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
-    vm: DocumentsViewModel = hiltViewModel(),
+    onOpenArchive: () -> Unit,
+    onBack: () -> Unit,
+    vm: DocumentsViewModel = hiltViewModel<DocumentsViewModel, DocumentsViewModel.Factory>(
+        creationCallback = { it.create(isArchive) },
+    ),
 ) {
     val documentList by vm.documentList.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
@@ -122,11 +127,6 @@ fun DocumentsScreen(
         selectionDialog = null
     }
     val selectAll = { selectedIds = list?.visible.orEmpty().map { it.id } }
-    val isArchive = list?.archive == true
-    val showArchive = { archive: Boolean ->
-        isSearching = false
-        vm.onShowArchive(archive)
-    }
     LaunchedEffect(list?.visible) {
         list?.let { documents ->
             val visibleIds = documents.visible.map { it.id }.toSet()
@@ -139,8 +139,7 @@ fun DocumentsScreen(
         isSearching = false
         vm.onQueryChange("")
     }
-    // registered first, so closing the search or the selection comes first
-    BackHandler(enabled = isArchive) { showArchive(false) }
+    // Search and selection consume back before screen navigation.
     BackHandler(enabled = isSearching, onBack = closeSearch)
     BackHandler(enabled = isSelecting, onBack = clearSelection)
 
@@ -180,7 +179,11 @@ fun DocumentsScreen(
                 onExport = { list?.visible?.takeIf { it.isNotEmpty() }?.let(context::sharePdfs) },
                 onDelete = { listDialog = ListDialog.DELETE_VISIBLE },
                 onSelectAll = selectAll,
-                onShowArchive = showArchive,
+                onOpenArchive = {
+                    isSearching = false
+                    onOpenArchive()
+                },
+                onBack = onBack,
                 onLock = vm::onLock,
                 onOpenSettings = onOpenSettings,
                 onOpenAbout = onOpenAbout,
@@ -338,7 +341,8 @@ private fun DocumentsTopBar(
     onExport: () -> Unit,
     onDelete: () -> Unit,
     onSelectAll: () -> Unit,
-    onShowArchive: (Boolean) -> Unit,
+    onOpenArchive: () -> Unit,
+    onBack: () -> Unit,
     onLock: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -369,7 +373,7 @@ private fun DocumentsTopBar(
                     Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close_search))
                 }
             } else if (isArchive) {
-                IconButton(onClick = { onShowArchive(false) }) {
+                IconButton(onClick = onBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                 }
             }
@@ -406,7 +410,7 @@ private fun DocumentsTopBar(
                 onExport = onExport,
                 onDelete = onDelete,
                 onSelectAll = onSelectAll,
-                onOpenArchive = { onShowArchive(true) },
+                onOpenArchive = onOpenArchive,
                 onLock = onLock,
                 onOpenSettings = onOpenSettings,
                 onOpenAbout = onOpenAbout,

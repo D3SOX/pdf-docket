@@ -1,6 +1,7 @@
 package me.d3sox.pdfwallet
 
 import android.content.Intent
+import androidx.activity.BackEventCompat
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsNotSelected
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.lifecycle.ViewModelProvider
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.CoroutineDispatchersModule
 import me.d3sox.pdfwallet.db.di.DatabaseModule
 import me.d3sox.pdfwallet.documents.DocumentFilter
@@ -170,6 +172,98 @@ class MainActivityRobolectricTest {
         documents.getValue("Ticket A").tags.map { it.id }.toSet() shouldBe setOf(travel, work)
         documents.getValue("Ticket B").tags.map { it.id } shouldBe listOf(work)
         documents.getValue("Other document").tags shouldBe emptyList()
+    }
+
+    @Test
+    fun archive_keepsTheDocumentListVisibleDuringNavigation() {
+        seedDocuments()
+        composeRule.onNode(
+            hasContentDescription(composeRule.activity.getString(R.string.more_options)) and
+                !hasAnyAncestor(hasScrollAction()),
+        ).performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.archive_title)).assertIsDisplayed()
+        composeRule.mainClock.autoAdvance = false
+
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.archive_title)).performClick()
+        composeRule.mainClock.advanceTimeBy(100)
+        composeRule.waitForIdle()
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.back)).assertExists()
+        // Both screens must exist while the archive slides over the document list.
+        composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isNotEmpty() shouldBe true
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText(composeRule.activity.getString(R.string.archive_empty_title)))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.archive_empty_title)).assertIsDisplayed()
+
+        composeRule.mainClock.autoAdvance = false
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.back)).performClick()
+        composeRule.mainClock.advanceTimeBy(100)
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.archive_empty_title)).assertExists()
+        composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isNotEmpty() shouldBe true
+        composeRule.mainClock.autoAdvance = true
+        composeRule.onNodeWithText("Ticket A").assertIsDisplayed()
+    }
+
+    @Test
+    fun archive_predictiveBackPreviewsTheListAndCanBeCancelledFromEitherEdge() {
+        seedDocuments()
+        val context = composeRule.activity
+        val dispatcher = context.onBackPressedDispatcher
+        val archiveTitle = context.getString(R.string.archive_empty_title)
+        listOf(BackEventCompat.EDGE_LEFT, BackEventCompat.EDGE_RIGHT).forEach { edge ->
+            selectionAction(R.string.archive_title)
+            composeRule.waitUntil(timeoutMillis = 5_000) {
+                composeRule.onAllNodes(hasText(archiveTitle)).fetchSemanticsNodes().isNotEmpty()
+            }
+            val fullWidth = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot.width
+            composeRule.runOnIdle {
+                dispatcher.dispatchOnBackStarted(BackEventCompat(0f, 100f, 0f, edge))
+                dispatcher.dispatchOnBackProgressed(BackEventCompat(100f, 100f, 0.5f, edge))
+            }
+            composeRule.waitForIdle()
+
+            composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isNotEmpty() shouldBe true
+            val previewWidth = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot.width
+            (previewWidth < fullWidth) shouldBe true
+
+            composeRule.runOnIdle { dispatcher.dispatchOnBackCancelled() }
+            composeRule.onNodeWithText(archiveTitle).assertIsDisplayed()
+            composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isEmpty() shouldBe true
+
+            composeRule.runOnIdle {
+                dispatcher.dispatchOnBackStarted(BackEventCompat(0f, 100f, 0f, edge))
+                dispatcher.dispatchOnBackProgressed(BackEventCompat(100f, 100f, 0.8f, edge))
+                dispatcher.onBackPressed()
+            }
+            composeRule.onNodeWithText("Ticket A").assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun archive_isRestoredAfterRecreationAndShortcutBackReturnsToIt() = runTest {
+        seedDocuments()
+        repository.archive(listOf("Ticket A"))
+        composeRule.runOnUiThread {
+            ViewModelProvider(composeRule.activity)[MainViewModel::class.java].onShortcutOpened("Ticket A")
+        }
+        val context = composeRule.activity
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText(context.getString(R.string.error_showing_document)))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.runOnUiThread { context.onBackPressedDispatcher.onBackPressed() }
+        composeRule.onNodeWithText(context.getString(R.string.archive_title)).assertIsDisplayed()
+        composeRule.onNodeWithText("Ticket A").assertIsDisplayed()
+        composeRule.onAllNodes(hasText("Ticket B")).fetchSemanticsNodes().isEmpty() shouldBe true
+
+        composeRule.activityRule.scenario.recreate()
+
+        composeRule.onNodeWithText(context.getString(R.string.archive_title)).assertIsDisplayed()
+        composeRule.onNodeWithText("Ticket A").assertIsDisplayed()
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.onNodeWithText("Ticket B").assertIsDisplayed()
     }
 
     @Test

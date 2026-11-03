@@ -91,9 +91,12 @@ class DocumentFilterTest {
         filter.documentList.first().archive shouldBe true
         // and the search was cleared
         visibleNames() shouldContainExactly listOf("beta")
+        filter.documentList(archive = false).first().visible.map { it.name } shouldContainExactly
+            listOf("Alpha", "gamma")
 
         filter.show(archive = false)
         visibleNames() shouldContainExactly listOf("Alpha", "gamma")
+        filter.documentList(archive = true).first().visible.map { it.name } shouldContainExactly listOf("beta")
     }
 
     @Test
