@@ -1,6 +1,13 @@
 package me.d3sox.pdfwallet.documents
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +35,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -48,11 +56,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -91,6 +101,8 @@ import me.d3sox.pdfwallet.ui.components.checkable
 import me.d3sox.pdfwallet.ui.components.selectable
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+
+private const val LAYOUT_DURATION_MS = 400
 
 private enum class ListDialog { MANAGE_TAGS, DELETE_VISIBLE, LOCK_SCREEN_WARNING }
 private enum class SelectionDialog { TAGS, DELETE }
@@ -212,6 +224,7 @@ fun DocumentsScreen(
                 list = list,
                 contentPadding = innerPadding,
                 loadThumbnail = vm::thumbnail,
+                cachedThumbnail = vm::cachedThumbnail,
                 onClearFilters = {
                     vm.onClearFilters()
                     isSearching = false
@@ -600,6 +613,7 @@ private fun DocumentList(
     canReorder: Boolean,
     onReorder: (List<String>) -> Unit,
     loadThumbnail: suspend (String) -> android.graphics.Bitmap?,
+    cachedThumbnail: (String) -> android.graphics.Bitmap?,
     onClearFilters: () -> Unit,
     onOpenDocument: (String) -> Unit,
     onDialog: (DocumentDialog) -> Unit,
@@ -613,96 +627,133 @@ private fun DocumentList(
     // the drag callbacks are only taken once per item
     val stopDrag = rememberUpdatedState { drag.stop(list.visible, selectedIds, onToggleSelection, onReorder) }
     val haptic = LocalHapticFeedback.current
-    val gridState = rememberLazyGridState()
-    val reorderState = rememberReorderableLazyGridState(gridState) { from, to ->
-        if (drag.move(list.visible, from.key, to.key)) {
-            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-        }
-    }
     val moveUp = stringResource(R.string.move_up)
     val moveDown = stringResource(R.string.move_down)
+    // the grid of the new layout starts where the previous one was scrolled to
+    var firstVisibleItem by rememberSaveable { mutableIntStateOf(0) }
 
-    LazyVerticalGrid(
-        state = gridState,
-        columns = if (asList) GridCells.Fixed(1) else GridCells.Adaptive(minSize = 160.dp),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = contentPadding.calculateTopPadding() + 8.dp,
-            // keep the last tiles clear of the floating action button, the archive has none
-            bottom = contentPadding.calculateBottomPadding() + if (list.archive) 16.dp else 88.dp,
-        ),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(if (asList) 8.dp else 12.dp),
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        if (list.isFiltered) {
-            fullWidthItem(key = "count") {
-                Text(
-                    text = stringResource(R.string.showing_count, list.visible.size, list.all.size),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+    // the tiles move and resize into their place in the other layout, with their previews
+    SharedTransitionLayout {
+        AnimatedContent(
+            targetState = asList,
+            transitionSpec = {
+                fadeIn(tween(LAYOUT_DURATION_MS)) togetherWith fadeOut(tween(LAYOUT_DURATION_MS))
+            },
+            label = "documentLayout",
+        ) { asList ->
+            val gridState = rememberLazyGridState(firstVisibleItem)
+            LaunchedEffect(gridState) {
+                snapshotFlow { gridState.firstVisibleItemIndex }.collect { firstVisibleItem = it }
             }
-        }
-        if (list.visible.isEmpty()) {
-            fullWidthItem(key = "no_results") {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                ) {
-                    Text(
-                        stringResource(R.string.empty_filter_result),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    TextButton(onClick = onClearFilters) {
-                        Text(stringResource(R.string.search_results_reset_filters_cta))
-                    }
+            val reorderState = rememberReorderableLazyGridState(gridState) { from, to ->
+                if (drag.move(list.visible, from.key, to.key)) {
+                    haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                 }
             }
-        }
-        itemsIndexed(documents, key = { _, document -> document.id }, contentType = { _, _ -> "document" }) {
-            index, document ->
-            ReorderableItem(reorderState, key = document.id, enabled = canReorder) { isDragging ->
-                DocumentTile(
-                    document = document,
-                    loadThumbnail = loadThumbnail,
-                    onClick = {
-                        if (selectedIds.isEmpty()) onOpenDocument(document.id) else onToggleSelection(document.id)
-                    },
-                    onDialog = onDialog,
-                    editor = editor,
-                    selectionMode = selectedIds.isNotEmpty(),
-                    isSelected = document.id in selectedIds,
-                    isDragging = isDragging,
-                    onLongClick = {
-                        drag.onLongPress(document.id, wasSelected = document.id in selectedIds)
-                        onToggleSelection(document.id)
-                    },
-                    asListItem = asList,
-                    dragHandle = Modifier.longPressDraggableHandle(
-                        enabled = canReorder,
-                        onDragStopped = { stopDrag.value() },
-                    ),
-                    modifier = Modifier.semantics {
-                        // dragging isn't possible with a screen reader
-                        if (canReorder) {
-                            customActions = listOfNotNull(
-                                CustomAccessibilityAction(moveUp) {
-                                    onReorder(documents.moved(index, index - 1).map { it.id })
-                                    true
-                                }.takeIf { index > 0 },
-                                CustomAccessibilityAction(moveDown) {
-                                    onReorder(documents.moved(index, index + 1).map { it.id })
-                                    true
-                                }.takeIf { index < documents.lastIndex },
+
+            LazyVerticalGrid(
+                state = gridState,
+                columns = if (asList) GridCells.Fixed(1) else GridCells.Adaptive(minSize = 160.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = contentPadding.calculateTopPadding() + 8.dp,
+                    // keep the last tiles clear of the floating action button, the archive has none
+                    bottom = contentPadding.calculateBottomPadding() + if (list.archive) 16.dp else 88.dp,
+                ),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(if (asList) 8.dp else 12.dp),
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                if (list.isFiltered) {
+                    fullWidthItem(key = "count") {
+                        Text(
+                            text = stringResource(R.string.showing_count, list.visible.size, list.all.size),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (list.visible.isEmpty()) {
+                    fullWidthItem(key = "no_results") {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                        ) {
+                            Text(
+                                stringResource(R.string.empty_filter_result),
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            TextButton(onClick = onClearFilters) {
+                                Text(stringResource(R.string.search_results_reset_filters_cta))
+                            }
                         }
-                    },
-                )
+                    }
+                }
+                itemsIndexed(
+                    documents,
+                    key = { _, document -> document.id },
+                    contentType = { _, _ -> "document" },
+                ) { index, document ->
+                    ReorderableItem(reorderState, key = document.id, enabled = canReorder) { isDragging ->
+                        DocumentTile(
+                            document = document,
+                            loadThumbnail = loadThumbnail,
+                            cachedThumbnail = cachedThumbnail,
+                            onClick = {
+                                if (selectedIds.isEmpty()) {
+                                    onOpenDocument(document.id)
+                                } else {
+                                    onToggleSelection(document.id)
+                                }
+                            },
+                            onDialog = onDialog,
+                            editor = editor,
+                            selectionMode = selectedIds.isNotEmpty(),
+                            isSelected = document.id in selectedIds,
+                            isDragging = isDragging,
+                            onLongClick = {
+                                drag.onLongPress(document.id, wasSelected = document.id in selectedIds)
+                                onToggleSelection(document.id)
+                            },
+                            asListItem = asList,
+                            dragHandle = Modifier.longPressDraggableHandle(
+                                enabled = canReorder,
+                                onDragStopped = { stopDrag.value() },
+                            ),
+                            previewModifier = Modifier.sharedElement(
+                                rememberSharedContentState("preview-${document.id}"),
+                                animatedVisibilityScope = this@AnimatedContent,
+                            ),
+                            modifier = Modifier
+                                .sharedBounds(
+                                    rememberSharedContentState("tile-${document.id}"),
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                    // the card keeps its corners and border instead of being stretched
+                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                                    clipInOverlayDuringTransition = OverlayClip(CardDefaults.outlinedShape),
+                                )
+                                .semantics {
+                                    // dragging isn't possible with a screen reader
+                                    if (canReorder) {
+                                        customActions = listOfNotNull(
+                                            CustomAccessibilityAction(moveUp) {
+                                                onReorder(documents.moved(index, index - 1).map { it.id })
+                                                true
+                                            }.takeIf { index > 0 },
+                                            CustomAccessibilityAction(moveDown) {
+                                                onReorder(documents.moved(index, index + 1).map { it.id })
+                                                true
+                                            }.takeIf { index < documents.lastIndex },
+                                        )
+                                    }
+                                },
+                        )
+                    }
+                }
             }
         }
     }

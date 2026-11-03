@@ -76,6 +76,8 @@ private val TAG_CHIP_MAX_WIDTH = 120.dp
 fun DocumentTile(
     document: Document,
     loadThumbnail: suspend (String) -> Bitmap?,
+    // the other layout's tiles show up with their previews during the switch
+    cachedThumbnail: (String) -> Bitmap?,
     onClick: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
     editor: DocumentEditor,
@@ -87,6 +89,7 @@ fun DocumentTile(
     asListItem: Boolean = false,
     // inside the clickable, which would take the pointer events after a long press otherwise
     dragHandle: Modifier = Modifier,
+    previewModifier: Modifier = Modifier,
 ) {
     OutlinedCard(
         colors = if (isSelected) {
@@ -113,7 +116,7 @@ fun DocumentTile(
     ) {
         if (asListItem) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Preview(document.id, loadThumbnail, Modifier.width(LIST_PREVIEW_WIDTH))
+                Preview(document.id, loadThumbnail, cachedThumbnail, previewModifier.width(LIST_PREVIEW_WIDTH))
                 NameTagsAndActions(document, onDialog, editor, selectionMode, isSelected, asListItem = true)
             }
         } else {
@@ -124,7 +127,7 @@ fun DocumentTile(
                     .aspectRatio(PREVIEW_ASPECT_RATIO)
                     .clipToBounds()
             ) {
-                Preview(document.id, loadThumbnail, Modifier.fillMaxSize())
+                Preview(document.id, loadThumbnail, cachedThumbnail, previewModifier.fillMaxSize())
                 TagChips(
                     document.tags,
                     Modifier
@@ -265,9 +268,15 @@ private fun TagChip(
 }
 
 @Composable
-private fun Preview(id: String, loadThumbnail: suspend (String) -> Bitmap?, modifier: Modifier) {
-    val thumbnail by produceState<ImageBitmap?>(null, id) {
-        value = loadThumbnail(id)?.asImageBitmap()
+private fun Preview(
+    id: String,
+    loadThumbnail: suspend (String) -> Bitmap?,
+    cachedThumbnail: (String) -> Bitmap?,
+    modifier: Modifier,
+) {
+    val cached = remember(id) { cachedThumbnail(id)?.asImageBitmap() }
+    val thumbnail by produceState(cached, id) {
+        value = cached ?: loadThumbnail(id)?.asImageBitmap()
     }
     Box(
         modifier = modifier
