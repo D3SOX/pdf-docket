@@ -2,6 +2,7 @@ package me.d3sox.pdfwallet.details
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -29,11 +30,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -42,6 +46,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
@@ -161,29 +166,48 @@ internal enum class PageIndicatorStyle { DOTS, NUMBERED_DOTS }
 
 /**
  * A row of dots below the horizontally swiped pages, or a page count for long documents and when the dots
- * don't fit, e.g. in split screen on a narrow phone or with a large font.
+ * don't fit, e.g. in split screen on a narrow phone or with a large font. Tapping a dot selects its page.
  */
 @Composable
-internal fun PageIndicator(current: Int, count: Int, label: String, numbered: Boolean, modifier: Modifier = Modifier) {
+internal fun PageIndicator(
+    current: Int,
+    count: Int,
+    label: String,
+    numbered: Boolean,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     BoxWithConstraints(modifier) {
-        val showDots = count <= MAX_PAGE_DOTS && dotsWidth(count, numbered) <= maxWidth
-        PageIndicatorContent(current, count, label, numbered, showDots)
+        // numbered dots grow with the font size
+        val dot = if (numbered) numberedDotSize() else DOT_SIZE
+        val spacing = if (numbered) NUMBERED_DOT_SPACING else DOT_SPACING
+        val padding = if (numbered) NUMBERED_DOTS_PADDING else DOTS_PADDING
+        val dotsWidth = dot * count + spacing * (count - 1) + padding * 2
+        val showDots = count <= MAX_PAGE_DOTS && dotsWidth <= maxWidth
+        val onSelectState = rememberUpdatedState(onSelect)
+        val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+        val tap = if (showDots) {
+            Modifier.pointerInput(count, dot, spacing, padding, rtl) {
+                detectTapGestures { offset ->
+                    // each dot owns half of the spacing on both sides, the outer dots also the padding
+                    val x = if (rtl) size.width - offset.x else offset.x
+                    val slot = (dot + spacing).toPx()
+                    val index = ((x - padding.toPx() + spacing.toPx() / 2) / slot).toInt()
+                    onSelectState.value(index.coerceIn(0, count - 1))
+                }
+            }
+        } else {
+            Modifier
+        }
+        // the vertical padding enlarges the area for tapping the small dots
+        Box(tap.padding(vertical = 8.dp)) {
+            PageIndicatorContent(current, count, label, numbered, showDots)
+        }
     }
 }
 
 @Composable
 private fun numberedDotSize(): Dp = max(NUMBERED_DOT_SIZE, NUMBER_LINE_HEIGHT * LocalDensity.current.fontScale)
-
-/**
- * The width of the dots including the padding around them. Numbered dots grow with the font size.
- */
-@Composable
-private fun dotsWidth(count: Int, numbered: Boolean): Dp {
-    val dot = if (numbered) numberedDotSize() else DOT_SIZE
-    val spacing = if (numbered) NUMBERED_DOT_SPACING else DOT_SPACING
-    val padding = if (numbered) NUMBERED_DOTS_PADDING else DOTS_PADDING
-    return dot * count + spacing * (count - 1) + padding * 2
-}
 
 @Composable
 private fun PageIndicatorContent(current: Int, count: Int, label: String, numbered: Boolean, showDots: Boolean) {

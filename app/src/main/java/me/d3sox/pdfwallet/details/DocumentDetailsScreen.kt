@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -81,6 +82,7 @@ import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
 import me.d3sox.pdfwallet.ui.components.checkable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val HALF_SIZE = 0.5f
@@ -398,6 +400,7 @@ private fun PagesPager(
     pageLabel: @Composable (Int) -> String,
     page: @Composable (Int) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     // the indicator sits below the pages, so it never covers a part of them
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(state = state, modifier = Modifier.weight(1f)) {
@@ -411,7 +414,7 @@ private fun PagesPager(
                 count = state.pageCount,
                 label = pageLabel(state.currentPage),
                 numbered = indicator == PageIndicatorStyle.NUMBERED_DOTS,
-                modifier = Modifier.padding(vertical = 8.dp),
+                onSelect = { scope.launch { state.animateScrollToPage(it) } },
             )
         }
     }

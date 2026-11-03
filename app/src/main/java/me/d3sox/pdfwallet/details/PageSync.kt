@@ -1,6 +1,5 @@
 package me.d3sox.pdfwallet.details
 
-import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,7 +17,7 @@ import kotlin.math.roundToInt
  * Moves one pager along with the other while it's swiped, so the PDF shows the page of the current barcode,
  * and the barcodes one on the current PDF page. [barcodePages] are the page indexes of the barcodes.
  *
- * Only the pager the user swiped last leads, so the pagers never chase each other. With [alignAtStart], the PDF
+ * Only the pager the user moved last leads, so the pagers never chase each other. With [alignAtStart], the PDF
  * starts at the page of the first barcode, otherwise both pagers stay where they are until one is swiped.
  */
 @Composable
@@ -33,14 +32,15 @@ internal fun SyncPagers(
         var barcodesLead by mutableStateOf(if (alignAtStart) true else null)
         // the barcode shown when the PDF was touched, which stays while the PDF is on its page
         var barcodeAtDragStart by mutableIntStateOf(0)
+        // a swipe or a tapped page dot scrolls a pager, while the follower only jumps with requestScrollToPage
         launch {
-            barcodePager.interactionSource.interactions.collect {
-                if (it is DragInteraction.Start) barcodesLead = true
+            snapshotFlow { barcodePager.isScrollInProgress }.collect {
+                if (it) barcodesLead = true
             }
         }
         launch {
-            pdfPager.interactionSource.interactions.collect {
-                if (it is DragInteraction.Start) {
+            snapshotFlow { pdfPager.isScrollInProgress }.collect {
+                if (it) {
                     barcodeAtDragStart = barcodePager.currentPage
                     barcodesLead = false
                 }
