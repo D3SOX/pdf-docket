@@ -1,0 +1,2 @@
+- Release builds are now reproducible, so F-Droid can verify and publish them.
+- Includes everything from 1.10.0: tap a page dot to jump to that page, animated switching between list and grid view, and optional deletion of original PDFs after importing them.
