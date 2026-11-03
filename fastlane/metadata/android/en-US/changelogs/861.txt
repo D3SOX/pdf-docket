@@ -1,0 +1,4 @@
+- Choose "Manual order" in the sort menu, then hold and drag documents into the order you want.
+- New imports go to the top of the manual order. Reordering a filtered list keeps hidden documents in place, and backups preserve the order.
+- Fixed a crash when importing a document while another document is open.
+- Toggling screenshot protection no longer restarts the screen or interrupts the switch animation.

@@ -1,2 +1,0 @@
-- Verbesserung des Layout-Wechsels
-- Hinzufügen von Koreanisch, Japanisch, Russisch und Arabisch

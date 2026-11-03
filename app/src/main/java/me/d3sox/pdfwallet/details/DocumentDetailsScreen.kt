@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,6 +73,7 @@ import me.d3sox.pdfwallet.documents.DocumentDialog
 import me.d3sox.pdfwallet.documents.DocumentDialogHost
 import me.d3sox.pdfwallet.documents.DocumentEditor
 import me.d3sox.pdfwallet.documents.DocumentMenu
+import me.d3sox.pdfwallet.documents.addRecentShortcut
 import me.d3sox.pdfwallet.render.BarcodeScan
 import me.d3sox.pdfwallet.render.PageBarcode
 import me.d3sox.pdfwallet.settings.AppSettings
@@ -127,6 +129,12 @@ fun DocumentDetailsScreen(
     val pagerDocuments by rememberUpdatedState(documents)
     val pagerState = rememberPagerState(initialPage = initialPage) { pagerDocuments.size }
     val current = documents[pagerState.currentPage.coerceIn(documents.indices)]
+    val shown = documents[pagerState.settledPage.coerceIn(documents.indices)]
+    val context = LocalContext.current
+    // the app icon's menu shows document names without unlocking the app
+    LaunchedEffect(shown.id, settings.requireAuthentication) {
+        if (!settings.requireAuthentication) context.addRecentShortcut(shown.id, shown.name)
+    }
     // only whether barcodes were found, the scans themselves are cached by the renderer
     val hasBarcodes = remember { mutableStateMapOf<String, Boolean>() }
     var showPdf by rememberSaveable { mutableStateOf(false) }

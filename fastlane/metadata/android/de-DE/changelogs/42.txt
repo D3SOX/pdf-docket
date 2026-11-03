@@ -1,3 +1,0 @@
-- Android 13 Themed Icons ("Symboldesigns") Unterstützung
-- Update von Dependencies
-- Dieser Build hat ein bekanntes Problem (4MB größere App-Größe), benutze den neueren Build

@@ -1,2 +1,0 @@
-- Verbesserte Beschreibung der QR Code Einstellung
-- Behebt einen Fehler bei dem nach App-Einstellungs-Änderungen wieder nach Authentifizierung gefragt wurde

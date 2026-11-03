@@ -1,3 +1,0 @@
-- Neu: Teilen-Funktionalität (ermöglicht indirekt Drucken)
-- Neuer leerer Zustand der App mit besser sichtbarerem Hinzufüge-Button
-- Update von Abhängigkeiten (Dependencies)

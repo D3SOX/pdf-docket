@@ -35,6 +35,19 @@ fun Context.addToHomeScreen(document: Document) {
     ShortcutManagerCompat.requestPinShortcut(this, documentShortcut(document.id, document.name), null)
 }
 
+/**
+ * Puts the document at the top of the recent documents in the menu of the app icon.
+ * The system drops the least recent one when the limit is reached.
+ */
+fun Context.addRecentShortcut(id: String, name: String) {
+    ShortcutManagerCompat.pushDynamicShortcut(this, documentShortcut(id, name))
+}
+
+/** Clears the recent documents in the menu of the app icon, home screen shortcuts stay. */
+fun Context.removeRecentShortcuts() {
+    ShortcutManagerCompat.removeAllDynamicShortcuts(this)
+}
+
 /** Updates the label of the document's home screen shortcut, if there is one. */
 fun Context.renameShortcut(id: String, name: String) {
     ShortcutManagerCompat.updateShortcuts(this, listOf(documentShortcut(id, name)))

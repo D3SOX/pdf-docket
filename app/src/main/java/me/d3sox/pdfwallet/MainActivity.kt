@@ -22,6 +22,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.d3sox.pdfwallet.documents.ACTION_OPEN_DOCUMENT
 import me.d3sox.pdfwallet.documents.EXTRA_DOCUMENT_ID
+import me.d3sox.pdfwallet.documents.removeRecentShortcuts
 import me.d3sox.pdfwallet.settings.AppSettings
 import me.d3sox.pdfwallet.settings.ThemeMode
 import me.d3sox.pdfwallet.ui.AppRoot
@@ -82,6 +83,10 @@ class MainActivity : FragmentActivity() {
             }
             LaunchedEffect(uiState.settings) {
                 applyWindowSettings(uiState.settings)
+            }
+            // the app icon's menu shows document names without unlocking the app
+            LaunchedEffect(uiState.settings.requireAuthentication) {
+                if (uiState.settings.requireAuthentication) removeRecentShortcuts()
             }
 
             PdfWalletTheme(darkTheme = darkTheme, dynamicColor = uiState.settings.dynamicColor) {
