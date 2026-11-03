@@ -38,8 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # the release notes list the commits since the previous release
-          fetch-depth: 0
+          # for the release notes of the tagged version
+          ref: ${{ inputs.tag }}
       - uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a # v1.329.0
         with:
           ruby-version: '3.4'
@@ -64,10 +64,10 @@ jobs:
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'A release tag is required.'; exit 1; }
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir play-release --pattern '*.aab'
           mv play-release/*.aab play-release/pdf-docket.aab
-          previous=$(git describe --tags --abbrev=0 "$RELEASE_TAG^" 2>/dev/null || true)
-          range=${previous:+$previous..}$RELEASE_TAG
-          git log --no-merges --format='• %s' "$range" | head -c 500 > play-release/notes.txt
-          [[ -s play-release/notes.txt ]] || echo '• Bug fixes and improvements' > play-release/notes.txt
+          version_code=$(sed -n 's/^ *versionCode = \([0-9]*\).*/\1/p' app/build.gradle.kts)
+          changelog=fastlane/metadata/android/en-US/changelogs/$version_code.txt
+          [[ -s $changelog ]] || { echo "::error::$RELEASE_TAG has no release notes in $changelog"; exit 1; }
+          cp "$changelog" play-release/notes.txt
           cat play-release/notes.txt
       - name: Submit to the testing track
         if: ${{ !inputs.verify_only }}

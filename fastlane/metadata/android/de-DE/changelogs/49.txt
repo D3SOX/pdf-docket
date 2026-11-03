@@ -1,2 +1,0 @@
-- PDFs können nun (optional) am Sperrbildschirm angezeigt werden
-- Unterstützung für "Predictive back gesture", ein Android 14 Feature

@@ -1,9 +1,0 @@
- - Neue alternative Listenansicht
- - Support von DataMatrix, PDF417, UPC-A, UPC-E, EAN-8, EAN-13, CODE-39, CODE-93, CODE-128, ITF und Codabar Barcodes
- - Priorisiert Barcodes üblich für Tickets (wie Aztec) wenn mehrere im PDF
- - Verbesserte Erkennung von kleinen Barcodes
- - Dokumente werden leicht größer angezeigt
- - Behebt Fehler in der Sortier-Funktion bei vielen Dokumenten
- - App wird auf Hauptscreen geleitet bei Import von PDF während die App im Mehr-, Einstellungs- oder Detail-Screen ist
- - Aktualisierung von Bibliotheken (Dependencies)
- - Erhöhung der maximalen Vergrößerung von PDF-Seiten

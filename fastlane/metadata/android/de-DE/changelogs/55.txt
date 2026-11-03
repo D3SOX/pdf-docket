@@ -1,8 +1,0 @@
- - Aztec Code Support (experimentell)
- - Verbessertes Umbennen von Dokumenten
- - Verbessertes Ändern der Reihenfolge
- - Wenn Dokumente gefiltert werden, kann nun gewählt werden zw. Teilen/Löschen aller oder nur der aktuell sichtbaren
- - "In neuem Fenster öffnen" Icons zu den Links auf dem "Mehr" Bildschirm hinzugefügt
- - Behebt ein Problem mit der Darstellung der Authentifizierung-Einstellung
- - Leistungsverbesserung
- - Griechische Übersetzung (danke an "OpenContribution")

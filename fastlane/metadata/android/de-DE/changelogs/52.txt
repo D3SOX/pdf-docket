@@ -1,1 +1,0 @@
-- Zeigt eine Warnung wenn "Über Sperrbildschirm anzeigen" aktiviert ist
