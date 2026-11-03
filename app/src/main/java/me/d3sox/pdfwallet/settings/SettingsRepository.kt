@@ -37,6 +37,7 @@ private object Keys {
     val manualSortExplained = booleanPreferencesKey("manualSortExplained")
     val tagFilterMode = stringPreferencesKey("tagFilterMode")
     val documentLayout = stringPreferencesKey("documentLayout")
+    val deleteImportedFiles = booleanPreferencesKey("deleteImportedFiles")
 }
 
 @Singleton
@@ -55,6 +56,8 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    // one default per setting
+    @Suppress("CyclomaticComplexMethod")
     private fun Preferences.toSettings(): AppSettings {
         val defaults = AppSettings()
         return AppSettings(
@@ -77,6 +80,7 @@ class SettingsRepository @Inject constructor(
             manualSortExplained = this[Keys.manualSortExplained] ?: defaults.manualSortExplained,
             tagFilterMode = enumOrDefault(this[Keys.tagFilterMode], defaults.tagFilterMode),
             documentLayout = enumOrDefault(this[Keys.documentLayout], defaults.documentLayout),
+            deleteImportedFiles = this[Keys.deleteImportedFiles] ?: defaults.deleteImportedFiles,
         )
     }
 
@@ -100,6 +104,7 @@ class SettingsRepository @Inject constructor(
         this[Keys.manualSortExplained] = settings.manualSortExplained
         this[Keys.tagFilterMode] = settings.tagFilterMode.name
         this[Keys.documentLayout] = settings.documentLayout.name
+        this[Keys.deleteImportedFiles] = settings.deleteImportedFiles
     }
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String?, default: T): T =

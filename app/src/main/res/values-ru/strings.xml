@@ -153,6 +153,15 @@
         <item quantity="many">%d документов уже были импортированы</item>
         <item quantity="other">%d документа уже были импортированы</item>
     </plurals>
+    <string name="settings_section_import">Импорт</string>
+    <string name="preference_delete_imported_files">Удалять PDF после импорта</string>
+    <string name="preference_delete_imported_files_description">Удалять исходный файл, когда он уже в приложении. Файлы, которыми поделились другие приложения, часто нельзя удалить</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="one">Не удалось удалить %d исходный файл</item>
+        <item quantity="few">Не удалось удалить %d исходных файла</item>
+        <item quantity="many">Не удалось удалить %d исходных файлов</item>
+        <item quantity="other">Не удалось удалить %d исходного файла</item>
+    </plurals>
     <string name="settings_section_backup">Резервная копия</string>
     <string name="create_backup">Создать резервную копию</string>
     <string name="create_backup_summary">Сохранить все документы и теги в файл, защищенный паролем</string>

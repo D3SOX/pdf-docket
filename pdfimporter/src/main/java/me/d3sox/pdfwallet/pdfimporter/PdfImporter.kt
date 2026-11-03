@@ -14,6 +14,8 @@ public interface PdfImporter {
     public suspend fun preparePendingFile(uri: Uri): PdfImportResult
     public fun deletePendingFile()
     public suspend fun importPendingFile(password: String?): PdfImportResult
+    /** Deletes the file a document was imported from, returns whether it worked. */
+    public suspend fun deleteSourceFile(uri: Uri): Boolean
 }
 
 internal class PdfImporterImpl @Inject constructor(
@@ -55,6 +57,8 @@ internal class PdfImporterImpl @Inject constructor(
             importPasswordProtectedPdf(password)
         }
     }
+
+    override suspend fun deleteSourceFile(uri: Uri): Boolean = fileRepo.deleteSource(uri)
 
     @Suppress("TooGenericExceptionCaught", "ReturnCount")
     private suspend fun importRegularPdf(): PdfImportResult {

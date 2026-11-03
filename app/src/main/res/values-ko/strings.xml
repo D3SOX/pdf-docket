@@ -138,6 +138,12 @@
     <plurals name="documents_already_imported">
         <item quantity="other">문서 %d개는 이미 가져왔습니다</item>
     </plurals>
+    <string name="settings_section_import">가져오기</string>
+    <string name="preference_delete_imported_files">가져온 후 PDF 삭제</string>
+    <string name="preference_delete_imported_files_description">앱에 저장되면 원본 파일을 삭제합니다. 다른 앱에서 공유한 파일은 삭제할 수 없는 경우가 많습니다</string>
+    <plurals name="source_files_not_deleted">
+        <item quantity="other">원본 파일 %d개를 삭제하지 못했습니다</item>
+    </plurals>
     <string name="settings_section_backup">백업</string>
     <string name="create_backup">백업 만들기</string>
     <string name="create_backup_summary">모든 문서와 태그를 비밀번호로 보호된 파일에 저장합니다</string>
