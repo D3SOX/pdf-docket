@@ -15,7 +15,10 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -31,9 +34,14 @@ class DocumentDetailsViewModel @AssistedInject constructor(
     val editor: DocumentEditor,
 ) : ViewModel() {
 
+    // the filter starts over when the app is restored after its process was killed, the document may be archived
+    private val initialArchiveShown = viewModelScope.async { filter.showArchiveOf(initialDocumentId) }
+
     /** null while loading */
-    val documentList: StateFlow<DocumentList?> = filter.documentList
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+    val documentList: StateFlow<DocumentList?> = flow {
+        initialArchiveShown.await()
+        emitAll(filter.documentList)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
     fun scanBarcodes(id: String, settings: AppSettings): Flow<BarcodeScan> =
         renderer.scanBarcodes(id, settings.barcodeSearchMode, settings.generateNewBarcode)

@@ -195,4 +195,13 @@
     <string name="grid_view">Visualização em grade</string>
     <string name="edit_tag">Editar etiqueta</string>
     <string name="tag_icon">Ícone</string>
+    <string name="archive">Arquivar</string>
+    <string name="unarchive">Desarquivar</string>
+    <string name="archive_on_date">Arquivar em uma data</string>
+    <string name="dialog_archive_date_title">Arquivar automaticamente em</string>
+    <string name="archives_on">Será arquivado em %1$s</string>
+    <string name="remove">Remover</string>
+    <string name="archive_title">Arquivo</string>
+    <string name="archive_empty_title">Nenhum documento arquivado</string>
+    <string name="archive_empty_description">Arquive documentos para ocultá-los da sua lista sem excluí-los. Você também pode escolher uma data para que um documento seja arquivado automaticamente.</string>
 </resources>

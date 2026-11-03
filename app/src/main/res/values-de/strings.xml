@@ -190,4 +190,13 @@
     <string name="grid_view">Rasteransicht</string>
     <string name="edit_tag">Tag bearbeiten</string>
     <string name="tag_icon">Symbol</string>
+    <string name="archive">Archivieren</string>
+    <string name="unarchive">Aus dem Archiv holen</string>
+    <string name="archive_on_date">An Datum archivieren</string>
+    <string name="dialog_archive_date_title">Automatisch archivieren am</string>
+    <string name="archives_on">Wird am %1$s archiviert</string>
+    <string name="remove">Entfernen</string>
+    <string name="archive_title">Archiv</string>
+    <string name="archive_empty_title">Keine archivierten Dokumente</string>
+    <string name="archive_empty_description">Archiviere Dokumente, um sie aus deiner Liste auszublenden, ohne sie zu löschen. Du kannst auch ein Datum wählen, an dem ein Dokument automatisch archiviert wird.</string>
 </resources>

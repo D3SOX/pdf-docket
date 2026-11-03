@@ -15,6 +15,7 @@ import me.d3sox.pdfwallet.coroutines.dispatcher.di.CoroutineDispatchersModule
 import me.d3sox.pdfwallet.db.di.DatabaseModule
 import me.d3sox.pdfwallet.db.Tag
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -75,6 +76,39 @@ class DocumentFilterTest {
         visibleNames() shouldContainExactly listOf("gamma", "Alpha", "beta")
         certificateDao.reorder(listOf("1.pdf", "3.pdf", "2.pdf"))
         visibleNames() shouldContainExactly listOf("beta", "gamma", "Alpha")
+    }
+
+    @Test
+    fun archive_showsOnlyTheArchivedDocuments() = runTest {
+        settingsRepository.update { it.copy(sortOrder = SortOrder.NAME_ASC) }
+        certificateDao.archive(listOf("1.pdf"))
+        visibleNames() shouldContainExactly listOf("Alpha", "gamma")
+        // the archived document isn't counted as filtered out
+        filter.documentList.first().isFiltered shouldBe false
+
+        filter.setQuery("a")
+        filter.show(archive = true)
+        filter.documentList.first().archive shouldBe true
+        // and the search was cleared
+        visibleNames() shouldContainExactly listOf("beta")
+
+        filter.show(archive = false)
+        visibleNames() shouldContainExactly listOf("Alpha", "gamma")
+    }
+
+    @Test
+    fun showArchiveOf_followsTheDocumentAndKeepsTheFilters() = runTest {
+        certificateDao.archive(listOf("1.pdf"))
+        filter.setQuery("a")
+
+        filter.showArchiveOf("1.pdf")
+        filter.documentList.first().let {
+            it.archive shouldBe true
+            it.query shouldBe "a"
+        }
+
+        filter.showArchiveOf("2.pdf")
+        filter.documentList.first().archive shouldBe false
     }
 
     @Test

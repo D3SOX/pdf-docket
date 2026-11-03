@@ -195,4 +195,13 @@
     <string name="grid_view">Vista griglia</string>
     <string name="edit_tag">Modifica tag</string>
     <string name="tag_icon">Icona</string>
+    <string name="archive">Archivia</string>
+    <string name="unarchive">Rimuovi dall\'archivio</string>
+    <string name="archive_on_date">Archivia in una data</string>
+    <string name="dialog_archive_date_title">Archivia automaticamente il</string>
+    <string name="archives_on">Verrà archiviato il %1$s</string>
+    <string name="remove">Rimuovi</string>
+    <string name="archive_title">Archivio</string>
+    <string name="archive_empty_title">Nessun documento archiviato</string>
+    <string name="archive_empty_description">Archivia i documenti per nasconderli dall\'elenco senza eliminarli. Puoi anche scegliere una data in cui un documento verrà archiviato automaticamente.</string>
 </resources>

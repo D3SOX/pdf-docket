@@ -195,4 +195,13 @@
     <string name="grid_view">Vue en grille</string>
     <string name="edit_tag">Modifier l\'étiquette</string>
     <string name="tag_icon">Icône</string>
+    <string name="archive">Archiver</string>
+    <string name="unarchive">Désarchiver</string>
+    <string name="archive_on_date">Archiver à une date</string>
+    <string name="dialog_archive_date_title">Archiver automatiquement le</string>
+    <string name="archives_on">Sera archivé le %1$s</string>
+    <string name="remove">Supprimer la date</string>
+    <string name="archive_title">Archives</string>
+    <string name="archive_empty_title">Aucun document archivé</string>
+    <string name="archive_empty_description">Archivez des documents pour les masquer de votre liste sans les supprimer. Vous pouvez aussi choisir une date à laquelle un document sera archivé automatiquement.</string>
 </resources>

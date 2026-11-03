@@ -29,6 +29,13 @@ class DocumentEditor @Inject constructor(
         context.disableShortcuts(ids)
     }
 
+    fun setArchived(ids: List<String>, archived: Boolean) = scope.launch {
+        if (archived) repository.archive(ids) else repository.unarchive(ids)
+    }
+
+    /** [archiveAt] in epoch millis, or null to keep the document */
+    fun setArchiveAt(id: String, archiveAt: Long?) = scope.launch { repository.setArchiveAt(id, archiveAt) }
+
     fun setTags(id: String, tagIds: Set<Long>) = scope.launch { repository.setTags(id, tagIds) }
 
     fun updateTags(ids: List<String>, addedTagIds: Set<Long>, removedTagIds: Set<Long>) = scope.launch {

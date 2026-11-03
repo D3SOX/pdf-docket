@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -20,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -29,7 +28,6 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -124,6 +122,11 @@ fun DocumentsScreen(
         selectionDialog = null
     }
     val selectAll = { selectedIds = list?.visible.orEmpty().map { it.id } }
+    val isArchive = list?.archive == true
+    val showArchive = { archive: Boolean ->
+        isSearching = false
+        vm.onShowArchive(archive)
+    }
     LaunchedEffect(list?.visible) {
         list?.let { documents ->
             val visibleIds = documents.visible.map { it.id }.toSet()
@@ -136,6 +139,8 @@ fun DocumentsScreen(
         isSearching = false
         vm.onQueryChange("")
     }
+    // registered first, so closing the search or the selection comes first
+    BackHandler(enabled = isArchive) { showArchive(false) }
     BackHandler(enabled = isSearching, onBack = closeSearch)
     BackHandler(enabled = isSelecting, onBack = clearSelection)
 
@@ -144,14 +149,20 @@ fun DocumentsScreen(
             if (isSelecting) {
                 SelectionTopBar(
                     count = selectedDocuments.size,
+                    isArchive = isArchive,
                     onClose = clearSelection,
                     onSelectAll = selectAll,
                     onTags = { selectionDialog = SelectionDialog.TAGS },
                     onShare = { context.sharePdfs(selectedDocuments) },
+                    onArchive = {
+                        vm.editor.setArchived(selectedDocuments.map { it.id }, archived = !isArchive)
+                        clearSelection()
+                    },
                     onDelete = { selectionDialog = SelectionDialog.DELETE },
                 )
             } else DocumentsTopBar(
                 isSearching = isSearching,
+                isArchive = isArchive,
                 query = query,
                 hasDocuments = !list?.all.isNullOrEmpty(),
                 settings = settings,
@@ -169,6 +180,7 @@ fun DocumentsScreen(
                 onExport = { list?.visible?.takeIf { it.isNotEmpty() }?.let(context::sharePdfs) },
                 onDelete = { listDialog = ListDialog.DELETE_VISIBLE },
                 onSelectAll = selectAll,
+                onShowArchive = showArchive,
                 onLock = vm::onLock,
                 onOpenSettings = onOpenSettings,
                 onOpenAbout = onOpenAbout,
@@ -176,7 +188,7 @@ fun DocumentsScreen(
             )
         },
         floatingActionButton = {
-            if (!isSelecting) {
+            if (!isSelecting && !isArchive) {
                 val label = stringResource(R.string.import_pdf)
                 ExtendedFloatingActionButton(
                     onClick = onAddDocument,
@@ -192,7 +204,7 @@ fun DocumentsScreen(
     ) { innerPadding ->
         when {
             list == null -> Unit
-            list.all.isEmpty() -> EmptyState(onAddDocument, Modifier.padding(innerPadding))
+            list.all.isEmpty() -> EmptyState(isArchive, onAddDocument, Modifier.padding(innerPadding))
             else -> DocumentList(
                 list = list,
                 contentPadding = innerPadding,
@@ -206,6 +218,7 @@ fun DocumentsScreen(
                 onReorder = vm.editor::reorder,
                 onOpenDocument = onOpenDocument,
                 onDialog = { documentDialog = it },
+                editor = vm.editor,
                 selectedIds = selectedIds.toSet(),
                 onToggleSelection = { id ->
                     selectedIds = if (id in selectedIds) selectedIds - id else selectedIds + id
@@ -277,7 +290,8 @@ private fun ListDialogHost(
         ListDialog.DELETE_VISIBLE -> {
             val documents = list?.visible.orEmpty()
             ConfirmDialog(
-                text = if (list?.isFiltered == true) {
+                // "all" would be wrong in the archive, which only has some of the documents
+                text = if (list?.isFiltered == true || list?.archive == true) {
                     pluralStringResource(
                         R.plurals.dialog_delete_filtered_confirmation_text,
                         documents.size,
@@ -306,6 +320,7 @@ private fun ListDialogHost(
 @Suppress("LongParameterList")
 private fun DocumentsTopBar(
     isSearching: Boolean,
+    isArchive: Boolean,
     query: String,
     hasDocuments: Boolean,
     settings: AppSettings,
@@ -323,6 +338,7 @@ private fun DocumentsTopBar(
     onExport: () -> Unit,
     onDelete: () -> Unit,
     onSelectAll: () -> Unit,
+    onShowArchive: (Boolean) -> Unit,
     onLock: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -332,6 +348,8 @@ private fun DocumentsTopBar(
         title = {
             if (isSearching) {
                 SearchField(query, onQueryChange)
+            } else if (isArchive) {
+                Text(stringResource(R.string.archive_title))
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
@@ -349,6 +367,10 @@ private fun DocumentsTopBar(
             if (isSearching) {
                 IconButton(onClick = onCloseSearch) {
                     Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close_search))
+                }
+            } else if (isArchive) {
+                IconButton(onClick = { onShowArchive(false) }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                 }
             }
         },
@@ -375,6 +397,7 @@ private fun DocumentsTopBar(
             }
             OverflowMenu(
                 hasDocuments = hasDocuments,
+                isArchive = isArchive,
                 layout = settings.documentLayout,
                 onToggleLayout = onToggleLayout,
                 isFiltered = isFiltered,
@@ -383,6 +406,7 @@ private fun DocumentsTopBar(
                 onExport = onExport,
                 onDelete = onDelete,
                 onSelectAll = onSelectAll,
+                onOpenArchive = { onShowArchive(true) },
                 onLock = onLock,
                 onOpenSettings = onOpenSettings,
                 onOpenAbout = onOpenAbout,
@@ -488,6 +512,7 @@ private fun SortMenu(selected: SortOrder, onSelect: (SortOrder) -> Unit) {
 @Suppress("LongParameterList")
 private fun OverflowMenu(
     hasDocuments: Boolean,
+    isArchive: Boolean,
     layout: DocumentLayout,
     onToggleLayout: () -> Unit,
     isFiltered: Boolean,
@@ -496,6 +521,7 @@ private fun OverflowMenu(
     onExport: () -> Unit,
     onDelete: () -> Unit,
     onSelectAll: () -> Unit,
+    onOpenArchive: () -> Unit,
     onLock: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -517,6 +543,7 @@ private fun OverflowMenu(
                 }
             }
             group {
+                if (!isArchive) action(R.string.archive_title, R.drawable.archive_24px, dismiss, onOpenArchive)
                 action(R.string.menu_item_manage_tags, R.drawable.tag_24, dismiss, onManageTags)
                 if (hasDocuments) {
                     action(R.string.select_all, R.drawable.select_all_24, dismiss, onSelectAll)
@@ -572,6 +599,7 @@ private fun DocumentList(
     onClearFilters: () -> Unit,
     onOpenDocument: (String) -> Unit,
     onDialog: (DocumentDialog) -> Unit,
+    editor: DocumentEditor,
     selectedIds: Set<String>,
     onToggleSelection: (String) -> Unit,
 ) {
@@ -597,8 +625,8 @@ private fun DocumentList(
             start = 16.dp,
             end = 16.dp,
             top = contentPadding.calculateTopPadding() + 8.dp,
-            // keep the last tiles clear of the floating action button
-            bottom = contentPadding.calculateBottomPadding() + 88.dp,
+            // keep the last tiles clear of the floating action button, the archive has none
+            bottom = contentPadding.calculateBottomPadding() + if (list.archive) 16.dp else 88.dp,
         ),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(if (asList) 8.dp else 12.dp),
@@ -642,6 +670,7 @@ private fun DocumentList(
                         if (selectedIds.isEmpty()) onOpenDocument(document.id) else onToggleSelection(document.id)
                     },
                     onDialog = onDialog,
+                    editor = editor,
                     selectionMode = selectedIds.isNotEmpty(),
                     isSelected = document.id in selectedIds,
                     isDragging = isDragging,
@@ -677,34 +706,3 @@ private fun DocumentList(
 
 private fun LazyGridScope.fullWidthItem(key: String, content: @Composable () -> Unit) =
     item(key = key, contentType = key, span = { GridItemSpan(maxLineSpan) }) { content() }
-
-@Composable
-private fun EmptyState(onAddDocument: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-    ) {
-        Icon(
-            painterResource(R.drawable.picture_as_pdf_24),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(72.dp),
-        )
-        Spacer(Modifier.height(24.dp))
-        Text(stringResource(R.string.empty_state_title), style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            stringResource(R.string.empty_state_description),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = onAddDocument) {
-            Text(stringResource(R.string.import_pdf))
-        }
-    }
-}

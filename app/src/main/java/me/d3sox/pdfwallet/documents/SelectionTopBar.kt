@@ -22,12 +22,16 @@ import me.d3sox.pdfwallet.ui.components.action
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("LongParameterList")
 fun SelectionTopBar(
     count: Int,
+    isArchive: Boolean,
     onClose: () -> Unit,
     onSelectAll: () -> Unit,
     onTags: () -> Unit,
     onShare: () -> Unit,
+    /** or unarchive, in the archive */
+    onArchive: () -> Unit,
     onDelete: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -51,6 +55,11 @@ fun SelectionTopBar(
                         action(R.string.share, R.drawable.share_24px, dismiss, onShare)
                     }
                     group {
+                        if (isArchive) {
+                            action(R.string.unarchive, R.drawable.unarchive_24px, dismiss, onArchive)
+                        } else {
+                            action(R.string.archive, R.drawable.archive_24px, dismiss, onArchive)
+                        }
                         action(R.string.delete, R.drawable.delete_24, dismiss, onDelete)
                     }
                 }

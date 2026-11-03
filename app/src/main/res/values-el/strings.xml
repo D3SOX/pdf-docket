@@ -190,4 +190,13 @@
     <string name="grid_view">Προβολή πλέγματος</string>
     <string name="edit_tag">Επεξεργασία ετικέτας</string>
     <string name="tag_icon">Εικονίδιο</string>
+    <string name="archive">Αρχειοθέτηση</string>
+    <string name="unarchive">Κατάργηση αρχειοθέτησης</string>
+    <string name="archive_on_date">Αρχειοθέτηση σε ημερομηνία</string>
+    <string name="dialog_archive_date_title">Αυτόματη αρχειοθέτηση στις</string>
+    <string name="archives_on">Θα αρχειοθετηθεί στις %1$s</string>
+    <string name="remove">Αφαίρεση</string>
+    <string name="archive_title">Αρχείο</string>
+    <string name="archive_empty_title">Δεν υπάρχουν αρχειοθετημένα έγγραφα</string>
+    <string name="archive_empty_description">Αρχειοθετήστε έγγραφα για να τα αποκρύψετε από τη λίστα σας χωρίς να τα διαγράψετε. Μπορείτε επίσης να επιλέξετε μια ημερομηνία για την αυτόματη αρχειοθέτηση ενός εγγράφου.</string>
 </resources>

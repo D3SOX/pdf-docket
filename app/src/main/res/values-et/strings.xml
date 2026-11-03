@@ -190,4 +190,13 @@
     <string name="grid_view">Ruudustikuvaade</string>
     <string name="edit_tag">Muuda silti</string>
     <string name="tag_icon">Ikoon</string>
+    <string name="archive">Arhiveeri</string>
+    <string name="unarchive">Taasta arhiivist</string>
+    <string name="archive_on_date">Arhiveeri kuupäeval</string>
+    <string name="dialog_archive_date_title">Arhiveeri automaatselt</string>
+    <string name="archives_on">Arhiveeritakse %1$s</string>
+    <string name="remove">Eemalda</string>
+    <string name="archive_title">Arhiiv</string>
+    <string name="archive_empty_title">Arhiveeritud dokumente pole</string>
+    <string name="archive_empty_description">Arhiveeri dokumente, et peita need loendist ilma kustutamata. Saad valida ka kuupäeva, mil dokument automaatselt arhiveeritakse.</string>
 </resources>

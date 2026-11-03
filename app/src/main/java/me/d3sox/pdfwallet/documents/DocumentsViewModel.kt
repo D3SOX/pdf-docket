@@ -36,6 +36,8 @@ class DocumentsViewModel @Inject constructor(
 
     fun onClearFilters() = filter.clear()
 
+    fun onShowArchive(archive: Boolean) = filter.show(archive)
+
     fun onSortOrderSelected(sortOrder: SortOrder) = viewModelScope.launch {
         settingsRepository.update { it.copy(sortOrder = sortOrder) }
     }

@@ -37,6 +37,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
+// 2100-01-01
+private const val ARCHIVE_AT = 4_102_444_800_000L
+
 private const val PASSWORD = "correct horse battery staple"
 
 @HiltAndroidTest
@@ -78,11 +81,14 @@ class BackupRepositoryTest {
     }
 
     @Test
-    fun restore_bringsBackDocumentsNamesDatesTagsAndOrder() = runTest {
+    fun restore_bringsBackDocumentsNamesDatesTagsOrderAndArchive() = runTest {
         documentRepository.updateTag(Tag(documentRepository.createTag("Travel"), "Travel", TagIcon.TRAIN.name))
         documentRepository.createTag("Unused")
         addDocument("a.pdf", name = "Train ticket", tags = setOf("Travel"))
         addDocument("b.pdf", name = "Certificate")
+        addDocument("c.pdf", name = "Old ticket")
+        documentRepository.setArchiveAt("a.pdf", ARCHIVE_AT)
+        documentRepository.archive(listOf("c.pdf"))
         // differs from the import order, which would be used if the manual order got lost
         documentRepository.reorder(listOf("a.pdf", "b.pdf"))
         val original = documentRepository.documents.first()
@@ -91,7 +97,7 @@ class BackupRepositoryTest {
         deleteEverything()
         val restored = backupRepository.restore(backupUri, PASSWORD)
 
-        restored shouldBe 2
+        restored shouldBe 3
         // restored tags get new ids, and restored documents new positions in the same order
         fun List<Document>.withoutIds() =
             map { it.copy(position = 0, tags = it.tags.map { tag -> tag.copy(id = 0) }) }

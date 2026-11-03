@@ -10,7 +10,9 @@ import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
 import me.d3sox.pdfwallet.render.BarcodeScanStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -38,6 +40,8 @@ class DocumentRepository @Inject constructor(
                     position = it.certificate.position,
                     sizeBytes = file(it.certificate.id).length(),
                     tags = it.tags.sortedBy { tag -> tag.name.lowercase() },
+                    archived = it.certificate.archived,
+                    archiveAt = it.certificate.archiveAt,
                 )
             }
         }
@@ -50,7 +54,8 @@ class DocumentRepository @Inject constructor(
     /**
      * Adds the document at the top of the manual order, unless one with the same content is already there,
      * e.g. when a ticket is shared twice.
-     * Then the file of the pending document is deleted and the id of the existing one is returned.
+     * Then the file of the pending document is deleted, the existing one is taken out of the archive
+     * and its id is returned.
      */
     suspend fun add(pending: PendingCertificate): String? {
         val ids = certificateDao.ids()
@@ -69,16 +74,37 @@ class DocumentRepository @Inject constructor(
                     position = (certificateDao.minPosition() ?: 0) - 1,
                 )
             )
+        } else {
+            certificateDao.unarchive(listOf(duplicate))
         }
         return duplicate
     }
 
-    suspend fun exists(id: String): Boolean = certificateDao.exists(id)
+    /** null if there is no such document */
+    suspend fun isArchived(id: String): Boolean? = certificateDao.isArchived(id)
 
     suspend fun rename(id: String, name: String) = certificateDao.updateName(id, name)
 
     /** @see CertificateDao.reorder */
     suspend fun reorder(ids: List<String>) = certificateDao.reorder(ids)
+
+    /** Also cancels their automatic archiving */
+    suspend fun archive(ids: List<String>) = certificateDao.archive(ids)
+
+    suspend fun unarchive(ids: List<String>) = certificateDao.unarchive(ids)
+
+    /** [archiveAt] in epoch millis, or null to keep the document */
+    suspend fun setArchiveAt(id: String, archiveAt: Long?) = certificateDao.setArchiveAt(id, archiveAt)
+
+    /**
+     * Archives the documents whose archive date has passed, and then each one when its date is reached,
+     * until cancelled.
+     */
+    suspend fun archiveWhenDue() = certificateDao.nextArchiveAt().collectLatest { archiveAt ->
+        archiveAt ?: return@collectLatest
+        delay(archiveAt - System.currentTimeMillis())
+        certificateDao.archiveDue(System.currentTimeMillis())
+    }
 
     suspend fun delete(ids: List<String>) {
         certificateDao.delete(ids)
