@@ -47,11 +47,14 @@ class DocumentRenderer @Inject constructor(
 
     private val screenWidth: Int get() = context.resources.displayMetrics.widthPixels
 
-    suspend fun thumbnail(id: String): Bitmap? = cached("thumb-$id") {
+    suspend fun thumbnail(id: String): Bitmap? = cached(thumbnailKey(id)) {
         withRenderer(id) { renderer ->
             renderer.renderPage(pageIndex = 0, highResolution = false)?.scaleToWidth(THUMBNAIL_WIDTH_PX)
         }
     }
+
+    /** The thumbnail if it's already rendered, to show it without waiting a frame for [thumbnail] */
+    fun cachedThumbnail(id: String): Bitmap? = cache.get(thumbnailKey(id))
 
     suspend fun page(id: String, pageIndex: Int): Bitmap? = cached(pageKey(id, pageIndex)) {
         withRenderer(id) { renderer ->
@@ -111,6 +114,8 @@ class DocumentRenderer @Inject constructor(
             emit(scan)
         }
     }
+
+    private fun thumbnailKey(id: String) = "thumb-$id"
 
     private fun pageKey(id: String, pageIndex: Int) = "page-$id-$pageIndex"
 

@@ -58,6 +58,8 @@ class DocumentsViewModel @AssistedInject constructor(
 
     suspend fun thumbnail(id: String): Bitmap? = renderer.thumbnail(id)
 
+    fun cachedThumbnail(id: String): Bitmap? = renderer.cachedThumbnail(id)
+
     @AssistedFactory
     interface Factory {
         fun create(archive: Boolean): DocumentsViewModel
