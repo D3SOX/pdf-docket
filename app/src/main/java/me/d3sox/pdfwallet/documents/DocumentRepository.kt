@@ -102,7 +102,8 @@ class DocumentRepository @Inject constructor(
      */
     suspend fun archiveWhenDue() = certificateDao.nextArchiveAt().collectLatest { archiveAt ->
         archiveAt ?: return@collectLatest
-        delay(archiveAt - System.currentTimeMillis())
+        // delay follows the uptime, which can fall behind the wall clock, and archiving nothing wouldn't wait again
+        while (System.currentTimeMillis() < archiveAt) delay(archiveAt - System.currentTimeMillis())
         certificateDao.archiveDue(System.currentTimeMillis())
     }
 
