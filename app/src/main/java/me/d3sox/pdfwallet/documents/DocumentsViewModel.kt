@@ -9,14 +9,17 @@ import me.d3sox.pdfwallet.settings.DocumentLayout
 import me.d3sox.pdfwallet.settings.SettingsRepository
 import me.d3sox.pdfwallet.settings.SortOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class DocumentsViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = DocumentsViewModel.Factory::class)
+class DocumentsViewModel @AssistedInject constructor(
+    @Assisted archive: Boolean,
     private val filter: DocumentFilter,
     private val settingsRepository: SettingsRepository,
     private val lockedRepo: AppLockedRepo,
@@ -25,7 +28,7 @@ class DocumentsViewModel @Inject constructor(
 ) : ViewModel() {
 
     /** null while loading */
-    val documentList: StateFlow<DocumentList?> = filter.documentList
+    val documentList: StateFlow<DocumentList?> = filter.documentList(archive)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
     val query: StateFlow<String> = filter.query
@@ -35,8 +38,6 @@ class DocumentsViewModel @Inject constructor(
     fun onToggleTag(id: Long) = filter.toggleTag(id)
 
     fun onClearFilters() = filter.clear()
-
-    fun onShowArchive(archive: Boolean) = filter.show(archive)
 
     fun onSortOrderSelected(sortOrder: SortOrder) = viewModelScope.launch {
         settingsRepository.update { it.copy(sortOrder = sortOrder) }
@@ -56,6 +57,11 @@ class DocumentsViewModel @Inject constructor(
     fun onLock() = lockedRepo.lockApp()
 
     suspend fun thumbnail(id: String): Bitmap? = renderer.thumbnail(id)
+
+    @AssistedFactory
+    interface Factory {
+        fun create(archive: Boolean): DocumentsViewModel
+    }
 
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L

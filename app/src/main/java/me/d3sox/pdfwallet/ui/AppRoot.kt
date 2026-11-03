@@ -43,7 +43,15 @@ fun AppRoot(
 ) {
     val backStack = rememberNavBackStack(DocumentsRoute)
     // e.g. a double tap on a back arrow would otherwise also remove the document list, which crashes
-    val goBack: () -> Unit = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }
+    val goBack: () -> Unit = {
+        if (backStack.size > 1 && backStack.removeAt(backStack.lastIndex) == ArchiveRoute) {
+            vm.documentFilter.show(archive = false)
+        }
+    }
+    val openArchive: () -> Unit = {
+        vm.documentFilter.show(archive = true)
+        backStack.add(ArchiveRoute)
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val importError = stringResource(R.string.error_reading_pdf)
     val resources = LocalResources.current
@@ -61,6 +69,7 @@ fun AppRoot(
             when (event) {
                 is MainEvent.OpenDocument -> {
                     backStack.retainAll { it == DocumentsRoute }
+                    if (event.archived) backStack.add(ArchiveRoute)
                     backStack.add(DetailsRoute(event.id))
                 }
                 is MainEvent.DocumentsImported -> {
@@ -99,11 +108,26 @@ fun AppRoot(
             entryProvider = entryProvider {
                 entry<DocumentsRoute> {
                     DocumentsScreen(
+                        isArchive = false,
                         settings = state.settings,
                         onAddDocument = { documentPicker.launch(arrayOf(PDF_MIME_TYPE)) },
                         onOpenDocument = { backStack.add(DetailsRoute(it)) },
                         onOpenSettings = { backStack.add(SettingsRoute) },
                         onOpenAbout = { backStack.add(AboutRoute) },
+                        onOpenArchive = openArchive,
+                        onBack = goBack,
+                    )
+                }
+                entry<ArchiveRoute> {
+                    DocumentsScreen(
+                        isArchive = true,
+                        settings = state.settings,
+                        onAddDocument = { documentPicker.launch(arrayOf(PDF_MIME_TYPE)) },
+                        onOpenDocument = { backStack.add(DetailsRoute(it)) },
+                        onOpenSettings = { backStack.add(SettingsRoute) },
+                        onOpenAbout = { backStack.add(AboutRoute) },
+                        onOpenArchive = openArchive,
+                        onBack = goBack,
                     )
                 }
                 entry<DetailsRoute> { route ->
@@ -118,7 +142,7 @@ fun AppRoot(
                     )
                 }
                 entry<SettingsRoute> {
-                    SettingsScreen(onBack = goBack)
+                    SettingsScreen(settings = state.settings, onBack = goBack)
                 }
                 entry<AboutRoute> {
                     AboutScreen(onBack = goBack)

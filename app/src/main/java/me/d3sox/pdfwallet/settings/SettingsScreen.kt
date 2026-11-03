@@ -60,12 +60,11 @@ private enum class SettingsDialog { LOCK_TIMEOUT, BARCODE_MODE, THEME, TAG_FILTE
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
+    settings: AppSettings,
     onBack: () -> Unit,
     vm: SettingsViewModel = hiltViewModel(),
     backupVm: BackupViewModel = hiltViewModel(),
 ) {
-    val state by vm.settings.collectAsStateWithLifecycle()
-    val settings = state ?: return
     val activity = LocalActivity.current as FragmentActivity
     val canAuthenticate = remember { activity.canAuthenticate() }
     var dialog by rememberSaveable { mutableStateOf<SettingsDialog?>(null) }

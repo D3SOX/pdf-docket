@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,7 +35,7 @@ data class DocumentList(
 @Singleton
 class DocumentFilter @Inject constructor(
     private val repository: DocumentRepository,
-    settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
 ) {
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -43,7 +44,12 @@ class DocumentFilter @Inject constructor(
 
     private val archive = MutableStateFlow(false)
 
-    val documentList: Flow<DocumentList> = combine(
+    val documentList: Flow<DocumentList> = documentList(archive)
+
+    // Navigation can show both lists at once during a transition or a predictive back gesture.
+    fun documentList(archive: Boolean): Flow<DocumentList> = documentList(flowOf(archive))
+
+    private fun documentList(archive: Flow<Boolean>): Flow<DocumentList> = combine(
         repository.documents,
         repository.tags,
         settingsRepository.settings,

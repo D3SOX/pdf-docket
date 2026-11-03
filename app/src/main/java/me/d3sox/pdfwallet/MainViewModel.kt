@@ -34,7 +34,7 @@ data class MainUiState(
 )
 
 sealed interface MainEvent {
-    data class OpenDocument(val id: String) : MainEvent
+    data class OpenDocument(val id: String, val archived: Boolean) : MainEvent
     data class DocumentsImported(val count: Int) : MainEvent
     data class DocumentsAlreadyImported(val count: Int) : MainEvent
     data object ImportFailed : MainEvent
@@ -45,7 +45,7 @@ class MainViewModel @Inject constructor(
     private val pdfImporter: PdfImporter,
     private val lockedRepo: AppLockedRepo,
     private val documentRepository: DocumentRepository,
-    private val documentFilter: DocumentFilter,
+    val documentFilter: DocumentFilter,
     private val settingsRepository: SettingsRepository,
     val lockTimer: AppLockTimer,
 ) : ViewModel() {
@@ -81,7 +81,7 @@ class MainViewModel @Inject constructor(
         val archived = documentRepository.isArchived(id) ?: return@launch
         // make sure the document is part of the visible documents
         documentFilter.show(archive = archived)
-        _events.send(MainEvent.OpenDocument(id))
+        _events.send(MainEvent.OpenDocument(id, archived))
     }
 
     /** Archives documents when their archive date is reached, until cancelled. */
@@ -119,7 +119,8 @@ class MainViewModel @Inject constructor(
         }
         // not suspending, so files selected meanwhile can't end up in the queue of a finished job
         // a single file opens its document, even if it was already imported
-        val event = (imported + duplicates).distinct().singleOrNull()?.let(MainEvent::OpenDocument)
+        val event = (imported + duplicates).distinct().singleOrNull()
+            ?.let { MainEvent.OpenDocument(it, archived = false) }
             ?: imported.takeIf { it.isNotEmpty() }?.let { MainEvent.DocumentsImported(it.size) }
         if (event != null) {
             // make sure the documents are part of the visible documents, adding them took them out of the archive

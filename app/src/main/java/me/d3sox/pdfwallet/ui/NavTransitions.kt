@@ -11,12 +11,15 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.scene.Scene
@@ -73,7 +76,16 @@ fun <T : Any> roundedWhileLeaving(): NavEntryDecorator<T> = NavEntryDecorator { 
         transitionSpec = { tween(CORNER_DURATION_MS) },
         label = "cornerRadius",
     ) { if (it == EnterExitState.PostExit) LEAVING_CORNER_RADIUS else 0.dp }
-    Box(Modifier.clip(RoundedCornerShape(radius))) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            // read while drawing, so the animation doesn't recompose the screen every frame
+            .graphicsLayer {
+                shape = RoundedCornerShape(radius)
+                clip = true
+            }
+            .background(MaterialTheme.colorScheme.background),
+    ) {
         entry.Content()
     }
 }

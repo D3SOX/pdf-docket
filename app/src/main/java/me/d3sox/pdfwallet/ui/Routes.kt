@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 data object DocumentsRoute : NavKey
 
 @Serializable
+data object ArchiveRoute : NavKey
+
+@Serializable
 data class DetailsRoute(val documentId: String) : NavKey
 
 @Serializable
