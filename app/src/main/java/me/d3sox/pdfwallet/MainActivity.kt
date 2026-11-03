@@ -16,6 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.core.content.IntentCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.d3sox.pdfwallet.documents.ACTION_OPEN_DOCUMENT
 import me.d3sox.pdfwallet.documents.EXTRA_DOCUMENT_ID
@@ -24,6 +27,7 @@ import me.d3sox.pdfwallet.settings.ThemeMode
 import me.d3sox.pdfwallet.ui.AppRoot
 import me.d3sox.pdfwallet.ui.theme.PdfWalletTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 // same as the androidx.activity defaults
 private val LIGHT_NAVIGATION_BAR_SCRIM = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
@@ -45,6 +49,11 @@ class MainActivity : FragmentActivity() {
 
         if (savedInstanceState == null) {
             handleIntent(intent)
+        }
+
+        // restarted when the app is shown again, the device may have slept through an archive date
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) { vm.archiveWhenDue() }
         }
 
         setContent {

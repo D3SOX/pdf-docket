@@ -78,12 +78,14 @@ class MainViewModel @Inject constructor(
     }
 
     fun onShortcutOpened(id: String) = viewModelScope.launch {
-        if (documentRepository.exists(id)) {
-            // make sure the document is part of the visible documents
-            documentFilter.clear()
-            _events.send(MainEvent.OpenDocument(id))
-        }
+        val archived = documentRepository.isArchived(id) ?: return@launch
+        // make sure the document is part of the visible documents
+        documentFilter.show(archive = archived)
+        _events.send(MainEvent.OpenDocument(id))
     }
+
+    /** Archives documents when their archive date is reached, until cancelled. */
+    suspend fun archiveWhenDue() = documentRepository.archiveWhenDue()
 
     fun onPasswordEntered(password: String) {
         passwords.trySend(password)
@@ -120,8 +122,8 @@ class MainViewModel @Inject constructor(
         val event = (imported + duplicates).distinct().singleOrNull()?.let(MainEvent::OpenDocument)
             ?: imported.takeIf { it.isNotEmpty() }?.let { MainEvent.DocumentsImported(it.size) }
         if (event != null) {
-            // make sure the documents are part of the visible documents
-            documentFilter.clear()
+            // make sure the documents are part of the visible documents, adding them took them out of the archive
+            documentFilter.show(archive = false)
             _events.trySend(event)
         }
         // one message each for the whole batch, after the documents are shown

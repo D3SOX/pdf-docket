@@ -22,16 +22,19 @@ sealed interface DocumentDialog {
 
     data class Rename(override val document: Document) : DocumentDialog
     data class AssignTags(override val document: Document) : DocumentDialog
+    data class ArchiveDate(override val document: Document) : DocumentDialog
     data class Delete(override val document: Document) : DocumentDialog
 }
 
 /**
  * The menu for a single document, followed by the groups of [extraGroups].
+ * [editor] archives the document right away.
  * [onDialog] opens the matching [DocumentDialog].
  */
 @Composable
 fun DocumentMenu(
     document: Document,
+    editor: DocumentEditor,
     expanded: Boolean,
     onDismiss: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
@@ -55,6 +58,18 @@ fun DocumentMenu(
             }
         }
         group {
+            if (document.archived) {
+                action(R.string.unarchive, R.drawable.unarchive_24px, onDismiss) {
+                    editor.setArchived(listOf(document.id), archived = false)
+                }
+            } else {
+                action(R.string.archive, R.drawable.archive_24px, onDismiss) {
+                    editor.setArchived(listOf(document.id), archived = true)
+                }
+                action(R.string.archive_on_date, R.drawable.event_upcoming_24px, onDismiss) {
+                    onDialog(DocumentDialog.ArchiveDate(document))
+                }
+            }
             action(R.string.delete, R.drawable.delete_24, onDismiss) { onDialog(DocumentDialog.Delete(document)) }
         }
         extraGroups()
@@ -87,6 +102,11 @@ fun DocumentDialogHost(
             assignedTagIds = document.tags.map { it.id }.toSet(),
             onAssignedTagsChange = { editor.setTags(document.id, it) },
             onCreateTag = { name, icon -> editor.createTag(name, icon, assignTo = document) },
+            onDismiss = onDismiss,
+        )
+        is DocumentDialog.ArchiveDate -> ArchiveDateDialog(
+            archiveAt = document.archiveAt,
+            onConfirm = { editor.setArchiveAt(document.id, it) },
             onDismiss = onDismiss,
         )
         is DocumentDialog.Delete -> ConfirmDialog(

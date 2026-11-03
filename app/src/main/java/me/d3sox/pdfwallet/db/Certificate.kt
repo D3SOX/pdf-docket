@@ -22,4 +22,12 @@ data class Certificate(
      * Place in the manual sort order, lower values come first
      */
     @ColumnInfo(name = "position", defaultValue = "0") val position: Int = 0,
+    /**
+     * Archived documents are only shown in the archive
+     */
+    @ColumnInfo(name = "archived", defaultValue = "0") val archived: Boolean = false,
+    /**
+     * When the document gets archived automatically, in epoch millis, or null
+     */
+    @ColumnInfo(name = "archiveAt") val archiveAt: Long? = null,
 )

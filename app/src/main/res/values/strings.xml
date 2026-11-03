@@ -189,4 +189,13 @@
     <string name="grid_view">Grid view</string>
     <string name="edit_tag">Edit tag</string>
     <string name="tag_icon">Icon</string>
+    <string name="archive">Archive</string>
+    <string name="unarchive">Unarchive</string>
+    <string name="archive_on_date">Archive on date</string>
+    <string name="dialog_archive_date_title">Archive automatically on</string>
+    <string name="archives_on">Gets archived on %1$s</string>
+    <string name="remove">Remove</string>
+    <string name="archive_title">Archive</string>
+    <string name="archive_empty_title">No archived documents</string>
+    <string name="archive_empty_description">Archive documents to hide them from your list without deleting them. You can also pick a date for a document to be archived automatically.</string>
 </resources>

@@ -45,6 +45,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.Placeholder
@@ -57,6 +59,8 @@ import android.graphics.Bitmap
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.iconDrawable
+import java.text.DateFormat
+import java.util.Date
 
 private const val PREVIEW_ASPECT_RATIO = 4f / 3f
 private val LIST_PREVIEW_WIDTH = 96.dp
@@ -74,6 +78,7 @@ fun DocumentTile(
     loadThumbnail: suspend (String) -> Bitmap?,
     onClick: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
+    editor: DocumentEditor,
     modifier: Modifier = Modifier,
     selectionMode: Boolean = false,
     isSelected: Boolean = false,
@@ -109,7 +114,7 @@ fun DocumentTile(
         if (asListItem) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Preview(document.id, loadThumbnail, Modifier.width(LIST_PREVIEW_WIDTH))
-                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 1, showTags = true)
+                NameTagsAndActions(document, onDialog, editor, selectionMode, isSelected, asListItem = true)
             }
         } else {
             // the tags are on the preview, which keeps its size, so they don't change the height of the tile
@@ -126,23 +131,32 @@ fun DocumentTile(
                         .align(Alignment.TopEnd)
                         .padding(6.dp),
                 )
+                document.archiveAt?.let {
+                    ArchiveDateChip(
+                        it,
+                        Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(6.dp),
+                    )
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // reserves the same height in every tile, so the grid rows line up
-                NameTagsAndActions(document, onDialog, selectionMode, isSelected, minNameLines = 2, showTags = false)
+                NameTagsAndActions(document, onDialog, editor, selectionMode, isSelected, asListItem = false)
             }
         }
     }
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun RowScope.NameTagsAndActions(
     document: Document,
     onDialog: (DocumentDialog) -> Unit,
+    editor: DocumentEditor,
     selectionMode: Boolean,
     isSelected: Boolean,
-    minNameLines: Int,
-    showTags: Boolean,
+    // grid tiles show the tags and the archive date on the preview
+    asListItem: Boolean,
 ) {
     Column(
         modifier = Modifier
@@ -150,8 +164,9 @@ private fun RowScope.NameTagsAndActions(
             .padding(start = 12.dp, top = 10.dp, bottom = 12.dp),
     ) {
         Box(contentAlignment = Alignment.CenterStart) {
-            // reserves the lines, so a shorter name is centered in them
-            Text(text = "", style = MaterialTheme.typography.titleSmall, minLines = minNameLines)
+            // reserves the lines, so a shorter name is centered in them,
+            // and in a grid the same height in every tile, so the rows line up
+            Text(text = "", style = MaterialTheme.typography.titleSmall, minLines = if (asListItem) 1 else 2)
             Text(
                 text = document.name,
                 style = MaterialTheme.typography.titleSmall,
@@ -160,7 +175,8 @@ private fun RowScope.NameTagsAndActions(
             )
         }
         // an empty line would push the name off center
-        if (showTags && document.tags.isNotEmpty()) TagsLine(document.tags)
+        if (asListItem && document.tags.isNotEmpty()) TagsLine(document.tags)
+        if (asListItem) document.archiveAt?.let { ArchiveDateChip(it, Modifier.padding(top = 4.dp)) }
     }
     if (selectionMode) {
         Checkbox(checked = isSelected, onCheckedChange = null, modifier = Modifier.padding(12.dp))
@@ -169,7 +185,13 @@ private fun RowScope.NameTagsAndActions(
         IconButton(onClick = { showMenu = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
-        DocumentMenu(document = document, expanded = showMenu, onDismiss = { showMenu = false }, onDialog = onDialog)
+        DocumentMenu(
+            document = document,
+            editor = editor,
+            expanded = showMenu,
+            onDismiss = { showMenu = false },
+            onDialog = onDialog,
+        )
     }
 }
 
@@ -192,12 +214,35 @@ private fun TagChips(tags: List<Tag>, modifier: Modifier) {
     }
 }
 
+/**
+ * When the document gets archived automatically.
+ */
 @Composable
-private fun TagChip(text: String, icon: Int?) {
+private fun ArchiveDateChip(archiveAt: Long, modifier: Modifier) {
+    val date = remember(archiveAt) { DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(archiveAt)) }
+    val description = stringResource(R.string.archives_on, date)
+    TagChip(
+        text = date,
+        icon = R.drawable.event_upcoming_24px,
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        modifier = modifier.clearAndSetSemantics { contentDescription = description },
+    )
+}
+
+@Composable
+private fun TagChip(
+    text: String,
+    icon: Int?,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+) {
     Surface(
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f),
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        color = color.copy(alpha = 0.92f),
+        contentColor = contentColor,
+        modifier = modifier,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

@@ -213,4 +213,13 @@
     <string name="grid_view">عرض الشبكة</string>
     <string name="edit_tag">تعديل العلامة</string>
     <string name="tag_icon">الأيقونة</string>
+    <string name="archive">أرشفة</string>
+    <string name="unarchive">إلغاء الأرشفة</string>
+    <string name="archive_on_date">الأرشفة في تاريخ</string>
+    <string name="dialog_archive_date_title">الأرشفة تلقائيًا في</string>
+    <string name="archives_on">ستتم أرشفته في %1$s</string>
+    <string name="remove">إزالة</string>
+    <string name="archive_title">الأرشيف</string>
+    <string name="archive_empty_title">لا توجد مستندات مؤرشفة</string>
+    <string name="archive_empty_description">أرشف المستندات لإخفائها من قائمتك دون حذفها. يمكنك أيضًا اختيار تاريخ تتم فيه أرشفة المستند تلقائيًا.</string>
 </resources>

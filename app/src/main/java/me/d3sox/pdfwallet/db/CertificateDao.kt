@@ -52,6 +52,27 @@ interface CertificateDao {
             .forEachIndexed { position, id -> updatePosition(id, position) }
     }
 
+    /** null if there is no such document */
+    @Query("SELECT archived FROM certificates WHERE id = :id")
+    suspend fun isArchived(id: String): Boolean?
+
+    /** Also cancels their automatic archiving */
+    @Query("UPDATE certificates SET archived = 1, archiveAt = NULL WHERE id IN (:ids)")
+    suspend fun archive(ids: List<String>)
+
+    @Query("UPDATE certificates SET archived = 0 WHERE id IN (:ids)")
+    suspend fun unarchive(ids: List<String>)
+
+    @Query("UPDATE certificates SET archiveAt = :archiveAt WHERE id = :id")
+    suspend fun setArchiveAt(id: String, archiveAt: Long?)
+
+    /** The earliest time a document gets archived automatically, or null if none does */
+    @Query("SELECT MIN(archiveAt) FROM certificates")
+    fun nextArchiveAt(): Flow<Long?>
+
+    @Query("UPDATE certificates SET archived = 1, archiveAt = NULL WHERE archiveAt <= :now")
+    suspend fun archiveDue(now: Long)
+
     @Query("DELETE FROM certificates WHERE id IN (:ids)")
     suspend fun delete(ids: List<String>)
 

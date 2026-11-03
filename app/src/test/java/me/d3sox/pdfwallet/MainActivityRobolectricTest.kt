@@ -173,6 +173,36 @@ class MainActivityRobolectricTest {
     }
 
     @Test
+    fun archive_hidesDocumentsUntilTheyAreUnarchived() = runTest {
+        seedDocuments()
+        val context = composeRule.activity
+        selectTickets()
+        selectionAction(R.string.archive)
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isEmpty()
+        }
+        composeRule.onNodeWithText("Other document").assertIsDisplayed()
+
+        selectionAction(R.string.archive_title)
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onAllNodes(hasText("Other document")).fetchSemanticsNodes().isEmpty() shouldBe true
+        selectTickets()
+        selectionAction(R.string.unarchive)
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText(context.getString(R.string.archive_empty_title)))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.runOnUiThread { context.onBackPressedDispatcher.onBackPressed() }
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isNotEmpty()
+        }
+        repository.documents.first().none { it.archived } shouldBe true
+    }
+
+    @Test
     fun openDocument_explainsWhenThePdfCantBeOpened() {
         // the seeded documents are text files, not PDFs
         seedDocuments()

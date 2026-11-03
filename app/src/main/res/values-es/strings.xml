@@ -195,4 +195,13 @@
     <string name="grid_view">Vista de cuadrícula</string>
     <string name="edit_tag">Editar etiqueta</string>
     <string name="tag_icon">Icono</string>
+    <string name="archive">Archivar</string>
+    <string name="unarchive">Desarchivar</string>
+    <string name="archive_on_date">Archivar en una fecha</string>
+    <string name="dialog_archive_date_title">Archivar automáticamente el</string>
+    <string name="archives_on">Se archivará el %1$s</string>
+    <string name="remove">Quitar</string>
+    <string name="archive_title">Archivo</string>
+    <string name="archive_empty_title">No hay documentos archivados</string>
+    <string name="archive_empty_description">Archiva documentos para ocultarlos de tu lista sin eliminarlos. También puedes elegir una fecha para que un documento se archive automáticamente.</string>
 </resources>

@@ -15,22 +15,25 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class DocumentList(
+    /** the documents of the list or the archive */
     val all: List<Document>,
     val visible: List<Document>,
     val tags: List<Tag>,
     val query: String,
     val selectedTagIds: Set<Long>,
+    /** whether [all] are the archived documents */
+    val archive: Boolean,
 ) {
     val isFiltered: Boolean get() = visible.size != all.size
 }
 
 /**
- * Holds the search and tag filter of the current session.
+ * Holds the search and tag filter of the current session, and whether the archive is shown.
  * It is shared, so the document pager shows the same documents in the same order as the list.
  */
 @Singleton
 class DocumentFilter @Inject constructor(
-    repository: DocumentRepository,
+    private val repository: DocumentRepository,
     settingsRepository: SettingsRepository,
 ) {
     private val _query = MutableStateFlow("")
@@ -38,14 +41,17 @@ class DocumentFilter @Inject constructor(
 
     private val selectedTagIds = MutableStateFlow<Set<Long>>(emptySet())
 
+    private val archive = MutableStateFlow(false)
+
     val documentList: Flow<DocumentList> = combine(
         repository.documents,
         repository.tags,
         settingsRepository.settings,
         _query,
-        selectedTagIds,
-    ) { documents, tags, settings, query, selectedTagIds ->
+        combine(selectedTagIds, archive, ::Pair),
+    ) { allDocuments, tags, settings, query, (selectedTagIds, archive) ->
         val existingSelection = selectedTagIds.filterTo(mutableSetOf()) { id -> tags.any { it.id == id } }
+        val documents = allDocuments.filter { it.archived == archive }
         DocumentList(
             all = documents,
             visible = documents
@@ -54,6 +60,7 @@ class DocumentFilter @Inject constructor(
             tags = tags,
             query = query,
             selectedTagIds = existingSelection,
+            archive = archive,
         )
     }
 
@@ -68,6 +75,17 @@ class DocumentFilter @Inject constructor(
     fun clear() {
         _query.value = ""
         selectedTagIds.value = emptySet()
+    }
+
+    /** Clears the filters and shows the archived documents if [archive], the others otherwise */
+    fun show(archive: Boolean) {
+        clear()
+        this.archive.value = archive
+    }
+
+    /** Shows the archive if the document with [id] is archived, the other documents otherwise, and keeps the filters */
+    suspend fun showArchiveOf(id: String) {
+        repository.isArchived(id)?.let { archive.value = it }
     }
 
     private fun Document.matches(query: String, tagIds: Set<Long>, settings: AppSettings): Boolean {

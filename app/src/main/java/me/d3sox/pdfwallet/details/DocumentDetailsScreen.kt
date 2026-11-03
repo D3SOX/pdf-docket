@@ -70,6 +70,7 @@ import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.documents.Document
 import me.d3sox.pdfwallet.documents.DocumentDialog
 import me.d3sox.pdfwallet.documents.DocumentDialogHost
+import me.d3sox.pdfwallet.documents.DocumentEditor
 import me.d3sox.pdfwallet.documents.DocumentMenu
 import me.d3sox.pdfwallet.render.BarcodeScan
 import me.d3sox.pdfwallet.render.PageBarcode
@@ -164,6 +165,7 @@ fun DocumentDetailsScreen(
                 actions = {
                     DetailsOverflowMenu(
                         document = current,
+                        editor = vm.editor,
                         settings = settings,
                         onToggleHalfSizeBarcodes = vm::onToggleHalfSizeBarcodes,
                         onDialog = { dialog = it },
@@ -219,6 +221,7 @@ fun DocumentDetailsScreen(
 @Composable
 private fun DetailsOverflowMenu(
     document: Document,
+    editor: DocumentEditor,
     settings: AppSettings,
     onToggleHalfSizeBarcodes: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
@@ -230,6 +233,7 @@ private fun DetailsOverflowMenu(
         }
         DocumentMenu(
             document = document,
+            editor = editor,
             expanded = expanded,
             onDismiss = { expanded = false },
             onDialog = onDialog,

@@ -34,8 +34,8 @@ private const val DOCUMENTS_DIRECTORY = "documents/"
 private val DOCUMENT_ID = Regex("[0-9a-f-]+\\.pdf")
 
 /**
- * Backups are encrypted ZIP files with the PDFs and a JSON file with their names, import dates and tags,
- * listed in the manual sort order.
+ * Backups are encrypted ZIP files with the PDFs and a JSON file with their names, import dates, tags
+ * and whether and when they get archived, listed in the manual sort order.
  * Tag icons are stored separately, so older versions can still restore newer backups.
  */
 @Singleton
@@ -123,6 +123,9 @@ class BackupRepository @Inject constructor(
                         name = json.getString("name"),
                         importedAt = json.getLong("importedAt"),
                         position = position++,
+                        // added in 1.9.0
+                        archived = json.optBoolean("archived"),
+                        archiveAt = json.takeIf { it.has("archiveAt") }?.getLong("archiveAt"),
                     )
                 )
                 tagDao.insertCrossRefs(
@@ -146,6 +149,8 @@ class BackupRepository @Inject constructor(
                         .put("name", document.name)
                         .put("importedAt", document.importedAt)
                         .put("tags", JSONArray(document.tags.map { it.name }))
+                        .put("archived", document.archived)
+                        .putOpt("archiveAt", document.archiveAt)
                 }
             ),
         )

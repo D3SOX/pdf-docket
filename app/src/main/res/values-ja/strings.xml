@@ -183,4 +183,13 @@
     <string name="grid_view">グリッド表示</string>
     <string name="edit_tag">タグを編集</string>
     <string name="tag_icon">アイコン</string>
+    <string name="archive">アーカイブ</string>
+    <string name="unarchive">アーカイブを解除</string>
+    <string name="archive_on_date">日付を指定してアーカイブ</string>
+    <string name="dialog_archive_date_title">自動でアーカイブする日</string>
+    <string name="archives_on">%1$sにアーカイブされます</string>
+    <string name="remove">削除</string>
+    <string name="archive_title">アーカイブ</string>
+    <string name="archive_empty_title">アーカイブされたドキュメントはありません</string>
+    <string name="archive_empty_description">ドキュメントをアーカイブすると、削除せずに一覧から非表示にできます。ドキュメントを自動でアーカイブする日付も指定できます。</string>
 </resources>

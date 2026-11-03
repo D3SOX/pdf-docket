@@ -28,6 +28,7 @@ More Features
 - Assign tags to documents and filter documents by tags
 - Tags can have icons
 - Documents can be shown as a grid or a list
+- Documents can be archived instead of deleted, right away or automatically on a chosen date
 - PDFs can be shared from other apps, also several at once
 - Documents can be added to the home screen
 - Encrypted backups of all documents and tags

@@ -11,4 +11,7 @@ data class Document(
     val position: Int,
     val sizeBytes: Long,
     val tags: List<Tag>,
+    val archived: Boolean = false,
+    /** when the document gets archived automatically, in epoch millis */
+    val archiveAt: Long? = null,
 )

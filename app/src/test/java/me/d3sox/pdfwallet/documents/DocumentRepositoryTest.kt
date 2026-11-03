@@ -17,6 +17,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -24,6 +25,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import javax.inject.Inject
+
+// 2100-01-01
+private const val FUTURE = 4_102_444_800_000L
 
 @HiltAndroidTest
 @UninstallModules(DatabaseModule::class, CoroutineDispatchersModule::class)
@@ -53,8 +57,63 @@ class DocumentRepositoryTest {
         val document = repository.documents.first().single()
         document.name shouldBe "Ticket"
         document.sizeBytes shouldBe "content of a.pdf".length.toLong()
-        repository.exists("a.pdf") shouldBe true
-        repository.exists("b.pdf") shouldBe false
+        repository.isArchived("a.pdf") shouldBe false
+        repository.isArchived("b.pdf") shouldBe null
+    }
+
+    @Test
+    fun archive_cancelsTheArchiveDateAndUnarchiveBringsTheDocumentBack() = runTest {
+        addDocument("a.pdf")
+        repository.setArchiveAt("a.pdf", FUTURE)
+        repository.documents.first().single().archiveAt shouldBe FUTURE
+
+        repository.archive(listOf("a.pdf"))
+        repository.documents.first().single().let {
+            it.archived shouldBe true
+            it.archiveAt shouldBe null
+        }
+
+        repository.unarchive(listOf("a.pdf"))
+        repository.documents.first().single().archived shouldBe false
+    }
+
+    @Test
+    fun archiveWhenDue_archivesOnlyDocumentsWhoseDateHasPassed() = runTest {
+        addDocument("due.pdf")
+        addDocument("later.pdf")
+        repository.setArchiveAt("due.pdf", System.currentTimeMillis() - 1)
+        repository.setArchiveAt("later.pdf", FUTURE)
+
+        backgroundScope.launch { repository.archiveWhenDue() }
+
+        val documents = repository.documents
+            .first { list -> list.single { it.id == "due.pdf" }.archived }
+            .associateBy { it.id }
+        documents.getValue("due.pdf").archiveAt shouldBe null
+        documents.getValue("later.pdf").archived shouldBe false
+        documents.getValue("later.pdf").archiveAt shouldBe FUTURE
+    }
+
+    @Test
+    fun add_takesADuplicateOutOfTheArchive() = runTest {
+        addDocument("a.pdf")
+        repository.archive(listOf("a.pdf"))
+        repository.file("new.pdf").writeText("content of a.pdf")
+
+        repository.add(PendingCertificate(fileName = "new.pdf", documentName = "New")) shouldBe "a.pdf"
+
+        repository.documents.first().single().archived shouldBe false
+    }
+
+    @Test
+    fun add_keepsTheArchiveDateOfADuplicate() = runTest {
+        addDocument("a.pdf")
+        repository.setArchiveAt("a.pdf", FUTURE)
+        repository.file("new.pdf").writeText("content of a.pdf")
+
+        repository.add(PendingCertificate(fileName = "new.pdf", documentName = "New"))
+
+        repository.documents.first().single().archiveAt shouldBe FUTURE
     }
 
     @Test

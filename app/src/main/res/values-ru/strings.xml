@@ -201,4 +201,13 @@
     <string name="grid_view">Сетка</string>
     <string name="edit_tag">Изменить тег</string>
     <string name="tag_icon">Значок</string>
+    <string name="archive">Архивировать</string>
+    <string name="unarchive">Вернуть из архива</string>
+    <string name="archive_on_date">Архивировать в дату</string>
+    <string name="dialog_archive_date_title">Архивировать автоматически</string>
+    <string name="archives_on">Будет архивирован %1$s</string>
+    <string name="remove">Удалить</string>
+    <string name="archive_title">Архив</string>
+    <string name="archive_empty_title">Нет архивных документов</string>
+    <string name="archive_empty_description">Архивируйте документы, чтобы скрыть их из списка, не удаляя. Также можно выбрать дату, когда документ будет архивирован автоматически.</string>
 </resources>
