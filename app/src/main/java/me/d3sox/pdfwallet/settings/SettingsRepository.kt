@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,6 +24,8 @@ private object Keys {
     val barcodeSearchMode = stringPreferencesKey("barcodeSearchMode")
     val halfSizeBarcodes = booleanPreferencesKey("halfSizeBarcodes")
     val splitScreen = booleanPreferencesKey("splitScreen")
+    val splitFraction = floatPreferencesKey("splitFraction")
+    val showViewModeBar = booleanPreferencesKey("showViewModeBar")
     val syncPages = booleanPreferencesKey("syncPages")
     val reopenAtLastPosition = booleanPreferencesKey("reopenAtLastPosition")
     val showPageNumbers = booleanPreferencesKey("showPageNumbers")
@@ -33,6 +36,7 @@ private object Keys {
     val themeMode = stringPreferencesKey("themeMode")
     val dynamicColor = booleanPreferencesKey("dynamicColor")
     val invertPdfColors = booleanPreferencesKey("invertPdfColors")
+    val fillPdfWidth = booleanPreferencesKey("fillPdfWidth")
     val sortOrder = stringPreferencesKey("sortOrder")
     val manualSortExplained = booleanPreferencesKey("manualSortExplained")
     val tagFilterMode = stringPreferencesKey("tagFilterMode")
@@ -66,6 +70,8 @@ class SettingsRepository @Inject constructor(
             barcodeSearchMode = enumOrDefault(this[Keys.barcodeSearchMode], defaults.barcodeSearchMode),
             halfSizeBarcodes = this[Keys.halfSizeBarcodes] ?: defaults.halfSizeBarcodes,
             splitScreen = this[Keys.splitScreen] ?: defaults.splitScreen,
+            splitFraction = this[Keys.splitFraction],
+            showViewModeBar = this[Keys.showViewModeBar] ?: defaults.showViewModeBar,
             syncPages = this[Keys.syncPages] ?: defaults.syncPages,
             reopenAtLastPosition = this[Keys.reopenAtLastPosition] ?: defaults.reopenAtLastPosition,
             showPageNumbers = this[Keys.showPageNumbers] ?: defaults.showPageNumbers,
@@ -76,6 +82,7 @@ class SettingsRepository @Inject constructor(
             themeMode = enumOrDefault(this[Keys.themeMode], defaults.themeMode),
             dynamicColor = this[Keys.dynamicColor] ?: defaults.dynamicColor,
             invertPdfColors = this[Keys.invertPdfColors] ?: defaults.invertPdfColors,
+            fillPdfWidth = this[Keys.fillPdfWidth] ?: defaults.fillPdfWidth,
             sortOrder = enumOrDefault(this[Keys.sortOrder], defaults.sortOrder),
             manualSortExplained = this[Keys.manualSortExplained] ?: defaults.manualSortExplained,
             tagFilterMode = enumOrDefault(this[Keys.tagFilterMode], defaults.tagFilterMode),
@@ -90,6 +97,8 @@ class SettingsRepository @Inject constructor(
         this[Keys.barcodeSearchMode] = settings.barcodeSearchMode.name
         this[Keys.halfSizeBarcodes] = settings.halfSizeBarcodes
         this[Keys.splitScreen] = settings.splitScreen
+        settings.splitFraction?.let { this[Keys.splitFraction] = it } ?: remove(Keys.splitFraction)
+        this[Keys.showViewModeBar] = settings.showViewModeBar
         this[Keys.syncPages] = settings.syncPages
         this[Keys.reopenAtLastPosition] = settings.reopenAtLastPosition
         this[Keys.showPageNumbers] = settings.showPageNumbers
@@ -100,6 +109,7 @@ class SettingsRepository @Inject constructor(
         this[Keys.themeMode] = settings.themeMode.name
         this[Keys.dynamicColor] = settings.dynamicColor
         this[Keys.invertPdfColors] = settings.invertPdfColors
+        this[Keys.fillPdfWidth] = settings.fillPdfWidth
         this[Keys.sortOrder] = settings.sortOrder.name
         this[Keys.manualSortExplained] = settings.manualSortExplained
         this[Keys.tagFilterMode] = settings.tagFilterMode.name

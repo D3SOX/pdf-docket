@@ -1,5 +1,6 @@
 package me.d3sox.pdfwallet.ui
 
+import android.content.res.Resources
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
@@ -53,7 +54,6 @@ fun AppRoot(
         backStack.add(ArchiveRoute)
     }
     val snackbarHostState = remember { SnackbarHostState() }
-    val importError = stringResource(R.string.error_reading_pdf)
     val resources = LocalResources.current
     val documentPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) vm.onFilesSelected(uris)
@@ -74,17 +74,9 @@ fun AppRoot(
                 }
                 is MainEvent.DocumentsImported -> {
                     backStack.retainAll { it == DocumentsRoute }
-                    snackbarHostState.showSnackbar(
-                        resources.getQuantityString(R.plurals.documents_imported, event.count, event.count)
-                    )
+                    snackbarHostState.showSnackbar(event.message(resources))
                 }
-                is MainEvent.DocumentsAlreadyImported -> snackbarHostState.showSnackbar(
-                    resources.getQuantityString(R.plurals.documents_already_imported, event.count, event.count)
-                )
-                is MainEvent.SourceFilesNotDeleted -> snackbarHostState.showSnackbar(
-                    resources.getQuantityString(R.plurals.source_files_not_deleted, event.count, event.count)
-                )
-                MainEvent.ImportFailed -> snackbarHostState.showSnackbar(importError)
+                else -> snackbarHostState.showSnackbar(event.message(resources))
             }
         }
     }
@@ -166,4 +158,15 @@ fun AppRoot(
             onDismiss = vm::onPasswordDialogDismissed,
         )
     }
+}
+
+/** The message about an import, which is shown in a snackbar. */
+private fun MainEvent.message(resources: Resources): String = when (this) {
+    is MainEvent.DocumentsImported -> resources.getQuantityString(R.plurals.documents_imported, count, count)
+    is MainEvent.DocumentsAlreadyImported ->
+        resources.getQuantityString(R.plurals.documents_already_imported, count, count)
+    is MainEvent.SourceFilesDeleted -> resources.getQuantityString(R.plurals.source_files_deleted, count, count)
+    is MainEvent.SourceFilesNotDeleted -> resources.getQuantityString(R.plurals.source_files_not_deleted, count, count)
+    MainEvent.ImportFailed -> resources.getString(R.string.error_reading_pdf)
+    is MainEvent.OpenDocument -> error("Opening a document has no message")
 }

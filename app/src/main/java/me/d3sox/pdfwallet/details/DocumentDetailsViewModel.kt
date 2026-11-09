@@ -60,6 +60,11 @@ class DocumentDetailsViewModel @AssistedInject constructor(
         settingsRepository.update { it.copy(splitScreen = enabled) }
     }
 
+    /** null fits the split to the barcode */
+    fun onSplitFractionChange(fraction: Float?) = viewModelScope.launch {
+        settingsRepository.update { it.copy(splitFraction = fraction) }
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(initialDocumentId: String): DocumentDetailsViewModel

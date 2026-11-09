@@ -3,6 +3,8 @@ package me.d3sox.pdfwallet.ui.components
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CheckableDropdownMenuItem
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuGroup
@@ -49,7 +51,12 @@ class MenuScope {
 fun ExpressiveMenu(expanded: Boolean, onDismissRequest: () -> Unit, content: MenuScope.() -> Unit) {
     val groups = MenuScope().apply(content).groups.filter { it.isNotEmpty() }
     val count = groups.sumOf { it.size }
-    DropdownMenuPopup(expanded = expanded, onDismissRequest = onDismissRequest) {
+    // unlike DropdownMenu, the popup doesn't scroll by itself, e.g. in landscape
+    DropdownMenuPopup(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.verticalScroll(rememberScrollState()),
+    ) {
         DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
             var index = 0
             groups.forEachIndexed { groupIndex, items ->

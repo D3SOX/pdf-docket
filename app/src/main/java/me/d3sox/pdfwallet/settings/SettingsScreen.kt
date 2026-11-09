@@ -174,6 +174,14 @@ fun SettingsScreen(
                         onCheckedChange = { checked -> vm.update { it.copy(splitScreen = checked) } },
                     )
                     switchItem(
+                        title = R.string.show_view_mode_bar,
+                        summary = R.string.preference_view_mode_bar_description,
+                        icon = R.drawable.bottom_navigation_24px,
+                        color = IconColor.ORANGE,
+                        checked = settings.showViewModeBar,
+                        onCheckedChange = { checked -> vm.update { it.copy(showViewModeBar = checked) } },
+                    )
+                    switchItem(
                         title = R.string.preference_sync_pages,
                         summary = R.string.preference_sync_pages_description,
                         icon = R.drawable.sync_24,
@@ -225,6 +233,14 @@ fun SettingsScreen(
                         color = IconColor.TEAL,
                         checked = settings.invertPdfColors,
                         onCheckedChange = { checked -> vm.update { it.copy(invertPdfColors = checked) } },
+                    )
+                    switchItem(
+                        title = R.string.preference_fill_pdf_width,
+                        summary = R.string.preference_fill_pdf_width_description,
+                        icon = R.drawable.fit_page_width_24px,
+                        color = IconColor.GREEN,
+                        checked = settings.fillPdfWidth,
+                        onCheckedChange = { checked -> vm.update { it.copy(fillPdfWidth = checked) } },
                     )
                     switchItem(
                         title = R.string.preference_page_numbers,

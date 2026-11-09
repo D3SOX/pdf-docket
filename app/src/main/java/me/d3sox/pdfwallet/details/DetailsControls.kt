@@ -6,31 +6,30 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import me.d3sox.pdfwallet.R
+import me.d3sox.pdfwallet.ui.components.ExpressiveMenu
+import me.d3sox.pdfwallet.ui.components.selectable
 
 private const val MAX_PAGE_DOTS = 10
 private val MIN_LABEL_FONT_SIZE = 10.sp
@@ -66,6 +67,8 @@ private val NUMBERED_DOT_SPACING = 4.dp
 private val NUMBERED_DOTS_PADDING = 4.dp
 // the line height of labelSmall, which sets the size of numbered dots with a large font
 private val NUMBER_LINE_HEIGHT = 16.dp
+// enlarges the area for tapping the small dots
+private val INDICATOR_TAP_PADDING = 8.dp
 
 internal enum class ViewMode(val label: Int, val icon: Int) {
     BARCODE(R.string.view_barcode, R.drawable.qr_code_24),
@@ -88,6 +91,33 @@ internal fun ViewModeBar(selected: ViewMode, onSelect: (ViewMode) -> Unit) {
                 maxWidth = maxWidth / ViewMode.entries.size - SEGMENT_SPACE_AROUND_LABEL,
             )
             ViewModeButtons(selected, onSelect, labelStyle)
+        }
+    }
+}
+
+/**
+ * Shows the [selected] view mode in the top bar, and the others in a menu, while the [ViewModeBar] is hidden.
+ */
+@Composable
+internal fun ViewModeMenuButton(selected: ViewMode, onSelect: (ViewMode) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val onDismiss = { expanded = false }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(painterResource(selected.icon), contentDescription = stringResource(R.string.switch_view))
+        }
+        ExpressiveMenu(expanded = expanded, onDismissRequest = onDismiss) {
+            group {
+                ViewMode.entries.forEach { mode ->
+                    selectable(
+                        text = { stringResource(mode.label) },
+                        icon = { Icon(painterResource(mode.icon), contentDescription = null) },
+                        selected = mode == selected,
+                        onDismiss = onDismiss,
+                        onClick = { onSelect(mode) },
+                    )
+                }
+            }
         }
     }
 }
@@ -140,28 +170,6 @@ private fun fittingStyle(labels: List<String>, style: TextStyle, maxWidth: Dp): 
     }
 }
 
-/**
- * Shows [first] above [second], or next to each other in landscape.
- */
-@Composable
-internal fun SplitLayout(first: @Composable () -> Unit, second: @Composable () -> Unit) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        if (maxWidth > maxHeight) {
-            Row(Modifier.fillMaxSize()) {
-                Box(Modifier.weight(1f)) { first() }
-                VerticalDivider()
-                Box(Modifier.weight(1f)) { second() }
-            }
-        } else {
-            Column(Modifier.fillMaxSize()) {
-                Box(Modifier.weight(1f)) { first() }
-                HorizontalDivider()
-                Box(Modifier.weight(1f)) { second() }
-            }
-        }
-    }
-}
-
 internal enum class PageIndicatorStyle { DOTS, NUMBERED_DOTS }
 
 /**
@@ -199,12 +207,15 @@ internal fun PageIndicator(
         } else {
             Modifier
         }
-        // the vertical padding enlarges the area for tapping the small dots
-        Box(tap.padding(vertical = 8.dp)) {
+        Box(tap.padding(vertical = INDICATOR_TAP_PADDING)) {
             PageIndicatorContent(current, count, label, numbered, showDots)
         }
     }
 }
+
+/** About the largest height of a [PageIndicator], to leave space for it. */
+@Composable
+internal fun pageIndicatorHeight(): Dp = INDICATOR_TAP_PADDING * 2 + numberedDotSize() + NUMBERED_DOTS_PADDING * 2
 
 @Composable
 private fun numberedDotSize(): Dp = max(NUMBERED_DOT_SIZE, NUMBER_LINE_HEIGHT * LocalDensity.current.fontScale)
