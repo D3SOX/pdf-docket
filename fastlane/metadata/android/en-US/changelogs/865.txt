@@ -1,0 +1,6 @@
+- In split screen, drag the divider to resize the barcode. Double tap the divider to return to the fitted size.
+- Double tap a barcode to rotate it.
+- Rotate the screen or pin the app from the menu.
+- New settings fit PDF pages to the width and hide the Barcode/PDF/Both bar.
+- Swiping between documents with and without barcodes no longer stops in between.
+- After importing, a message says how many original PDFs were deleted.
