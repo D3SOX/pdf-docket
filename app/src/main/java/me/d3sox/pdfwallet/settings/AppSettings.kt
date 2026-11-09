@@ -37,6 +37,9 @@ data class AppSettings(
     val barcodeSearchMode: BarcodeSearchMode = BarcodeSearchMode.EXTENDED,
     val halfSizeBarcodes: Boolean = false,
     val splitScreen: Boolean = false,
+    /** the share of the split screen that shows the barcode, null to fit the barcode */
+    val splitFraction: Float? = null,
+    val showViewModeBar: Boolean = true,
     val syncPages: Boolean = true,
     val reopenAtLastPosition: Boolean = true,
     val showPageNumbers: Boolean = true,
@@ -47,6 +50,8 @@ data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val dynamicColor: Boolean = false,
     val invertPdfColors: Boolean = false,
+    /** zooms PDF pages to the width of their view instead of showing them whole */
+    val fillPdfWidth: Boolean = false,
     val sortOrder: SortOrder = SortOrder.IMPORT_DATE_DESC,
     /** whether it was explained how to change the manual sort order */
     val manualSortExplained: Boolean = false,

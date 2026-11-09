@@ -21,6 +21,9 @@ Currently supported barcode formats are:
 More Features
 - Can detect and extract barcodes in PDFs
 - Split screen shows the barcode and the PDF at the same time, and the PDF turns to the page of each barcode
+- The split screen divider can be dragged, and barcodes can be turned by 90° with a double tap
+- PDF pages can be shown whole or fitted to the width
+- Turn the screen or pin the app before handing your phone over
 - Documents reopen at the barcode and page they were left on
 - (Optional) biometric authentication
 - PDFs can be sorted by name, file size, import date, or dragged into your own order

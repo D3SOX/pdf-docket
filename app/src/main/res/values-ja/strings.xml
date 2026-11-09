@@ -62,6 +62,8 @@
     <string name="preference_dynamic_color_description">青の代わりに壁紙の色を使用します。</string>
     <string name="preference_invert_pdf_colors">PDFの色を反転</string>
     <string name="preference_invert_pdf_colors_description">ダークモードでドキュメントの色を反転します。</string>
+    <string name="preference_fill_pdf_width">PDF を幅に合わせる</string>
+    <string name="preference_fill_pdf_width_description">ページ全体を表示する代わりに、表示領域の幅いっぱいに拡大し、残りはスクロールで表示します</string>
     <string name="preference_force_theme">テーマを強制</string>
     <string name="preference_theme_system">システム</string>
     <string name="preference_theme_light">ライト</string>
@@ -112,6 +114,14 @@
     <string name="view_barcode">バーコード</string>
     <string name="view_pdf">PDF</string>
     <string name="view_both">両方</string>
+    <string name="show_view_mode_bar">表示切り替えを表示</string>
+    <string name="rotate_barcode">バーコードを回転</string>
+    <string name="split_handle">分割画面の区切り線</string>
+    <string name="rotate_screen">画面を回転</string>
+    <string name="pin_app">アプリを固定</string>
+    <string name="unpin_app">アプリの固定を解除</string>
+    <string name="switch_view">表示を切り替え</string>
+    <string name="preference_view_mode_bar_description">ドキュメントの下に「バーコード」「PDF」「両方」ボタンを表示します。オフにすると、上部のバーから表示を切り替えます</string>
     <string name="document_position">ドキュメント %1$d/%2$d</string>
     <string name="page_position">ページ %1$d/%2$d</string>
     <string name="barcode_position">バーコード %1$d/%2$d</string>

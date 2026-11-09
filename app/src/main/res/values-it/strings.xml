@@ -68,6 +68,8 @@
     <string name="preference_dynamic_color_description">Usa i colori dello sfondo invece del blu.</string>
     <string name="preference_invert_pdf_colors">Inverti colori PDF</string>
     <string name="preference_invert_pdf_colors_description">Inverti i colori del documento in modalità scura.</string>
+    <string name="preference_fill_pdf_width">Adatta i PDF alla larghezza</string>
+    <string name="preference_fill_pdf_width_description">Ingrandisci le pagine a tutta la larghezza della vista e scorri per il resto, invece di mostrare l\'intera pagina</string>
     <string name="preference_force_theme">Forza tema</string>
     <string name="preference_theme_system">Sistema</string>
     <string name="preference_theme_light">Leggero</string>
@@ -118,6 +120,14 @@
     <string name="view_barcode">Codice</string>
     <string name="view_pdf">PDF</string>
     <string name="view_both">Entrambi</string>
+    <string name="show_view_mode_bar">Mostra selettore di vista</string>
+    <string name="rotate_barcode">Ruota codice a barre</string>
+    <string name="split_handle">Divisore dello schermo diviso</string>
+    <string name="rotate_screen">Ruota schermo</string>
+    <string name="pin_app">Blocca app su schermo</string>
+    <string name="unpin_app">Sblocca app dallo schermo</string>
+    <string name="switch_view">Cambia vista</string>
+    <string name="preference_view_mode_bar_description">Mostra i pulsanti Codice, PDF ed Entrambi sotto i documenti. Se disattivato, cambia vista dalla barra superiore</string>
     <string name="document_position">Documento %1$d/%2$d</string>
     <string name="page_position">Pagina %1$d/%2$d</string>
     <string name="barcode_position">Codice a barre %1$d/%2$d</string>

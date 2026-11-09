@@ -77,6 +77,8 @@
     <string name="preference_dynamic_color_description">استخدام ألوان خلفية الشاشة بدلاً من الأزرق.</string>
     <string name="preference_invert_pdf_colors">عكس ألوان PDF</string>
     <string name="preference_invert_pdf_colors_description">عكس ألوان المستند في الوضع الداكن.</string>
+    <string name="preference_fill_pdf_width">ملاءمة ملفات PDF للعرض</string>
+    <string name="preference_fill_pdf_width_description">تكبير الصفحات إلى كامل عرض مساحتها والتمرير لرؤية الباقي، بدلاً من إظهار الصفحة كاملة</string>
     <string name="preference_force_theme">فرض السمة</string>
     <string name="preference_theme_system">النظام</string>
     <string name="preference_theme_light">فاتح</string>
@@ -127,6 +129,14 @@
     <string name="view_barcode">الرمز الشريطي</string>
     <string name="view_pdf">PDF</string>
     <string name="view_both">كلاهما</string>
+    <string name="show_view_mode_bar">إظهار مبدّل العرض</string>
+    <string name="rotate_barcode">تدوير الرمز الشريطي</string>
+    <string name="split_handle">فاصل تقسيم الشاشة</string>
+    <string name="rotate_screen">تدوير الشاشة</string>
+    <string name="pin_app">تثبيت التطبيق</string>
+    <string name="unpin_app">إلغاء تثبيت التطبيق</string>
+    <string name="switch_view">تبديل العرض</string>
+    <string name="preference_view_mode_bar_description">إظهار أزرار الرمز الشريطي وPDF وكلاهما أسفل المستندات. عند إيقافه، بدّل العرض من الشريط العلوي</string>
     <string name="document_position">المستند %1$d/%2$d</string>
     <string name="page_position">الصفحة %1$d/%2$d</string>
     <string name="barcode_position">الرمز الشريطي %1$d/%2$d</string>

@@ -65,6 +65,8 @@
     <string name="preference_dynamic_color_description">Use the colors of your wallpaper instead of blue.</string>
     <string name="preference_invert_pdf_colors">Invert PDF colors</string>
     <string name="preference_invert_pdf_colors_description">Invert document colors in dark mode.</string>
+    <string name="preference_fill_pdf_width">Fit PDFs to the width</string>
+    <string name="preference_fill_pdf_width_description">Zoom pages to the full width of their view and scroll for the rest, instead of showing the whole page</string>
     <string name="preference_force_theme">Force theme</string>
     <string name="preference_theme_system">System</string>
     <string name="preference_theme_light">Light</string>
@@ -115,6 +117,14 @@
     <string name="view_barcode">Barcode</string>
     <string name="view_pdf">PDF</string>
     <string name="view_both">Both</string>
+    <string name="show_view_mode_bar">Show view switcher</string>
+    <string name="rotate_barcode">Rotate barcode</string>
+    <string name="split_handle">Split screen divider</string>
+    <string name="rotate_screen">Rotate screen</string>
+    <string name="pin_app">Pin app</string>
+    <string name="unpin_app">Unpin app</string>
+    <string name="switch_view">Switch view</string>
+    <string name="preference_view_mode_bar_description">Show the Barcode, PDF and Both buttons below documents. When off, switch the view from the top bar</string>
     <string name="document_position">Document %1$d/%2$d</string>
     <string name="page_position">Page %1$d/%2$d</string>
     <string name="barcode_position">Barcode %1$d/%2$d</string>

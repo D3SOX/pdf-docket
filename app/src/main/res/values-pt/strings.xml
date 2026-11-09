@@ -68,6 +68,8 @@
     <string name="preference_dynamic_color_description">Usar as cores do seu papel de parede em vez de azul.</string>
     <string name="preference_invert_pdf_colors">Inverter cores para PDF</string>
     <string name="preference_invert_pdf_colors_description">Inverter cores do documento em modo escuro.</string>
+    <string name="preference_fill_pdf_width">Ajustar PDFs à largura</string>
+    <string name="preference_fill_pdf_width_description">Ampliar as páginas para toda a largura da visualização e rolar para ver o resto, em vez de mostrar a página inteira</string>
     <string name="preference_force_theme">Forçar tema</string>
     <string name="preference_theme_system">Sistema</string>
     <string name="preference_theme_light">Claro</string>
@@ -118,6 +120,14 @@
     <string name="view_barcode">Código</string>
     <string name="view_pdf">PDF</string>
     <string name="view_both">Ambos</string>
+    <string name="show_view_mode_bar">Mostrar seletor de visualização</string>
+    <string name="rotate_barcode">Girar código de barras</string>
+    <string name="split_handle">Divisor da tela dividida</string>
+    <string name="rotate_screen">Girar tela</string>
+    <string name="pin_app">Fixar app</string>
+    <string name="unpin_app">Liberar app</string>
+    <string name="switch_view">Alternar visualização</string>
+    <string name="preference_view_mode_bar_description">Mostrar os botões Código, PDF e Ambos abaixo dos documentos. Se desativado, alterne a visualização pela barra superior</string>
     <string name="document_position">Documento %1$d/%2$d</string>
     <string name="page_position">Página %1$d/%2$d</string>
     <string name="barcode_position">Código de barras %1$d/%2$d</string>
