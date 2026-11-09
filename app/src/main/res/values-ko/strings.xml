@@ -141,6 +141,9 @@
     <string name="settings_section_import">가져오기</string>
     <string name="preference_delete_imported_files">가져온 후 PDF 삭제</string>
     <string name="preference_delete_imported_files_description">앱에 저장되면 원본 파일을 삭제합니다. 다른 앱에서 공유한 파일은 삭제할 수 없는 경우가 많습니다</string>
+    <plurals name="source_files_deleted">
+        <item quantity="other">원본 파일 %d개를 삭제했습니다</item>
+    </plurals>
     <plurals name="source_files_not_deleted">
         <item quantity="other">원본 파일 %d개를 삭제하지 못했습니다</item>
     </plurals>

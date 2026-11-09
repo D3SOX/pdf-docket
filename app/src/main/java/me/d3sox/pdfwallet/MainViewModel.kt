@@ -37,6 +37,7 @@ sealed interface MainEvent {
     data class OpenDocument(val id: String, val archived: Boolean) : MainEvent
     data class DocumentsImported(val count: Int) : MainEvent
     data class DocumentsAlreadyImported(val count: Int) : MainEvent
+    data class SourceFilesDeleted(val count: Int) : MainEvent
     data class SourceFilesNotDeleted(val count: Int) : MainEvent
     data object ImportFailed : MainEvent
 }
@@ -108,17 +109,15 @@ class MainViewModel @Inject constructor(
 
     private suspend fun importQueuedFiles() {
         val results = mutableListOf<ImportResult>()
+        var deleted = 0
         var notDeleted = 0
         while (importQueue.isNotEmpty()) {
             val uri = importQueue.removeFirst()
             val result = importFile(uri)
             results += result
             // a duplicate's document is in the app as well
-            if (result is ImportResult.Stored &&
-                settingsRepository.settings.first().deleteImportedFiles &&
-                !pdfImporter.deleteSourceFile(uri)
-            ) {
-                notDeleted++
+            if (result is ImportResult.Stored && settingsRepository.settings.first().deleteImportedFiles) {
+                if (pdfImporter.deleteSourceFile(uri)) deleted++ else notDeleted++
             }
         }
         val imported = results.filterIsInstance<ImportResult.Imported>().map { it.id }
@@ -135,6 +134,7 @@ class MainViewModel @Inject constructor(
         }
         // one message each for the whole batch, after the documents are shown
         if (duplicates.isNotEmpty()) _events.trySend(MainEvent.DocumentsAlreadyImported(duplicates.size))
+        if (deleted > 0) _events.trySend(MainEvent.SourceFilesDeleted(deleted))
         if (notDeleted > 0) _events.trySend(MainEvent.SourceFilesNotDeleted(notDeleted))
         if (ImportResult.Failed in results) _events.trySend(MainEvent.ImportFailed)
     }

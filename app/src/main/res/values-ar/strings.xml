@@ -166,6 +166,14 @@
     <string name="settings_section_import">الاستيراد</string>
     <string name="preference_delete_imported_files">حذف ملفات PDF بعد استيرادها</string>
     <string name="preference_delete_imported_files_description">إزالة الملف الأصلي بعد إضافته إلى التطبيق. غالبًا لا يمكن حذف الملفات التي تمت مشاركتها من تطبيقات أخرى</string>
+    <plurals name="source_files_deleted">
+        <item quantity="zero">تم حذف %d ملف أصلي</item>
+        <item quantity="one">تم حذف %d ملف أصلي</item>
+        <item quantity="two">تم حذف %d ملفين أصليين</item>
+        <item quantity="few">تم حذف %d ملفات أصلية</item>
+        <item quantity="many">تم حذف %d ملفًا أصليًا</item>
+        <item quantity="other">تم حذف %d ملف أصلي</item>
+    </plurals>
     <plurals name="source_files_not_deleted">
         <item quantity="zero">تعذر حذف %d ملف أصلي</item>
         <item quantity="one">تعذر حذف %d ملف أصلي</item>

@@ -141,6 +141,9 @@
     <string name="settings_section_import">インポート</string>
     <string name="preference_delete_imported_files">インポート後に PDF を削除</string>
     <string name="preference_delete_imported_files_description">アプリに取り込んだ後、元のファイルを削除します。他のアプリから共有されたファイルは削除できないことがよくあります</string>
+    <plurals name="source_files_deleted">
+        <item quantity="other">%d 件の元のファイルを削除しました</item>
+    </plurals>
     <plurals name="source_files_not_deleted">
         <item quantity="other">%d 件の元のファイルを削除できませんでした</item>
     </plurals>

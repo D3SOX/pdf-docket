@@ -156,6 +156,12 @@
     <string name="settings_section_import">Импорт</string>
     <string name="preference_delete_imported_files">Удалять PDF после импорта</string>
     <string name="preference_delete_imported_files_description">Удалять исходный файл, когда он уже в приложении. Файлы, которыми поделились другие приложения, часто нельзя удалить</string>
+    <plurals name="source_files_deleted">
+        <item quantity="one">Удалён %d исходный файл</item>
+        <item quantity="few">Удалено %d исходных файла</item>
+        <item quantity="many">Удалено %d исходных файлов</item>
+        <item quantity="other">Удалено %d исходного файла</item>
+    </plurals>
     <plurals name="source_files_not_deleted">
         <item quantity="one">Не удалось удалить %d исходный файл</item>
         <item quantity="few">Не удалось удалить %d исходных файла</item>

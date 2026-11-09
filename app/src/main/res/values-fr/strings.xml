@@ -151,6 +151,11 @@
     <string name="settings_section_import">Importation</string>
     <string name="preference_delete_imported_files">Supprimer les PDF après l\'importation</string>
     <string name="preference_delete_imported_files_description">Supprime le fichier d\'origine une fois qu\'il est dans l\'app. Les fichiers partagés depuis d\'autres apps ne peuvent souvent pas être supprimés</string>
+    <plurals name="source_files_deleted">
+        <item quantity="one">%d fichier d\'origine supprimé</item>
+        <item quantity="many">%d de fichiers d\'origine supprimés</item>
+        <item quantity="other">%d fichiers d\'origine supprimés</item>
+    </plurals>
     <plurals name="source_files_not_deleted">
         <item quantity="one">%d fichier d\'origine n\'a pas pu être supprimé</item>
         <item quantity="many">%d de fichiers d\'origine n\'ont pas pu être supprimés</item>

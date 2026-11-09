@@ -147,6 +147,10 @@
     <string name="settings_section_import">Εισαγωγή</string>
     <string name="preference_delete_imported_files">Διαγραφή PDF μετά την εισαγωγή</string>
     <string name="preference_delete_imported_files_description">Αφαίρεση του αρχικού αρχείου μόλις μπει στην εφαρμογή. Τα αρχεία που κοινοποιούνται από άλλες εφαρμογές συχνά δεν μπορούν να διαγραφούν</string>
+    <plurals name="source_files_deleted">
+        <item quantity="one">Διαγράφηκε %d αρχικό αρχείο</item>
+        <item quantity="other">Διαγράφηκαν %d αρχικά αρχεία</item>
+    </plurals>
     <plurals name="source_files_not_deleted">
         <item quantity="one">%d αρχικό αρχείο δεν ήταν δυνατό να διαγραφεί</item>
         <item quantity="other">%d αρχικά αρχεία δεν ήταν δυνατό να διαγραφούν</item>

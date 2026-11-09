@@ -151,6 +151,11 @@
     <string name="settings_section_import">Importação</string>
     <string name="preference_delete_imported_files">Excluir PDFs após importar</string>
     <string name="preference_delete_imported_files_description">Remove o arquivo original quando ele estiver no app. Arquivos compartilhados por outros apps muitas vezes não podem ser excluídos</string>
+    <plurals name="source_files_deleted">
+        <item quantity="one">%d arquivo original excluído</item>
+        <item quantity="many">%d de arquivos originais excluídos</item>
+        <item quantity="other">%d arquivos originais excluídos</item>
+    </plurals>
     <plurals name="source_files_not_deleted">
         <item quantity="one">Não foi possível excluir %d arquivo original</item>
         <item quantity="many">Não foi possível excluir %d de arquivos originais</item>
