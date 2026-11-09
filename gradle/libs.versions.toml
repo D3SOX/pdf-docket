@@ -1,6 +1,6 @@
 [versions]
 android-desugar-jdk-libs = "2.1.5"
-android-gradle-plugin = "9.5.0"
+android-gradle-plugin = "9.5.1"
 # R8 9.5.28, bundled with AGP 9.5.0, nondeterministically narrows parameter types (fixed in 9.6.0-alpha08),
 # so F-Droid fails to reproduce the release APK. Remove once AGP bundles a fixed R8.
 android-r8 = "9.6.0-alpha09"
