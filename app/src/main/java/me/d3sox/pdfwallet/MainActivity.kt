@@ -1,5 +1,6 @@
 package me.d3sox.pdfwallet
 
+import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -142,11 +143,13 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    // other apps could otherwise make this one read files with its own permissions, e.g. with a file URI
     private fun Intent.pdfUris(): List<Uri> = when (action) {
         Intent.ACTION_SEND_MULTIPLE ->
             IntentCompat.getParcelableArrayListExtra(this, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
         Intent.ACTION_SEND ->
             listOfNotNull(data ?: IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java))
-        else -> listOfNotNull(data)
-    }
+        Intent.ACTION_VIEW -> listOfNotNull(data)
+        else -> emptyList()
+    }.filter { it.scheme == ContentResolver.SCHEME_CONTENT }
 }
