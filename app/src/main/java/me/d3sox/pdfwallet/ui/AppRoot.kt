@@ -9,16 +9,20 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavEntryDecorator
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import kotlinx.coroutines.launch
 import me.d3sox.pdfwallet.MainEvent
 import me.d3sox.pdfwallet.MainUiState
 import me.d3sox.pdfwallet.MainViewModel
@@ -74,12 +78,20 @@ fun AppRoot(
                 }
                 is MainEvent.DocumentsImported -> {
                     backStack.retainAll { it == DocumentsRoute }
-                    snackbarHostState.showSnackbar(event.message(resources))
+                    launch { snackbarHostState.showSnackbar(event.message(resources)) }
                 }
-                else -> snackbarHostState.showSnackbar(event.message(resources))
+                // queued by the host state, while later events, e.g. opening a document, are handled right away
+                else -> launch { snackbarHostState.showSnackbar(event.message(resources)) }
             }
         }
     }
+
+    // created outside of the locked branch, so the screens keep their state, e.g. the scroll position, while locked
+    val entryDecorators: List<NavEntryDecorator<NavKey>> = listOf(
+        rememberSaveableStateHolderNavEntryDecorator(rememberSaveableStateHolder()),
+        rememberViewModelStoreNavEntryDecorator(),
+        remember { roundedWhileLeaving() },
+    )
 
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         if (state.isLocked) {
@@ -92,11 +104,7 @@ fun AppRoot(
         NavDisplay(
             backStack = backStack,
             onBack = goBack,
-            entryDecorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator(),
-                remember { roundedWhileLeaving() },
-            ),
+            entryDecorators = entryDecorators,
             transitionSpec = { forwardTransition() },
             popTransitionSpec = { backTransition() },
             predictivePopTransitionSpec = { predictiveBackTransition(it) },
