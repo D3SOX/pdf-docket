@@ -148,7 +148,7 @@ class MainActivity : FragmentActivity() {
         Intent.ACTION_SEND_MULTIPLE ->
             IntentCompat.getParcelableArrayListExtra(this, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
         Intent.ACTION_SEND ->
-            listOfNotNull(data, IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java))
+            listOfNotNull(IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java), data)
                 .filter { it.scheme == ContentResolver.SCHEME_CONTENT }
                 .take(1)
         Intent.ACTION_VIEW -> listOfNotNull(data)
