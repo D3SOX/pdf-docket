@@ -388,6 +388,7 @@ private fun Resources.message(message: BackupMessage): String = when (message) {
     BackupMessage.CreateFailed -> getString(R.string.error_creating_backup)
     is BackupMessage.Restored -> getQuantityString(R.plurals.backup_restored, message.count, message.count)
     BackupMessage.NotABackup -> getString(R.string.error_not_a_backup)
+    BackupMessage.NewerBackup -> getString(R.string.error_newer_backup)
     BackupMessage.RestoreFailed -> getString(R.string.error_reading_backup)
 }
 

@@ -222,4 +222,5 @@
     <string name="archive_empty_description">Arhiveeri dokumente, et peita need loendist ilma kustutamata. Saad valida ka kuupäeva, mil dokument automaatselt arhiveeritakse.</string>
     <string name="untitled_document">Nimetu dokument</string>
     <string name="dialog_password_protection_text">„%1$s“ on parooliga kaitstud. Rakendus hoiab paroolita koopiat, nii et see avaneb parooli küsimata.</string>
+    <string name="error_newer_backup">See varukoopia on rakenduse uuemast versioonist. Selle taastamiseks uuenda rakendust.</string>
 </resources>

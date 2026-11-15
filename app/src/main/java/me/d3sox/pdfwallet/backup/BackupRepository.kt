@@ -49,10 +49,13 @@ class BackupRepository @Inject constructor(
 ) {
 
     suspend fun export(uri: Uri, password: String): Unit = withContext(dispatcher) {
-        val documents = documentRepository.documents.first()
+        // e.g. a file that was deleted outside of the app, which would otherwise fail the whole backup
+        val documents = documentRepository.documents.first().filter { documentRepository.file(it.id).exists() }
         val tags = documentRepository.tags.first()
         try {
-            val output = context.contentResolver.openOutputStream(uri) ?: throw FileNotFoundException(uri.toString())
+            // truncates an existing file, its old end would otherwise break the authentication tag
+            val output = context.contentResolver.openOutputStream(uri, "wt")
+                ?: throw FileNotFoundException(uri.toString())
             ZipOutputStream(BackupCipher.encrypt(output.buffered(), password)).use { zip ->
                 zip.putNextEntry(ZipEntry(METADATA_ENTRY))
                 zip.write(metadata(documents, tags).toString().toByteArray())
@@ -74,6 +77,7 @@ class BackupRepository @Inject constructor(
      * Returns how many were added.
      *
      * @throws NotABackupException if the file isn't a backup
+     * @throws NewerBackupException if the backup needs a newer version of the app
      * @throws org.bouncycastle.crypto.io.InvalidCipherTextIOException if the password is wrong
      */
     suspend fun restore(uri: Uri, password: String): Int = withContext(dispatcher) {
@@ -109,32 +113,50 @@ class BackupRepository @Inject constructor(
         var restored = 0
         var position = (certificateDao.maxPosition() ?: -1) + 1
         metadata.getJSONArray("documents").objects().forEach { json ->
-            val id = json.getString("id")
-            val entry = zip.getEntry(DOCUMENTS_DIRECTORY + id)
-            if (!DOCUMENT_ID.matches(id) || entry == null || certificateDao.exists(id)) return@forEach
-            zip.getInputStream(entry).use { input ->
-                documentRepository.file(id).outputStream().use { input.copyTo(it) }
+            if (restore(zip, json, position, tagIds)) {
+                position++
+                restored++
             }
-            // a document restored without its tags would be skipped when restoring again
-            database.withTransaction {
-                certificateDao.insert(
-                    Certificate(
-                        id = id,
-                        name = json.getString("name"),
-                        importedAt = json.getLong("importedAt"),
-                        position = position++,
-                        // added in 1.9.0
-                        archived = json.optBoolean("archived"),
-                        archiveAt = json.takeIf { it.has("archiveAt") }?.getLong("archiveAt"),
-                    )
-                )
-                tagDao.insertCrossRefs(
-                    json.getJSONArray("tags").strings().mapNotNull(tagIds::get).map { CertificateTagCrossRef(id, it) }
-                )
-            }
-            restored++
         }
         return restored
+    }
+
+    /** Returns false if the document isn't in the backup or still in the app. */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun restore(zip: ZipFile, json: JSONObject, position: Int, tagIds: Map<String, Long>): Boolean {
+        val id = json.getString("id")
+        val entry = zip.getEntry(DOCUMENTS_DIRECTORY + id)
+        if (!DOCUMENT_ID.matches(id) || entry == null || certificateDao.exists(id)) return false
+        val file = documentRepository.file(id)
+        try {
+            zip.getInputStream(entry).use { input -> file.outputStream().use { input.copyTo(it) } }
+            insert(id, json, position, tagIds)
+        } catch (e: Exception) {
+            // the file of a document that isn't in the app
+            file.delete()
+            throw e
+        }
+        return true
+    }
+
+    private suspend fun insert(id: String, json: JSONObject, position: Int, tagIds: Map<String, Long>) {
+        // a document restored without its tags would be skipped when restoring again
+        database.withTransaction {
+            certificateDao.insert(
+                Certificate(
+                    id = id,
+                    name = json.getString("name"),
+                    importedAt = json.getLong("importedAt"),
+                    position = position,
+                    // added in 1.9.0
+                    archived = json.optBoolean("archived"),
+                    archiveAt = json.takeIf { it.has("archiveAt") }?.getLong("archiveAt"),
+                )
+            )
+            tagDao.insertCrossRefs(
+                json.getJSONArray("tags").strings().mapNotNull(tagIds::get).map { CertificateTagCrossRef(id, it) }
+            )
+        }
     }
 
     private fun metadata(documents: List<Document>, tags: List<Tag>) = JSONObject()

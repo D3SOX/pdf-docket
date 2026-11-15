@@ -222,4 +222,5 @@
     <string name="archive_empty_description">Archiviere Dokumente, um sie aus deiner Liste auszublenden, ohne sie zu löschen. Du kannst auch ein Datum wählen, an dem ein Dokument automatisch archiviert wird.</string>
     <string name="untitled_document">Unbenanntes Dokument</string>
     <string name="dialog_password_protection_text">„%1$s“ ist passwortgeschützt. Die App behält eine Kopie ohne Passwort, damit es sich öffnet, ohne danach zu fragen.</string>
+    <string name="error_newer_backup">Dieses Backup stammt von einer neueren Version der App. Aktualisiere die App, um es wiederherzustellen.</string>
 </resources>
