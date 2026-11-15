@@ -69,6 +69,8 @@ class MainViewModel @Inject constructor(
     /** a password, or null when the password dialog was dismissed */
     private val passwords = Channel<String?>(Channel.CONFLATED)
 
+    private val orphansDeleted = viewModelScope.launch { documentRepository.deleteOrphanedFiles() }
+
     // only accessed on the main thread
     private val importQueue = ArrayDeque<Uri>()
     private var importJob: Job? = null
@@ -161,6 +163,8 @@ class MainViewModel @Inject constructor(
     private suspend fun importFile(uri: Uri): ImportResult {
         // files are only imported once the app is unlocked
         lockedRepo.isAppLocked.first { !it }
+        // the file of a document that is being imported would otherwise look orphaned
+        orphansDeleted.join()
         // e.g. a second tap on OK for the previous file
         passwords.tryReceive()
         val prepared = pdfImporter.preparePendingFile(uri) as? PdfImportResult.Success ?: return ImportResult.Failed

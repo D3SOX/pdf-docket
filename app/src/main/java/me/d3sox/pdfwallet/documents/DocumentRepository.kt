@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,6 +53,24 @@ class DocumentRepository @Inject constructor(
     val tags: Flow<List<Tag>> = tagDao.getAll()
 
     fun file(id: String): File = File(context.filesDir, id)
+
+    private val orphansDeleted = AtomicBoolean(false)
+
+    /**
+     * Deletes the files that the app left behind when it was stopped while importing, decrypting or restoring
+     * documents. Runs once per process, before anything is imported.
+     */
+    suspend fun deleteOrphanedFiles() {
+        if (orphansDeleted.getAndSet(true)) return
+        val ids = certificateDao.ids().toSet()
+        withContext(dispatcher) {
+            context.filesDir.listFiles { file -> file.name.endsWith(".pdf") && file.name !in ids }
+                ?.forEach(File::delete)
+            // the decrypted content of a backup
+            context.cacheDir.listFiles { file -> file.name.startsWith("restore") && file.name.endsWith(".zip") }
+                ?.forEach(File::delete)
+        }
+    }
 
     /**
      * Adds the document at the top of the manual order, unless one with the same content is already there,
