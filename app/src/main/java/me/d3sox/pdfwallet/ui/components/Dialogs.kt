@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,8 +75,12 @@ fun TextInputDialog(
     dismissOnConfirm: Boolean = true,
     errorText: String? = null,
 ) {
-    var value by remember {
-        mutableStateOf(TextFieldValue(initialValue, selection = TextRange(0, initialValue.length)))
+    val initial = { mutableStateOf(TextFieldValue(initialValue, selection = TextRange(0, initialValue.length))) }
+    // a password isn't kept in the saved state
+    var value by if (isPassword) {
+        remember(calculation = initial)
+    } else {
+        rememberSaveable(stateSaver = TextFieldValue.Saver, init = initial)
     }
     val focusRequester = remember { FocusRequester() }
     val visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None

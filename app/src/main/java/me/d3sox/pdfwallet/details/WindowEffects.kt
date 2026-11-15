@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.os.Build
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
@@ -30,13 +31,18 @@ internal fun FullBrightness(enabled: Boolean) {
     }
 }
 
+// Android 16 ignores the orientation that apps targeting it request on these screens, e.g. tablets
+private const val MIN_LARGE_SCREEN_WIDTH_DP = 600
+
 /**
  * Turns the screen to the other orientation, regardless of the auto-rotate setting, until the details are left.
+ * Returns null where the system doesn't allow it.
  */
 @Composable
-internal fun rememberScreenRotation(): () -> Unit {
+internal fun rememberScreenRotation(): (() -> Unit)? {
     val activity = LocalActivity.current
-    val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val configuration = LocalConfiguration.current
+    val landscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     // null follows the system
     var orientation by rememberSaveable { mutableStateOf<Int?>(null) }
     val requested = orientation
@@ -49,6 +55,11 @@ internal fun rememberScreenRotation(): () -> Unit {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             }
         }
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA &&
+        configuration.smallestScreenWidthDp >= MIN_LARGE_SCREEN_WIDTH_DP
+    ) {
+        return null
     }
     return {
         orientation = if (landscape) {

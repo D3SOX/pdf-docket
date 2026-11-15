@@ -39,7 +39,6 @@
     <string name="changelog">Muudatuste logi</string>
     <string name="changelog_summary">Muudatused selles rakenduse versioonis</string>
     <string name="delete_all">Kustuta kõik</string>
-    <string name="dialog_delete_all_confirmation_message">Kas sa kindlasti soovid kustutada rakendusest kõik dokumendid?</string>
     <string name="dialog_warning_title">Hoiatus!</string>
     <string name="dialog_warning_description">Rakendus on hetkel seadistatud töötama nutiseadme lukustusvaate peal. See tähendab, et võõrastel võib olla võimalik näha sinu dokumente ilma nutiseadet lahti lukustamata. Androidi seadistusest saad seda muuta.</string>
     <string name="lock">Lukusta</string>

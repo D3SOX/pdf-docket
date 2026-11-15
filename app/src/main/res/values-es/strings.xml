@@ -41,7 +41,6 @@
     <string name="changelog">Registro de cambios</string>
     <string name="changelog_summary">Cambios en esta versión de la aplicación</string>
     <string name="delete_all">Eliminar todo</string>
-    <string name="dialog_delete_all_confirmation_message">¿Realmente desea eliminar todos los documentos de la aplicación?</string>
     <string name="dialog_warning_title">¡Aviso!</string>
     <string name="dialog_warning_description">La aplicación está configurada para mostrarse en la parte superior de la pantalla de bloqueo. Esto significa que se puede acceder a los documentos sin desbloquear el teléfono. Ve a la configuración para cambiar esto.</string>
     <string name="lock">Bloquear</string>

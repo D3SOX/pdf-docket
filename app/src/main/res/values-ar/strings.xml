@@ -47,7 +47,6 @@
     <string name="changelog">سجل التغييرات</string>
     <string name="changelog_summary">التغييرات في إصدار التطبيق هذا</string>
     <string name="delete_all">حذف الكل</string>
-    <string name="dialog_delete_all_confirmation_message">هل تريد حقًا حذف جميع المستندات من التطبيق؟</string>
     <string name="dialog_warning_title">تحذير!</string>
     <string name="dialog_warning_description">تم تكوين التطبيق حاليًا ليتم عرضه أعلى شاشة القفل. هذا يعني أنه يمكن الوصول إلى مستنداتك دون فتح هاتفك. اذهب إلى الإعدادات لتغيير هذا.</string>
     <string name="lock">قفل</string>

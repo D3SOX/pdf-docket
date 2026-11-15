@@ -43,7 +43,6 @@
     <string name="changelog">История изменений</string>
     <string name="changelog_summary">Изменения в этой версии приложения</string>
     <string name="delete_all">Удалить все</string>
-    <string name="dialog_delete_all_confirmation_message">Вы действительно хотите удалить все документы из приложения?</string>
     <string name="dialog_warning_title">Внимание!</string>
     <string name="dialog_warning_description">Приложение настроено на отображение поверх экрана блокировки. Это означает, что доступ к вашим документам можно получить без разблокировки телефона. Зайдите в настройки, чтобы изменить это.</string>
     <string name="lock">Заблокировать</string>

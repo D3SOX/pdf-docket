@@ -125,7 +125,7 @@ fun DocumentsScreen(
     val documentList by vm.documentList.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
     var isSearching by rememberSaveable { mutableStateOf(query.isNotEmpty()) }
-    var documentDialog by remember { mutableStateOf<DocumentDialog?>(null) }
+    var documentDialog by rememberSaveable(stateSaver = DocumentDialog.Saver) { mutableStateOf<DocumentDialog?>(null) }
     var listDialog by rememberSaveable { mutableStateOf<ListDialog?>(null) }
     var selectedIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var selectionDialog by rememberSaveable { mutableStateOf<SelectionDialog?>(null) }
@@ -255,6 +255,7 @@ fun DocumentsScreen(
         dialog = listDialog,
         list = list,
         vm = vm,
+        onOpenSettings = onOpenSettings,
         onDismiss = { listDialog = null },
     )
     if (isSelecting) {
@@ -292,6 +293,7 @@ private fun ListDialogHost(
     dialog: ListDialog?,
     list: DocumentList?,
     vm: DocumentsViewModel,
+    onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     when (dialog) {
@@ -306,16 +308,12 @@ private fun ListDialogHost(
         ListDialog.DELETE_VISIBLE -> {
             val documents = list?.visible.orEmpty()
             ConfirmDialog(
-                // "all" would be wrong in the archive, which only has some of the documents
-                text = if (list?.isFiltered == true || list?.archive == true) {
-                    pluralStringResource(
-                        R.plurals.dialog_delete_filtered_confirmation_text,
-                        documents.size,
-                        documents.size,
-                    )
-                } else {
-                    stringResource(R.string.dialog_delete_all_confirmation_message)
-                },
+                // "all" would be wrong, archived documents are only shown in the archive and the other way around
+                text = pluralStringResource(
+                    R.plurals.dialog_delete_filtered_confirmation_text,
+                    documents.size,
+                    documents.size,
+                ),
                 confirmLabel = stringResource(R.string.delete),
                 onConfirm = { vm.editor.delete(documents.map { it.id }) },
                 onDismiss = onDismiss,
@@ -324,8 +322,8 @@ private fun ListDialogHost(
         ListDialog.LOCK_SCREEN_WARNING -> ConfirmDialog(
             title = stringResource(R.string.dialog_warning_title),
             text = stringResource(R.string.dialog_warning_description),
-            confirmLabel = stringResource(R.string.ok),
-            onConfirm = {},
+            confirmLabel = stringResource(R.string.settings),
+            onConfirm = onOpenSettings,
             onDismiss = onDismiss,
         )
     }

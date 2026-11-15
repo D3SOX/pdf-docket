@@ -38,6 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
 import me.d3sox.pdfwallet.R
@@ -66,7 +68,11 @@ fun SettingsScreen(
     backupVm: BackupViewModel = hiltViewModel(),
 ) {
     val activity = LocalActivity.current as FragmentActivity
-    val canAuthenticate = remember { activity.canAuthenticate() }
+    var canAuthenticate by remember { mutableStateOf(activity.canAuthenticate()) }
+    // e.g. a screen lock was set in the system settings meanwhile
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        canAuthenticate = activity.canAuthenticate()
+    }
     var dialog by rememberSaveable { mutableStateOf<SettingsDialog?>(null) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val backupState by backupVm.state.collectAsStateWithLifecycle()

@@ -39,7 +39,6 @@
     <string name="changelog">Änderungsprotokoll</string>
     <string name="changelog_summary">Änderungen in dieser App-Version</string>
     <string name="delete_all">Alle löschen</string>
-    <string name="dialog_delete_all_confirmation_message">Willst du wirklich alle Dokumente aus der App löschen?</string>
     <string name="dialog_warning_title">Warnung!</string>
     <string name="dialog_warning_description">Die App ist derzeit so konfiguriert, dass sie über dem Sperrbildschirm angezeigt wird. Das bedeutet deine Dokumente sind potenziell aufrufbar, ohne dein Handy zu entsperren. Gehe zu den Einstellungen, um dies zu ändern.</string>
     <string name="lock">Sperren</string>

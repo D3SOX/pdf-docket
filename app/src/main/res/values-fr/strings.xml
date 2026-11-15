@@ -41,7 +41,6 @@
     <string name="changelog">Journal de modifications</string>
     <string name="changelog_summary">Changements dans cette version de l\'app</string>
     <string name="delete_all">Supprimer tout</string>
-    <string name="dialog_delete_all_confirmation_message">Voulez-vous vraiment supprimer tous les documents de l\'application?</string>
     <string name="dialog_warning_title">Attention!</string>
     <string name="dialog_warning_description">L\'application est actuellement configurée pour être affichée en haut de l\'écran de verrouillage. Cela signifie que vos documents peuvent potentiellement être accédés sans déverrouiller votre téléphone. Allez dans les paramètres pour modifier cela.</string>
     <string name="lock">Bloquer</string>

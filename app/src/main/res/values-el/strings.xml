@@ -39,7 +39,6 @@
     <string name="changelog">Τι νέο υπάρχει</string>
     <string name="changelog_summary">Αλλαγές σε αυτήν την έκδοση εφαρμογής</string>
     <string name="delete_all">Διαγραφή όλων</string>
-    <string name="dialog_delete_all_confirmation_message">Θέλετε πράγματι να διαγράψετε όλα τα έγγραφα από την εφαρμογή;</string>
     <string name="dialog_warning_title">Προσοχή!</string>
     <string name="dialog_warning_description">Η εφαρμογή έχει ρυθμιστεί να εμφανίζεται πάνω από την οθόνη κλειδώματος. Αυτό σημαίνει ότι τα έγγραφά σας μπορούν δυνητικά να προσπελαστούν χωρίς να ξεκλειδώσετε το τηλέφωνό σας. Μεταβείτε στις ρυθμίσεις για να το αλλάξετε αυτό.</string>
     <string name="lock">Κλείδωμα</string>

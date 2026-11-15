@@ -41,7 +41,6 @@
     <string name="changelog">Registro delle modifiche</string>
     <string name="changelog_summary">Modifiche in questa versione dell\'app</string>
     <string name="delete_all">Elimina tutto</string>
-    <string name="dialog_delete_all_confirmation_message">Vuoi davvero eliminare tutti i documenti dall\'app?</string>
     <string name="dialog_warning_title">Attenzione!</string>
     <string name="dialog_warning_description">L\'applicazione è attualmente configurata per essere visualizzata sulla parte superiore della schermata di blocco. Ciò significa che i documenti possono essere potenzialmente accessibili senza sbloccare il telefono. Vai alle impostazioni per cambiare questo.</string>
     <string name="lock">Blocca</string>
