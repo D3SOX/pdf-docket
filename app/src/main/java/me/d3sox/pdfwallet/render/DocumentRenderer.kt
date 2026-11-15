@@ -9,6 +9,7 @@ import me.d3sox.pdfwallet.pdfrenderer.PdfRendererBuilder
 import me.d3sox.pdfwallet.settings.BarcodeSearchMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
@@ -45,11 +46,16 @@ class DocumentRenderer @Inject constructor(
     private val scans = BitmapCache.scans
     private val scanMutex = Mutex()
 
-    private val screenWidth: Int get() = context.resources.displayMetrics.widthPixels
+    // only accessed on the render dispatcher
+    private val renderers = mutableMapOf<String, OpenRenderer>()
+
+    // the longer side, so pages are as sharp in landscape and pages cached in portrait can be used there as well
+    private val maxPageWidth: Int
+        get() = context.resources.displayMetrics.let { maxOf(it.widthPixels, it.heightPixels) }
 
     suspend fun thumbnail(id: String): Bitmap? = cached(thumbnailKey(id)) {
         withRenderer(id) { renderer ->
-            renderer.renderPage(pageIndex = 0, highResolution = false)?.scaleToWidth(THUMBNAIL_WIDTH_PX)
+            renderer.renderPage(pageIndex = 0, highResolution = false, maxWidth = THUMBNAIL_WIDTH_PX)
         }
     }
 
@@ -58,7 +64,7 @@ class DocumentRenderer @Inject constructor(
 
     suspend fun page(id: String, pageIndex: Int): Bitmap? = cached(pageKey(id, pageIndex)) {
         withRenderer(id) { renderer ->
-            renderer.renderPage(pageIndex = pageIndex, highResolution = false)?.scaleToWidth(screenWidth)
+            renderer.renderPage(pageIndex = pageIndex, highResolution = false, maxWidth = maxPageWidth)
         }
     }
 
@@ -99,7 +105,7 @@ class DocumentRenderer @Inject constructor(
                         if (!found.complete) allPagesScanned = false
                         barcodes += found.bitmaps.map { PageBarcode(pageIndex, it) }
                         if (cache.get(pageKey(id, pageIndex)) == null) {
-                            cache.put(pageKey(id, pageIndex), page.scaleToWidth(screenWidth))
+                            cache.put(pageKey(id, pageIndex), page.scaleToWidth(maxPageWidth))
                         }
                         emit(BarcodeScan(pageCount, barcodes.toList(), complete = false))
                     }
@@ -122,13 +128,38 @@ class DocumentRenderer @Inject constructor(
     private suspend fun cached(key: String, render: suspend () -> Bitmap?): Bitmap? =
         cache.get(key) ?: render()?.also { cache.put(key, it) }
 
+    /**
+     * Opening a document parses it, so its renderer is shared while it's in use and stays open afterwards,
+     * until another document's renderer is done, e.g. for the next page or thumbnail of the same document.
+     */
     private suspend fun <T> withRenderer(id: String, block: suspend (PdfRenderer) -> T): T {
-        val renderer = PdfRendererBuilder.create(context, fileName = id, renderContext = renderDispatcher)
+        // set where it's counted, as cancellation can discard the result of withContext
+        var open: OpenRenderer? = null
         return try {
+            val renderer = withContext(renderDispatcher) {
+                renderers.getOrPut(id) {
+                    OpenRenderer(PdfRendererBuilder.create(context, fileName = id, renderContext = renderDispatcher))
+                }.also {
+                    it.users++
+                    open = it
+                }.renderer
+            }
             block(renderer)
         } finally {
-            renderer.close()
+            withContext(NonCancellable + renderDispatcher) {
+                val open = open ?: return@withContext
+                open.users--
+                if (open.users == 0) {
+                    renderers.entries.removeAll { (otherId, other) ->
+                        (otherId != id && other.users == 0).also { if (it) other.renderer.close() }
+                    }
+                }
+            }
         }
+    }
+
+    private class OpenRenderer(val renderer: PdfRenderer) {
+        var users = 0
     }
 
     // Large pages take a while to scale, so this stays off the main thread

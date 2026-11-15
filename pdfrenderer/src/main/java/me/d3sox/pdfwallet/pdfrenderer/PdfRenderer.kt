@@ -53,7 +53,8 @@ public interface PdfRenderer {
     public suspend fun loadFile()
     public suspend fun getPageCount(): Int
     public fun close()
-    public suspend fun renderPage(pageIndex: Int, highResolution: Boolean): Bitmap?
+    /** Renders the page at most [maxWidth] pixels wide, if given, which is cheaper than scaling it down later */
+    public suspend fun renderPage(pageIndex: Int, highResolution: Boolean, maxWidth: Int? = null): Bitmap?
     public fun getInvertFilter(): ColorFilter
 }
 
@@ -103,11 +104,12 @@ private class PdfRendererImpl(
     override suspend fun renderPage(
         pageIndex: Int,
         highResolution: Boolean,
+        maxWidth: Int?,
     ): Bitmap? = withContext(renderContext) {
         // e.g. a file or page that can't be opened, or too little memory even for the smaller bitmap
         try {
             if (renderer == null) loadFile()
-            renderer?.openPage(pageIndex)?.renderAndClose(highResolution) { isActive }
+            renderer?.openPage(pageIndex)?.renderAndClose(highResolution, maxWidth) { isActive }
         } catch (_: Exception) {
             null
         } catch (_: OutOfMemoryError) {
@@ -115,9 +117,13 @@ private class PdfRendererImpl(
         }
     }
 
-    private fun PdfRenderer.Page.renderAndClose(highResolution: Boolean, isActive: () -> Boolean): Bitmap? = use {
+    private fun PdfRenderer.Page.renderAndClose(
+        highResolution: Boolean,
+        maxWidth: Int?,
+        isActive: () -> Boolean,
+    ): Bitmap? = use {
         if (!isActive()) return@use null
-        val bitmap = createBitmap(highResolution)
+        val bitmap = createBitmap(highResolution, maxWidth)
         if (!isActive()) return@use null
         render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
         bitmap
@@ -132,14 +138,17 @@ private class PdfRendererImpl(
         }
 
     @Suppress("SwallowedException")
-    private fun PdfRenderer.Page.createBitmap(highResolution: Boolean): Bitmap {
+    private fun PdfRenderer.Page.createBitmap(highResolution: Boolean, maxWidth: Int?): Bitmap {
         val multiplier = when {
             activityManager?.isLowRamDevice != false -> 1
             highResolution -> IMPROVED_PDF_RESOLUTION_MULTIPLIER
             else -> REGULAR_PDF_RESOLUTION_MULTIPLIER
         }
         // Scale before allocating, so the bitmap never exceeds the size limit, even for huge pages
-        val maxScale = sqrt(maxBitmapSize / (width.toDouble() * height * BYTES_PER_PIXEL))
+        val maxScale = min(
+            sqrt(maxBitmapSize / (width.toDouble() * height * BYTES_PER_PIXEL)),
+            maxWidth?.let { it.toDouble() / width } ?: Double.MAX_VALUE,
+        )
         val bitmap = try {
             createScaledBitmap(min(multiplier.toDouble(), maxScale))
         } catch (e: OutOfMemoryError) {
