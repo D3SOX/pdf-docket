@@ -54,9 +54,11 @@ class SettingsRepository @Inject constructor(
         .map { it.toSettings() }
         .distinctUntilChanged()
 
+    /** Only writes the settings that changed, so the others keep following their defaults, e.g. a new one. */
     suspend fun update(transform: (AppSettings) -> AppSettings) {
         dataStore.edit { prefs ->
-            prefs.write(transform(prefs.toSettings()))
+            val old = prefs.toSettings()
+            prefs.write(old, transform(old))
         }
     }
 
@@ -91,30 +93,38 @@ class SettingsRepository @Inject constructor(
         )
     }
 
-    private fun MutablePreferences.write(settings: AppSettings) {
-        this[Keys.requireAuthentication] = settings.requireAuthentication
-        this[Keys.lockTimeout] = settings.lockTimeout.name
-        this[Keys.barcodeSearchMode] = settings.barcodeSearchMode.name
-        this[Keys.halfSizeBarcodes] = settings.halfSizeBarcodes
-        this[Keys.splitScreen] = settings.splitScreen
-        settings.splitFraction?.let { this[Keys.splitFraction] = it } ?: remove(Keys.splitFraction)
-        this[Keys.showViewModeBar] = settings.showViewModeBar
-        this[Keys.syncPages] = settings.syncPages
-        this[Keys.reopenAtLastPosition] = settings.reopenAtLastPosition
-        this[Keys.showPageNumbers] = settings.showPageNumbers
-        this[Keys.generateNewBarcode] = settings.generateNewBarcode
-        this[Keys.fullBrightness] = settings.fullBrightness
-        this[Keys.showOnLockScreen] = settings.showOnLockScreen
-        this[Keys.preventScreenshots] = settings.preventScreenshots
-        this[Keys.themeMode] = settings.themeMode.name
-        this[Keys.dynamicColor] = settings.dynamicColor
-        this[Keys.invertPdfColors] = settings.invertPdfColors
-        this[Keys.fillPdfWidth] = settings.fillPdfWidth
-        this[Keys.sortOrder] = settings.sortOrder.name
-        this[Keys.manualSortExplained] = settings.manualSortExplained
-        this[Keys.tagFilterMode] = settings.tagFilterMode.name
-        this[Keys.documentLayout] = settings.documentLayout.name
-        this[Keys.deleteImportedFiles] = settings.deleteImportedFiles
+    @Suppress("LongMethod")
+    private fun MutablePreferences.write(old: AppSettings, new: AppSettings) {
+        fun <T> write(key: Preferences.Key<T>, value: (AppSettings) -> T) {
+            if (value(new) != value(old)) this[key] = value(new)
+        }
+        fun writeEnum(key: Preferences.Key<String>, value: (AppSettings) -> Enum<*>) = write(key) { value(it).name }
+
+        write(Keys.requireAuthentication) { it.requireAuthentication }
+        writeEnum(Keys.lockTimeout) { it.lockTimeout }
+        writeEnum(Keys.barcodeSearchMode) { it.barcodeSearchMode }
+        write(Keys.halfSizeBarcodes) { it.halfSizeBarcodes }
+        write(Keys.splitScreen) { it.splitScreen }
+        if (new.splitFraction != old.splitFraction) {
+            new.splitFraction?.let { this[Keys.splitFraction] = it } ?: remove(Keys.splitFraction)
+        }
+        write(Keys.showViewModeBar) { it.showViewModeBar }
+        write(Keys.syncPages) { it.syncPages }
+        write(Keys.reopenAtLastPosition) { it.reopenAtLastPosition }
+        write(Keys.showPageNumbers) { it.showPageNumbers }
+        write(Keys.generateNewBarcode) { it.generateNewBarcode }
+        write(Keys.fullBrightness) { it.fullBrightness }
+        write(Keys.showOnLockScreen) { it.showOnLockScreen }
+        write(Keys.preventScreenshots) { it.preventScreenshots }
+        writeEnum(Keys.themeMode) { it.themeMode }
+        write(Keys.dynamicColor) { it.dynamicColor }
+        write(Keys.invertPdfColors) { it.invertPdfColors }
+        write(Keys.fillPdfWidth) { it.fillPdfWidth }
+        writeEnum(Keys.sortOrder) { it.sortOrder }
+        write(Keys.manualSortExplained) { it.manualSortExplained }
+        writeEnum(Keys.tagFilterMode) { it.tagFilterMode }
+        writeEnum(Keys.documentLayout) { it.documentLayout }
+        write(Keys.deleteImportedFiles) { it.deleteImportedFiles }
     }
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String?, default: T): T =
