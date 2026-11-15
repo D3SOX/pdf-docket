@@ -227,4 +227,6 @@
     <string name="archive_title">Archives</string>
     <string name="archive_empty_title">Aucun document archivé</string>
     <string name="archive_empty_description">Archivez des documents pour les masquer de votre liste sans les supprimer. Vous pouvez aussi choisir une date à laquelle un document sera archivé automatiquement.</string>
+    <string name="untitled_document">Document sans titre</string>
+    <string name="dialog_password_protection_text">« %1$s » est protégé par un mot de passe. L’application garde une copie sans le mot de passe, qui s’ouvre donc sans le demander.</string>
 </resources>

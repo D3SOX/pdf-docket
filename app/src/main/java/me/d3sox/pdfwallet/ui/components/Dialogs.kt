@@ -69,6 +69,7 @@ fun TextInputDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
     initialValue: String = "",
+    text: String? = null,
     isPassword: Boolean = false,
     dismissOnConfirm: Boolean = true,
     errorText: String? = null,
@@ -77,7 +78,9 @@ fun TextInputDialog(
         mutableStateOf(TextFieldValue(initialValue, selection = TextRange(0, initialValue.length)))
     }
     val focusRequester = remember { FocusRequester() }
-    val isValid = value.text.isNotBlank()
+    val visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
+    // a password is used as it is, as when it was set
+    val isValid = if (isPassword) value.text.isNotEmpty() else value.text.isNotBlank()
     val confirm = {
         if (isValid) {
             onConfirm(if (isPassword) value.text else value.text.trim())
@@ -88,23 +91,26 @@ fun TextInputDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            OutlinedTextField(
-                value = value,
-                onValueChange = { value = it },
-                label = { Text(label) },
-                isError = errorText != null,
-                supportingText = errorText?.let { { Text(it) } },
-                singleLine = true,
-                visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text,
-                    imeAction = ImeAction.Done,
-                ),
-                keyboardActions = KeyboardActions(onDone = { confirm() }),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                text?.let { Text(it) }
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { value = it },
+                    label = { Text(label) },
+                    isError = errorText != null,
+                    supportingText = errorText?.let { { Text(it) } },
+                    singleLine = true,
+                    visualTransformation = visualTransformation,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text,
+                        imeAction = ImeAction.Done,
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { confirm() }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                )
+            }
         },
         confirmButton = {
             TextButton(onClick = confirm, enabled = isValid) { Text(stringResource(R.string.ok)) }

@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 import me.d3sox.pdfwallet.MainEvent
 import me.d3sox.pdfwallet.MainUiState
 import me.d3sox.pdfwallet.MainViewModel
-import me.d3sox.pdfwallet.PasswordPrompt
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.about.AboutScreen
 import me.d3sox.pdfwallet.details.DocumentDetailsScreen
@@ -154,14 +153,19 @@ fun AppRoot(
         )
     }
 
-    if (passwordPrompt != PasswordPrompt.NONE && !state.isLocked) {
+    val prompt = passwordPrompt
+    if (prompt != null && !state.isLocked) {
         TextInputDialog(
             title = stringResource(R.string.dialog_password_protection_title),
+            text = stringResource(
+                R.string.dialog_password_protection_text,
+                prompt.documentName.ifBlank { stringResource(R.string.untitled_document) },
+            ),
             label = stringResource(R.string.dialog_password_protection_hint),
             isPassword = true,
             // closes once the import succeeds, stays open on a wrong password
             dismissOnConfirm = false,
-            errorText = if (passwordPrompt == PasswordPrompt.WRONG) stringResource(R.string.wrong_password) else null,
+            errorText = if (prompt.isWrongPassword) stringResource(R.string.wrong_password) else null,
             onConfirm = vm::onPasswordEntered,
             onDismiss = vm::onPasswordDialogDismissed,
         )

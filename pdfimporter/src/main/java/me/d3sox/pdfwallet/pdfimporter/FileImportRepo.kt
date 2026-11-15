@@ -43,8 +43,7 @@ internal class FileImportRepoImpl @Inject constructor(
             // e.g. a cloud provider aborted the download or the disk is full
             if (!copied) getFile(fileName).delete()
         }
-        val docName = documentNameRepo.getDocumentName(uri).removeSuffix(".pdf")
-        return@withContext PendingCertificate(fileName = fileName, documentName = docName)
+        return@withContext PendingCertificate(fileName = fileName, documentName = documentNameRepo.getDocumentName(uri))
     }
 
     @OptIn(DelicateCoroutinesApi::class)

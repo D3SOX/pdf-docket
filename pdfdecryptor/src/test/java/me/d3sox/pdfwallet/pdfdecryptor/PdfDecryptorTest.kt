@@ -1,5 +1,7 @@
 package me.d3sox.pdfwallet.pdfdecryptor
 
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.encryption.InvalidPasswordException
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -18,10 +20,12 @@ class PdfDecryptorTest {
     private fun copyOf(name: String): File =
         File("../testdata_generic/$name").copyTo(tempFolder.root.resolve(name))
 
-    @Test
-    fun isPdfPasswordProtected_detectsProtectedPdf() = runTest {
-        decryptor.isPdfPasswordProtected(copyOf("password.pdf")) shouldBe true
-        decryptor.isPdfPasswordProtected(copyOf("demo.pdf")) shouldBe false
+    @Suppress("SwallowedException")
+    private fun File.isPasswordProtected(): Boolean = try {
+        PDDocument.load(this).close()
+        false
+    } catch (e: InvalidPasswordException) {
+        true
     }
 
     @Test
@@ -30,7 +34,7 @@ class PdfDecryptorTest {
 
         decryptor.decrypt("test", file) shouldBe true
 
-        decryptor.isPdfPasswordProtected(file) shouldBe false
+        file.isPasswordProtected() shouldBe false
         tempFolder.root.list()!!.toList() shouldBe listOf("password.pdf")
     }
 
@@ -40,7 +44,7 @@ class PdfDecryptorTest {
 
         decryptor.decrypt("wrong", file) shouldBe false
 
-        decryptor.isPdfPasswordProtected(file) shouldBe true
+        file.isPasswordProtected() shouldBe true
         tempFolder.root.list()!!.toList() shouldBe listOf("password.pdf")
     }
 }

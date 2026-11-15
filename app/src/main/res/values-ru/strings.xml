@@ -235,4 +235,6 @@
     <string name="archive_title">Архив</string>
     <string name="archive_empty_title">Нет архивных документов</string>
     <string name="archive_empty_description">Архивируйте документы, чтобы скрыть их из списка, не удаляя. Также можно выбрать дату, когда документ будет архивирован автоматически.</string>
+    <string name="untitled_document">Документ без названия</string>
+    <string name="dialog_password_protection_text">«%1$s» защищён паролем. Приложение хранит копию без пароля, поэтому она открывается без запроса пароля.</string>
 </resources>

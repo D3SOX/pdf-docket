@@ -26,7 +26,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class PasswordPrompt { NONE, REQUIRED, WRONG }
+/** Asks for the password of the document that is being imported, again after a wrong one */
+data class PasswordPrompt(val documentName: String, val isWrongPassword: Boolean)
 
 data class MainUiState(
     val settings: AppSettings,
@@ -59,8 +60,8 @@ class MainViewModel @Inject constructor(
         ::MainUiState,
     ).stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val _passwordPrompt = MutableStateFlow(PasswordPrompt.NONE)
-    val passwordPrompt: StateFlow<PasswordPrompt> = _passwordPrompt.asStateFlow()
+    private val _passwordPrompt = MutableStateFlow<PasswordPrompt?>(null)
+    val passwordPrompt: StateFlow<PasswordPrompt?> = _passwordPrompt.asStateFlow()
 
     private val _events = Channel<MainEvent>(Channel.BUFFERED)
     val events: Flow<MainEvent> = _events.receiveAsFlow()
@@ -115,8 +116,9 @@ class MainViewModel @Inject constructor(
             val uri = importQueue.removeFirst()
             val result = importFile(uri)
             results += result
-            // a duplicate's document is in the app as well
-            if (result is ImportResult.Stored && settingsRepository.settings.first().deleteImportedFiles) {
+            // a duplicate's document is in the app as well, but only without its password
+            val isInApp = result is ImportResult.Stored && !result.decrypted
+            if (isInApp && settingsRepository.settings.first().deleteImportedFiles) {
                 if (pdfImporter.deleteSourceFile(uri)) deleted++ else notDeleted++
             }
         }
@@ -141,9 +143,12 @@ class MainViewModel @Inject constructor(
 
     private sealed interface ImportResult {
         /** the document is in the app */
-        sealed interface Stored : ImportResult
-        data class Imported(val id: String) : Stored
-        data class Duplicate(val existingId: String) : Stored
+        sealed interface Stored : ImportResult {
+            /** the app only keeps a copy without the password */
+            val decrypted: Boolean
+        }
+        data class Imported(val id: String, override val decrypted: Boolean) : Stored
+        data class Duplicate(val existingId: String, override val decrypted: Boolean) : Stored
         data object Failed : ImportResult
         /** e.g. the password dialog was dismissed */
         data object Skipped : ImportResult
@@ -158,24 +163,24 @@ class MainViewModel @Inject constructor(
         lockedRepo.isAppLocked.first { !it }
         // e.g. a second tap on OK for the previous file
         passwords.tryReceive()
-        if (pdfImporter.preparePendingFile(uri) is PdfImportResult.ParsingError) return ImportResult.Failed
+        val prepared = pdfImporter.preparePendingFile(uri) as? PdfImportResult.Success ?: return ImportResult.Failed
+        val documentName = prepared.pendingCertificate.documentName
         var password: String? = null
         while (true) {
             val result = pdfImporter.importPendingFile(password)
-            _passwordPrompt.value = when {
-                result !is PdfImportResult.PasswordRequired -> PasswordPrompt.NONE
-                password == null -> PasswordPrompt.REQUIRED
-                else -> PasswordPrompt.WRONG
-            }
+            _passwordPrompt.value = (result as? PdfImportResult.PasswordRequired)
+                ?.let { PasswordPrompt(documentName, isWrongPassword = password != null) }
             when (result) {
                 is PdfImportResult.Success -> {
-                    return documentRepository.add(result.pendingCertificate)?.let(ImportResult::Duplicate)
-                        ?: ImportResult.Imported(result.pendingCertificate.fileName)
+                    val decrypted = password != null
+                    return documentRepository.add(result.pendingCertificate)
+                        ?.let { ImportResult.Duplicate(it, decrypted) }
+                        ?: ImportResult.Imported(result.pendingCertificate.fileName, decrypted)
                 }
                 PdfImportResult.ParsingError -> return ImportResult.Failed
                 PdfImportResult.NoFileToImport -> return ImportResult.Skipped
                 PdfImportResult.PasswordRequired -> password = passwords.receive() ?: run {
-                    _passwordPrompt.value = PasswordPrompt.NONE
+                    _passwordPrompt.value = null
                     pdfImporter.deletePendingFile()
                     return ImportResult.Skipped
                 }

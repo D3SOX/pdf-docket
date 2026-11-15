@@ -62,6 +62,14 @@ class DocumentRepositoryTest {
     }
 
     @Test
+    fun add_namesDocumentsWithoutAFileName() = runTest {
+        // e.g. imported from a file named ".pdf", which shortcuts couldn't use as their label
+        addDocument("a.pdf", name = "")
+
+        repository.documents.first().single().name shouldBe "Untitled document"
+    }
+
+    @Test
     fun archive_cancelsTheArchiveDateAndUnarchiveBringsTheDocumentBack() = runTest {
         addDocument("a.pdf")
         repository.setArchiveAt("a.pdf", FUTURE)

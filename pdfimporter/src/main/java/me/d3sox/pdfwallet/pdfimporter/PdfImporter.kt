@@ -51,76 +51,62 @@ internal class PdfImporterImpl @Inject constructor(
     }
 
     override suspend fun importPendingFile(password: String?): PdfImportResult {
+        val pendingFile = pendingFile.value ?: return PdfImportResult.NoFileToImport
         return if (password == null) {
-            importRegularPdf()
+            open(pendingFile)
         } else {
-            importPasswordProtectedPdf(password)
+            importPasswordProtectedPdf(pendingFile, password)
         }
     }
 
     override suspend fun deleteSourceFile(uri: Uri): Boolean = fileRepo.deleteSource(uri)
 
-    @Suppress("TooGenericExceptionCaught", "ReturnCount")
-    private suspend fun importRegularPdf(): PdfImportResult {
-        val pendingFile = pendingFile.value ?: return PdfImportResult.NoFileToImport
-        try {
-            val file = fileRepo.getFile(pendingFile.fileName)
-            return if (pdfDecryptor.isPdfPasswordProtected(file)) {
-                PdfImportResult.PasswordRequired
-            } else {
-                if (isValidPdf(pendingFile)) {
-                    PdfImportResult.Success(pendingFile)
-                } else {
-                    deletePendingFile()
-                    PdfImportResult.ParsingError
-                }
-            }
-        } catch (e: Throwable) {
-            logger.logError(e.toString())
-            deletePendingFile()
-            return PdfImportResult.ParsingError
-        }
-    }
-
     @Suppress("TooGenericExceptionCaught")
-    private suspend fun importPasswordProtectedPdf(password: String): PdfImportResult {
-        val pendingFile = pendingFile.value ?: return PdfImportResult.NoFileToImport
+    private suspend fun importPasswordProtectedPdf(pendingFile: PendingCertificate, password: String): PdfImportResult {
         return try {
             val file = fileRepo.getFile(pendingFile.fileName)
-            when {
-                !pdfDecryptor.decrypt(password = password, file = file) -> PdfImportResult.PasswordRequired
-                isValidPdf(pendingFile) -> PdfImportResult.Success(pendingFile)
-                else -> {
-                    deletePendingFile()
-                    PdfImportResult.ParsingError
-                }
+            if (!pdfDecryptor.decrypt(password = password, file = file)) return PdfImportResult.PasswordRequired
+            // the renderer can't open a document that is still protected
+            open(pendingFile).takeIf { it != PdfImportResult.PasswordRequired } ?: run {
+                deletePendingFile()
+                PdfImportResult.ParsingError
             }
         } catch (e: Exception) {
             // e.g. a full disk, which isn't the password's fault
-            logger.logError(e.toString())
-            deletePendingFile()
-            PdfImportResult.ParsingError
+            failed(e)
+        } catch (e: OutOfMemoryError) {
+            // PDFBox keeps the whole document in memory
+            failed(e)
         }
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    private suspend fun isValidPdf(certificate: PendingCertificate): Boolean {
-        val renderer = PdfRendererBuilder.create(
-            app,
-            fileName = certificate.fileName,
-            renderContext = Dispatchers.IO
-        )
+    /**
+     * Opens the pending file with Android's renderer, which shows the documents later. Only protected PDFs need PDFBox,
+     * which can't read some PDFs that the renderer shows fine.
+     */
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    private suspend fun open(pendingFile: PendingCertificate): PdfImportResult {
+        val renderer = PdfRendererBuilder.create(app, fileName = pendingFile.fileName, renderContext = Dispatchers.IO)
         return try {
             renderer.loadFile()
-            true
-        } catch (e: Exception) {
-            logger.logError(e.toString())
-            fileRepo.deleteFile(certificate.fileName)
-            false
-        } finally {
             _pendingFile.value = null
+            PdfImportResult.Success(pendingFile)
+        } catch (e: SecurityException) {
+            // the renderer's way of saying that the document needs a password
+            PdfImportResult.PasswordRequired
+        } catch (e: Exception) {
+            failed(e)
+        } catch (e: OutOfMemoryError) {
+            failed(e)
+        } finally {
             renderer.close()
         }
+    }
+
+    private fun failed(e: Throwable): PdfImportResult {
+        logger.logError(e.toString())
+        deletePendingFile()
+        return PdfImportResult.ParsingError
     }
 }
 

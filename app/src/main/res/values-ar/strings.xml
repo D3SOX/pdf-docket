@@ -251,4 +251,6 @@
     <string name="archive_title">الأرشيف</string>
     <string name="archive_empty_title">لا توجد مستندات مؤرشفة</string>
     <string name="archive_empty_description">أرشف المستندات لإخفائها من قائمتك دون حذفها. يمكنك أيضًا اختيار تاريخ تتم فيه أرشفة المستند تلقائيًا.</string>
+    <string name="untitled_document">مستند بلا عنوان</string>
+    <string name="dialog_password_protection_text">‏«%1$s» محمي بكلمة مرور. يحتفظ التطبيق بنسخة بدون كلمة المرور، لذا يُفتح دون أن يطلبها.</string>
 </resources>

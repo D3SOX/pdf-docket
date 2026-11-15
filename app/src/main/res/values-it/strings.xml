@@ -227,4 +227,6 @@
     <string name="archive_title">Archivio</string>
     <string name="archive_empty_title">Nessun documento archiviato</string>
     <string name="archive_empty_description">Archivia i documenti per nasconderli dall\'elenco senza eliminarli. Puoi anche scegliere una data in cui un documento verrà archiviato automaticamente.</string>
+    <string name="untitled_document">Documento senza titolo</string>
+    <string name="dialog_password_protection_text">«%1$s» è protetto da password. L’app conserva una copia senza password, così si apre senza chiederla.</string>
 </resources>

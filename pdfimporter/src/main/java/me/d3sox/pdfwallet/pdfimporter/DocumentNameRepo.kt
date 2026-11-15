@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal interface DocumentNameRepo {
+    /** The file name without the extension, empty if it's unknown */
     suspend fun getDocumentName(uri: Uri): String
 }
 
@@ -18,23 +19,20 @@ internal class DocumentNameRepoImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : DocumentNameRepo {
 
-    override suspend fun getDocumentName(uri: Uri): String {
-        return context.getDocumentName(uri)
-    }
-
-    private suspend fun Context.getDocumentName(uri: Uri): String = withContext(Dispatchers.IO) {
-        when(uri.scheme) {
-            ContentResolver.SCHEME_CONTENT -> getDocumentNameFromDb(uri)
+    override suspend fun getDocumentName(uri: Uri): String = withContext(Dispatchers.IO) {
+        val fileName = when (uri.scheme) {
+            ContentResolver.SCHEME_CONTENT -> displayName(uri)
             else -> uri.path?.let(::File)?.name
-        }?.removeSuffix(".pdf")?.removeSuffix(".PDF") ?: "Certificate"
+        }
+        fileName?.removeSuffix(".pdf", ignoreCase = true).orEmpty()
     }
 
-    private suspend fun Context.getDocumentNameFromDb(uri: Uri): String? = withContext(Dispatchers.IO) {
-        runCatching {
-            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                cursor.moveToFirst()
-                return@use cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME).let(cursor::getString)
-            }
-        }.getOrNull()
-    }
+    private fun displayName(uri: Uri): String? = runCatching {
+        context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+            cursor.takeIf { it.moveToFirst() }?.getString(0)
+        }
+    }.getOrNull()
 }
+
+private fun String.removeSuffix(suffix: String, ignoreCase: Boolean): String =
+    if (endsWith(suffix, ignoreCase)) dropLast(suffix.length) else this

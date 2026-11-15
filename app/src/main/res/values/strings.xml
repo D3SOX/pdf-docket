@@ -219,4 +219,6 @@
     <string name="archive_title">Archive</string>
     <string name="archive_empty_title">No archived documents</string>
     <string name="archive_empty_description">Archive documents to hide them from your list without deleting them. You can also pick a date for a document to be archived automatically.</string>
+    <string name="untitled_document">Untitled document</string>
+    <string name="dialog_password_protection_text">“%1$s” is password protected. The app keeps a copy without the password, so it opens without asking for it.</string>
 </resources>

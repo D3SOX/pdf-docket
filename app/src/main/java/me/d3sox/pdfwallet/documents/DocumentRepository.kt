@@ -1,6 +1,7 @@
 package me.d3sox.pdfwallet.documents
 
 import android.content.Context
+import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.IoDispatcher
 import me.d3sox.pdfwallet.db.Certificate
 import me.d3sox.pdfwallet.db.CertificateDao
@@ -35,7 +36,8 @@ class DocumentRepository @Inject constructor(
             list.map {
                 Document(
                     id = it.certificate.id,
-                    name = it.certificate.name,
+                    // e.g. a file named ".pdf"
+                    name = it.certificate.name.ifBlank { context.getString(R.string.untitled_document) },
                     importedAt = it.certificate.importedAt,
                     position = it.certificate.position,
                     sizeBytes = file(it.certificate.id).length(),

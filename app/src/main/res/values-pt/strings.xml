@@ -227,4 +227,6 @@
     <string name="archive_title">Arquivo</string>
     <string name="archive_empty_title">Nenhum documento arquivado</string>
     <string name="archive_empty_description">Arquive documentos para ocultá-los da sua lista sem excluí-los. Você também pode escolher uma data para que um documento seja arquivado automaticamente.</string>
+    <string name="untitled_document">Documento sem título</string>
+    <string name="dialog_password_protection_text">“%1$s” é protegido por senha. O app guarda uma cópia sem a senha, então ele abre sem pedi-la.</string>
 </resources>
