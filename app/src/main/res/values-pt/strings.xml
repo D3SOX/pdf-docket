@@ -54,8 +54,8 @@
     <string name="delete_filtered">Excluir filtrados atualmente</string>
     <!--suppress MissingQuantity -->
     <plurals name="dialog_delete_filtered_confirmation_text">
-        <item quantity="one">Você realmente deseja excluir o documento %d do aplicativo?</item>
-        <item quantity="other">Você realmente deseja excluir documentos do %d do aplicativo?</item>
+        <item quantity="one">Você realmente deseja excluir %d documento do aplicativo?</item>
+        <item quantity="other">Você realmente deseja excluir %d documentos do aplicativo?</item>
     </plurals>
     <string name="preference_barcode">Extrair códigos de barras</string>
     <string name="preference_barcode_disabled">Desabilitado</string>
