@@ -2,7 +2,6 @@ package me.d3sox.pdfwallet.di
 
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.DefaultDispatcher
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.IoDispatcher
-import me.d3sox.pdfwallet.coroutines.dispatcher.di.MainDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,8 +22,4 @@ object TestCoroutineDispatchersModule {
     @DefaultDispatcher
     @Provides
     fun providesDefaultDispatcher(): CoroutineDispatcher = UnconfinedTestDispatcher()
-
-    @MainDispatcher
-    @Provides
-    fun providesMainDispatcher(): CoroutineDispatcher = UnconfinedTestDispatcher()
 }
