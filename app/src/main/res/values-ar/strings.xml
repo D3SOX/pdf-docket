@@ -254,4 +254,5 @@
     <string name="untitled_document">مستند بلا عنوان</string>
     <string name="dialog_password_protection_text">‏«%1$s» محمي بكلمة مرور. يحتفظ التطبيق بنسخة بدون كلمة المرور، لذا يُفتح دون أن يطلبها.</string>
     <string name="error_newer_backup">هذه النسخة الاحتياطية من إصدار أحدث من التطبيق. حدّث التطبيق لاستعادتها.</string>
+    <string name="tag_name_taken">توجد علامة بهذا الاسم بالفعل</string>
 </resources>

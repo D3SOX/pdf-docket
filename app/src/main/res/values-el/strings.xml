@@ -223,4 +223,5 @@
     <string name="untitled_document">Έγγραφο χωρίς τίτλο</string>
     <string name="dialog_password_protection_text">Το «%1$s» προστατεύεται με κωδικό. Η εφαρμογή κρατά ένα αντίγραφο χωρίς κωδικό, ώστε να ανοίγει χωρίς να τον ζητά.</string>
     <string name="error_newer_backup">Αυτό το αντίγραφο ασφαλείας είναι από νεότερη έκδοση της εφαρμογής. Ενημερώστε την εφαρμογή για να το επαναφέρετε.</string>
+    <string name="tag_name_taken">Υπάρχει ήδη ετικέτα με αυτό το όνομα</string>
 </resources>

@@ -111,6 +111,7 @@ fun BulkTagsDialog(
     if (showCreateDialog) {
         TagEditorDialog(
             title = stringResource(R.string.add_tag_dialog_text),
+            takenNames = tags.map { it.name },
             onConfirm = onCreateTag,
             onDismiss = { showCreateDialog = false },
         )
@@ -156,6 +157,7 @@ fun AssignTagsDialog(
     if (showCreateDialog) {
         TagEditorDialog(
             title = stringResource(R.string.add_tag_dialog_text),
+            takenNames = tags.map { it.name },
             onConfirm = onCreateTag,
             onDismiss = { showCreateDialog = false },
         )
@@ -214,6 +216,7 @@ fun ManageTagsDialog(
     if (showCreateDialog) {
         TagEditorDialog(
             title = stringResource(R.string.add_tag_dialog_text),
+            takenNames = tags.map { it.name },
             onConfirm = onCreateTag,
             onDismiss = { showCreateDialog = false },
         )
@@ -223,6 +226,7 @@ fun ManageTagsDialog(
             title = stringResource(R.string.edit_tag),
             initialName = tag.name,
             initialIcon = tag.tagIcon,
+            takenNames = tags.filter { it.id != tag.id }.map { it.name },
             onConfirm = { name, icon -> onEditTag(tag, name, icon) },
             onDismiss = { tagToEdit = null },
         )
@@ -283,11 +287,12 @@ private fun AddTagButton(onClick: () -> Unit) {
 }
 
 /**
- * Asks for the name and the icon of a new or an existing tag.
+ * Asks for the name and the icon of a new or an existing tag, whose name can't be one of [takenNames].
  */
 @Composable
 private fun TagEditorDialog(
     title: String,
+    takenNames: List<String>,
     onConfirm: (String, TagIcon?) -> Unit,
     onDismiss: () -> Unit,
     initialName: String = "",
@@ -295,7 +300,9 @@ private fun TagEditorDialog(
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
     var icon by rememberSaveable { mutableStateOf(initialIcon) }
-    val isValid = name.isNotBlank()
+    // tag names are unique, the tag wouldn't be saved
+    val isTaken = name.trim() in takenNames
+    val isValid = name.isNotBlank() && !isTaken
     val confirm = {
         if (isValid) {
             onConfirm(name.trim(), icon)
@@ -311,6 +318,10 @@ private fun TagEditorDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.dialog_tag_name_hint)) },
+                    isError = isTaken,
+                    supportingText = if (isTaken) {
+                        { Text(stringResource(R.string.tag_name_taken)) }
+                    } else null,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { confirm() }),

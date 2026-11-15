@@ -222,4 +222,5 @@
     <string name="untitled_document">Untitled document</string>
     <string name="dialog_password_protection_text">“%1$s” is password protected. The app keeps a copy without the password, so it opens without asking for it.</string>
     <string name="error_newer_backup">This backup is from a newer version of the app. Update the app to restore it.</string>
+    <string name="tag_name_taken">A tag with this name already exists</string>
 </resources>

@@ -223,4 +223,5 @@
     <string name="untitled_document">Nimetu dokument</string>
     <string name="dialog_password_protection_text">„%1$s“ on parooliga kaitstud. Rakendus hoiab paroolita koopiat, nii et see avaneb parooli küsimata.</string>
     <string name="error_newer_backup">See varukoopia on rakenduse uuemast versioonist. Selle taastamiseks uuenda rakendust.</string>
+    <string name="tag_name_taken">Selle nimega silt on juba olemas</string>
 </resources>

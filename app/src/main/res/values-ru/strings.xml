@@ -238,4 +238,5 @@
     <string name="untitled_document">Документ без названия</string>
     <string name="dialog_password_protection_text">«%1$s» защищён паролем. Приложение хранит копию без пароля, поэтому она открывается без запроса пароля.</string>
     <string name="error_newer_backup">Эта резервная копия создана более новой версией приложения. Обновите приложение, чтобы восстановить её.</string>
+    <string name="tag_name_taken">Тег с таким названием уже есть</string>
 </resources>

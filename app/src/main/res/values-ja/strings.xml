@@ -214,4 +214,5 @@
     <string name="untitled_document">無題のドキュメント</string>
     <string name="dialog_password_protection_text">「%1$s」はパスワードで保護されています。アプリはパスワードなしのコピーを保存するため、パスワードを求めずに開きます。</string>
     <string name="error_newer_backup">このバックアップは新しいバージョンのアプリで作成されています。復元するにはアプリを更新してください。</string>
+    <string name="tag_name_taken">この名前のタグは既にあります</string>
 </resources>

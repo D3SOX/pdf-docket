@@ -214,4 +214,5 @@
     <string name="untitled_document">제목 없는 문서</string>
     <string name="dialog_password_protection_text">‘%1$s’은(는) 비밀번호로 보호되어 있습니다. 앱은 비밀번호 없는 사본을 보관하므로 비밀번호를 묻지 않고 열립니다.</string>
     <string name="error_newer_backup">이 백업은 더 새로운 버전의 앱에서 만들어졌습니다. 복원하려면 앱을 업데이트하세요.</string>
+    <string name="tag_name_taken">이 이름의 태그가 이미 있습니다</string>
 </resources>

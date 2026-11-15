@@ -230,4 +230,5 @@
     <string name="untitled_document">Documento sin título</string>
     <string name="dialog_password_protection_text">«%1$s» está protegido con contraseña. La app guarda una copia sin la contraseña, así que se abre sin pedirla.</string>
     <string name="error_newer_backup">Esta copia de seguridad es de una versión más reciente de la app. Actualiza la app para restaurarla.</string>
+    <string name="tag_name_taken">Ya existe una etiqueta con este nombre</string>
 </resources>

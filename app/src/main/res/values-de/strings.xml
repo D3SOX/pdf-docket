@@ -223,4 +223,5 @@
     <string name="untitled_document">Unbenanntes Dokument</string>
     <string name="dialog_password_protection_text">„%1$s“ ist passwortgeschützt. Die App behält eine Kopie ohne Passwort, damit es sich öffnet, ohne danach zu fragen.</string>
     <string name="error_newer_backup">Dieses Backup stammt von einer neueren Version der App. Aktualisiere die App, um es wiederherzustellen.</string>
+    <string name="tag_name_taken">Es gibt schon einen Tag mit diesem Namen</string>
 </resources>
