@@ -81,6 +81,8 @@ class BackupRepository @Inject constructor(
      * @throws org.bouncycastle.crypto.io.InvalidCipherTextIOException if the password is wrong
      */
     suspend fun restore(uri: Uri, password: String): Int = withContext(dispatcher) {
+        // it would delete the files restored meanwhile
+        documentRepository.deleteOrphanedFiles()
         // the content can only be trusted once it was decrypted completely
         val decrypted = File.createTempFile("restore", ".zip", context.cacheDir)
         try {

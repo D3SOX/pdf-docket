@@ -16,10 +16,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.security.MessageDigest
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,14 +55,15 @@ class DocumentRepository @Inject constructor(
 
     fun file(id: String): File = File(context.filesDir, id)
 
-    private val orphansDeleted = AtomicBoolean(false)
+    private val orphanCleanup = Mutex()
+    private var orphansDeleted = false
 
     /**
      * Deletes the files that the app left behind when it was stopped while importing, decrypting or restoring
-     * documents. Runs once per process, before anything is imported.
+     * documents. Runs once per process, and callers wait for it before they write documents.
      */
-    suspend fun deleteOrphanedFiles() {
-        if (orphansDeleted.getAndSet(true)) return
+    suspend fun deleteOrphanedFiles() = orphanCleanup.withLock {
+        if (orphansDeleted) return@withLock
         val ids = certificateDao.ids().toSet()
         withContext(dispatcher) {
             context.filesDir.listFiles { file -> file.name.endsWith(".pdf") && file.name !in ids }
@@ -70,6 +72,7 @@ class DocumentRepository @Inject constructor(
             context.cacheDir.listFiles { file -> file.name.startsWith("restore") && file.name.endsWith(".zip") }
                 ?.forEach(File::delete)
         }
+        orphansDeleted = true
     }
 
     /**
