@@ -6,7 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -17,17 +16,23 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 class AppLockTimer(
     private val scope: CoroutineScope,
-    private val lockTimeout: Flow<LockTimeout>,
+    lockTimeout: Flow<LockTimeout>,
     private val lock: () -> Unit,
 ) {
     private var job: Job? = null
     private var lastInteraction = SystemClock.elapsedRealtime()
-    private var currentTimeout: LockTimeout? = null
+    /** null until the settings are loaded */
+    private var timeout: LockTimeout? = null
     private var isAppVisible = true
     private var isShowingDocument = false
 
     init {
-        schedule()
+        scope.launch {
+            lockTimeout.distinctUntilChanged().collect {
+                timeout = it
+                schedule()
+            }
+        }
     }
 
     fun onUserInteraction() {
@@ -48,28 +53,25 @@ class AppLockTimer(
         if (!visible) {
             // the document was looked at until now
             if (isShowingDocument) lastInteraction = SystemClock.elapsedRealtime()
-            if (currentTimeout == LockTimeout.IMMEDIATELY) lock()
+            if (timeout == LockTimeout.IMMEDIATELY) lock()
         }
-        // delay() doesn't count the time the device sleeps, e.g. with the screen off
+        // delay() doesn't count the time the device sleeps, e.g. with the screen off.
+        // An expired timeout locks right away, before the app's content is drawn again.
         schedule()
     }
 
     private fun schedule() {
         job?.cancel()
-        job = scope.launch {
-            lockTimeout.distinctUntilChanged().collectLatest { timeout ->
-                currentTimeout = timeout
-                val remaining = timeout.duration - (SystemClock.elapsedRealtime() - lastInteraction).milliseconds
-                when {
-                    // locked when the app is left instead
-                    timeout == LockTimeout.IMMEDIATELY -> Unit
-                    !remaining.isPositive() -> lock()
-                    isShowingDocument && isAppVisible -> Unit
-                    else -> {
-                        delay(remaining)
-                        lock()
-                    }
-                }
+        val timeout = timeout ?: return
+        val remaining = timeout.duration - (SystemClock.elapsedRealtime() - lastInteraction).milliseconds
+        when {
+            // locked when the app is left instead
+            timeout == LockTimeout.IMMEDIATELY -> Unit
+            !remaining.isPositive() -> lock()
+            isShowingDocument && isAppVisible -> Unit
+            else -> job = scope.launch {
+                delay(remaining)
+                lock()
             }
         }
     }

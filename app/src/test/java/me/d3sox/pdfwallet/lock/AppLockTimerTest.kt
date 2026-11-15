@@ -48,8 +48,8 @@ class AppLockTimerTest {
         timer.onAppVisibilityChanged(false)
         sleep(6.minutes)
 
+        // before the app's content is drawn again
         timer.onAppVisibilityChanged(true)
-        runCurrent()
 
         locked shouldBe true
     }
