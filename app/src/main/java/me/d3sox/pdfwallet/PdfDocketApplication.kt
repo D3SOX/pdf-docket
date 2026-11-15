@@ -6,7 +6,7 @@ import me.d3sox.pdfwallet.render.BitmapCache
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class GreenPassApplication : Application() {
+class PdfDocketApplication : Application() {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)

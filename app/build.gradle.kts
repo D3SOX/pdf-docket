@@ -1,5 +1,5 @@
 plugins {
-    id("greenpass.app-conventions")
+    id("pdfdocket.app-conventions")
 }
 
 android {

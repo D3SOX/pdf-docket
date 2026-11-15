@@ -3,7 +3,7 @@ package me.d3sox.pdfwallet.logger
 import android.util.Log
 import javax.inject.Inject
 
-private const val TAG = "greenpass"
+private const val TAG = "pdfdocket"
 
 internal class LoggerDebugImpl @Inject constructor() : Logger {
     override fun logDebug(value: Any?) {
