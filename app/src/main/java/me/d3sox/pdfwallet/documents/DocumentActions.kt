@@ -42,6 +42,7 @@ data class DocumentDialog(val kind: Kind, val documentId: String) {
  * Picking a document for the Quick Settings tile shows how to add the tile to the snackbar host of the screen.
  * [editor] archives the document right away.
  * [onDialog] opens the matching [DocumentDialog].
+ * Without [showShare], sharing is left to a button next to the menu.
  */
 @Composable
 fun DocumentMenu(
@@ -52,6 +53,7 @@ fun DocumentMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
+    showShare: Boolean = true,
     extraGroups: MenuScope.() -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -67,7 +69,9 @@ fun DocumentMenu(
             action(R.string.tags, R.drawable.tag_24, onDismiss) { open(DocumentDialog.Kind.ASSIGN_TAGS) }
         }
         group {
-            action(R.string.share, R.drawable.share_24px, onDismiss) { context.sharePdfs(listOf(document)) }
+            if (showShare) {
+                action(R.string.share, R.drawable.share_24px, onDismiss) { context.sharePdfs(listOf(document)) }
+            }
             if (canAddToHomeScreen) {
                 action(R.string.add_to_home_screen, R.drawable.add_to_home_screen_24, onDismiss) {
                     // the launcher can take a while to answer
