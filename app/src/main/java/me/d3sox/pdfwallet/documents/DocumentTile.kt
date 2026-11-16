@@ -84,6 +84,9 @@ fun DocumentTile(
     modifier: Modifier = Modifier,
     selectionMode: Boolean = false,
     isSelected: Boolean = false,
+    /** shown next to the list */
+    isOpen: Boolean = false,
+    isInQuickSettings: Boolean = false,
     isDragging: Boolean = false,
     onLongClick: () -> Unit = {},
     asListItem: Boolean = false,
@@ -92,7 +95,7 @@ fun DocumentTile(
     previewModifier: Modifier = Modifier,
 ) {
     OutlinedCard(
-        colors = if (isSelected) {
+        colors = if (isSelected || isOpen) {
             CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
         } else {
             CardDefaults.outlinedCardColors()
@@ -112,12 +115,14 @@ fun DocumentTile(
                 role = if (selectionMode) Role.Checkbox else Role.Button,
             )
             .then(dragHandle)
-            .semantics { if (selectionMode) selected = isSelected },
+            .semantics { selected = if (selectionMode) isSelected else isOpen },
     ) {
         if (asListItem) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Preview(document.id, loadThumbnail, cachedThumbnail, previewModifier.width(LIST_PREVIEW_WIDTH))
-                NameTagsAndActions(document, onDialog, editor, selectionMode, isSelected, asListItem = true)
+                NameTagsAndActions(
+                    document, onDialog, editor, selectionMode, isSelected, isInQuickSettings, asListItem = true,
+                )
             }
         } else {
             // the tags are on the preview, which keeps its size, so they don't change the height of the tile
@@ -144,7 +149,9 @@ fun DocumentTile(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                NameTagsAndActions(document, onDialog, editor, selectionMode, isSelected, asListItem = false)
+                NameTagsAndActions(
+                    document, onDialog, editor, selectionMode, isSelected, isInQuickSettings, asListItem = false,
+                )
             }
         }
     }
@@ -158,6 +165,7 @@ private fun RowScope.NameTagsAndActions(
     editor: DocumentEditor,
     selectionMode: Boolean,
     isSelected: Boolean,
+    isInQuickSettings: Boolean,
     // grid tiles show the tags and the archive date on the preview
     asListItem: Boolean,
 ) {
@@ -191,6 +199,7 @@ private fun RowScope.NameTagsAndActions(
         DocumentMenu(
             document = document,
             editor = editor,
+            isInQuickSettings = isInQuickSettings,
             expanded = showMenu,
             onDismiss = { showMenu = false },
             onDialog = onDialog,

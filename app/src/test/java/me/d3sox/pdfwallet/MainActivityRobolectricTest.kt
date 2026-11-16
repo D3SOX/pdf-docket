@@ -332,6 +332,103 @@ class MainActivityRobolectricTest {
     }
 
     @Test
+    @Config(qualifiers = "w1280dp-h800dp")
+    fun wideScreen_showsDocumentsNextToTheListAndTurnsToThePickedOne() {
+        seedDocuments()
+        val context = composeRule.activity
+        val waitForPosition = { index: Int ->
+            composeRule.waitUntil(timeoutMillis = 5_000) {
+                composeRule.onAllNodes(hasText(context.getString(R.string.document_position, index, 3)))
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+        composeRule.onNodeWithText(context.getString(R.string.choose_document)).assertIsDisplayed()
+
+        composeRule.onNodeWithText("Ticket A").performClick()
+        waitForPosition(3)
+        // the list stays, with the open document highlighted
+        composeRule.onNodeWithContentDescription(context.getString(R.string.import_pdf)).assertIsDisplayed()
+        composeRule.onNode(hasText("Ticket A") and hasAnyAncestor(hasScrollAction())).assertIsSelected()
+
+        composeRule.onNodeWithText("Ticket B").performClick()
+        waitForPosition(2)
+        composeRule.onNode(hasText("Ticket B") and hasAnyAncestor(hasScrollAction())).assertIsSelected()
+        composeRule.onNode(hasText("Ticket A") and hasAnyAncestor(hasScrollAction())).assertIsNotSelected()
+
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.onNodeWithText(context.getString(R.string.choose_document)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.import_pdf)).assertIsDisplayed()
+    }
+
+    private fun waitForPosition(index: Int, count: Int = 3) {
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(hasText(composeRule.activity.getString(R.string.document_position, index, count)))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w1280dp-h800dp")
+    fun wideScreen_shortcutTurnsTheDetailsBackToItsDocument() {
+        seedDocuments()
+        composeRule.onNodeWithText("Ticket A").performClick()
+        waitForPosition(3)
+        composeRule.onNodeWithText("Ticket B").performClick()
+        waitForPosition(2)
+
+        composeRule.runOnUiThread {
+            ViewModelProvider(composeRule.activity)[MainViewModel::class.java].onShortcutOpened("Ticket A")
+        }
+        waitForPosition(3)
+    }
+
+    @Test
+    @Config(qualifiers = "w1280dp-h800dp")
+    fun wideScreen_openingTheArchiveClosesTheOpenDocument() {
+        seedDocuments()
+        val context = composeRule.activity
+        composeRule.onNodeWithText("Ticket A").performClick()
+        waitForPosition(3)
+
+        // the list's menu, the one of the details is further right
+        val menus = composeRule.onAllNodes(
+            hasContentDescription(context.getString(R.string.more_options)) and !hasAnyAncestor(hasScrollAction()),
+        )
+        val listMenu = menus.fetchSemanticsNodes().withIndex().minBy { it.value.boundsInRoot.left }.index
+        menus[listMenu].performClick()
+        composeRule.onNodeWithText(context.getString(R.string.archive)).performClick()
+
+        composeRule.onNodeWithText(context.getString(R.string.archive_empty_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(context.getString(R.string.choose_document)).assertIsDisplayed()
+    }
+
+    @Test
+    fun documentMenu_picksTheDocumentOfTheQuickSettingsTile() = runTest {
+        seedDocuments()
+        val context = composeRule.activity
+        val openMenu = {
+            composeRule.onAllNodes(
+                hasContentDescription(context.getString(R.string.more_options)) and hasAnyAncestor(hasScrollAction()),
+            )[0].performClick()
+        }
+        val firstDocument = repository.documents.first().first()
+
+        openMenu()
+        composeRule.onNodeWithText(context.getString(R.string.add_to_quick_settings)).performClick()
+        // Android 11 can't offer to add the tile
+        composeRule.onNodeWithText(context.getString(R.string.quick_settings_tile_hint)).assertIsDisplayed()
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            runBlocking { settingsRepository.settings.first() }.quickSettingsDocumentId == firstDocument.id
+        }
+
+        openMenu()
+        composeRule.onNodeWithText(context.getString(R.string.remove_from_quick_settings)).performClick()
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            runBlocking { settingsRepository.settings.first() }.quickSettingsDocumentId == null
+        }
+    }
+
+    @Test
     fun manualOrder_holdAndDragMovesADocumentWithoutSelectingIt() = runTest {
         seedDocuments()
         settingsRepository.update { it.copy(sortOrder = SortOrder.MANUAL, manualSortExplained = true) }

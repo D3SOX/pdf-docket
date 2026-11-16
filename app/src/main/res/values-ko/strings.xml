@@ -214,4 +214,11 @@
     <string name="dialog_password_protection_text">‘%1$s’은(는) 비밀번호로 보호되어 있습니다. 앱은 비밀번호 없는 사본을 보관하므로 비밀번호를 묻지 않고 열립니다.</string>
     <string name="error_newer_backup">이 백업은 더 새로운 버전의 앱에서 만들어졌습니다. 복원하려면 앱을 업데이트하세요.</string>
     <string name="tag_name_taken">이 이름의 태그가 이미 있습니다</string>
+    <string name="choose_document">문서 선택</string>
+    <string name="add_to_quick_settings">빠른 설정에 추가</string>
+    <string name="remove_from_quick_settings">빠른 설정에서 삭제</string>
+    <string name="quick_settings_tile_hint">빠른 설정에 PDF Docket 타일을 추가하면 거기에서 이 문서를 열 수 있습니다</string>
+    <string name="tile_no_document">문서 없음</string>
+    <string name="widget_label">문서</string>
+    <string name="widget_description">문서를 표시하고 한 번의 탭으로 엽니다</string>
 </resources>

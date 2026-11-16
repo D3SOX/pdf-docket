@@ -3,6 +3,7 @@
 package me.d3sox.pdfwallet.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
@@ -13,6 +14,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import me.d3sox.pdfwallet.settings.ThemeMode
 
 private val LightColors = lightColorScheme(
     primary = Color(0xFF405F90),
@@ -95,6 +97,13 @@ val supportsDynamicColor: Boolean
  * @param dynamicColor uses the system (wallpaper) colors on Android 12+ instead of the app colors
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ThemeMode.isDark(): Boolean = when (this) {
+    ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
+}
+
 @Composable
 fun PdfWalletTheme(
     darkTheme: Boolean,

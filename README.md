@@ -32,7 +32,8 @@ PDF Docket is a fork of the last open source version and stays under the GPLv3. 
 - Search and sort documents by import date, name or file size, or drag them into your own order, and show them as a grid or a list.
 - Select several documents to tag, share or delete them together.
 - Archive documents to hide them from the list without deleting them, or pick a date for the app to archive a document automatically.
-- Add a document to the home screen to open it with one tap.
+- Add a document to the home screen as a shortcut, or as a widget that shows its first page, or open it from a Quick Settings tile.
+- See the document list and the open document side by side on tablets and unfolded foldables.
 - Back up all documents and tags to a password-encrypted file and restore them on another device.
 - Open password protected PDFs and lock the app with biometrics or the device PIN.
 - Use a light or dark theme, in blue or in your system colors on Android 12 and later.

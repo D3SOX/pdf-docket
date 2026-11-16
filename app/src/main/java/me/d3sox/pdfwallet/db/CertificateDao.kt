@@ -21,6 +21,10 @@ interface CertificateDao {
     @Query("SELECT EXISTS(SELECT 1 FROM certificates WHERE id = :id)")
     suspend fun exists(id: String): Boolean
 
+    /** null if there is no such document */
+    @Query("SELECT name FROM certificates WHERE id = :id")
+    suspend fun name(id: String): String?
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(certificate: Certificate)
 

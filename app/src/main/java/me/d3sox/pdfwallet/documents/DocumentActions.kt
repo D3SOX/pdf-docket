@@ -10,6 +10,8 @@ import androidx.compose.ui.res.stringResource
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.AssignTagsDialog
+import me.d3sox.pdfwallet.quicksettings.requestQuickSettingsTile
+import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
 import me.d3sox.pdfwallet.ui.components.ConfirmDialog
 import me.d3sox.pdfwallet.ui.components.ExpressiveMenu
 import me.d3sox.pdfwallet.ui.components.MenuScope
@@ -36,6 +38,7 @@ data class DocumentDialog(val kind: Kind, val documentId: String) {
 
 /**
  * The menu for a single document, followed by the groups of [extraGroups].
+ * Picking a document for the Quick Settings tile shows how to add the tile to the snackbar host of the screen.
  * [editor] archives the document right away.
  * [onDialog] opens the matching [DocumentDialog].
  */
@@ -43,6 +46,8 @@ data class DocumentDialog(val kind: Kind, val documentId: String) {
 fun DocumentMenu(
     document: Document,
     editor: DocumentEditor,
+    /** whether the Quick Settings tile opens the document */
+    isInQuickSettings: Boolean,
     expanded: Boolean,
     onDismiss: () -> Unit,
     onDialog: (DocumentDialog) -> Unit,
@@ -51,6 +56,8 @@ fun DocumentMenu(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val canAddToHomeScreen = remember { context.canAddToHomeScreen() }
+    val snackbarHostState = LocalSnackbarHostState.current
+    val tileHint = stringResource(R.string.quick_settings_tile_hint)
     val open = { kind: DocumentDialog.Kind -> onDialog(DocumentDialog(kind, document.id)) }
     ExpressiveMenu(expanded = expanded, onDismissRequest = onDismiss) {
         group {
@@ -63,6 +70,18 @@ fun DocumentMenu(
                 action(R.string.add_to_home_screen, R.drawable.add_to_home_screen_24, onDismiss) {
                     // the launcher can take a while to answer
                     scope.launch(Dispatchers.IO) { context.addToHomeScreen(document) }
+                }
+            }
+            if (isInQuickSettings) {
+                action(R.string.remove_from_quick_settings, R.drawable.toggle_on_24px, onDismiss) {
+                    editor.setQuickSettingsDocument(null)
+                }
+            } else {
+                action(R.string.add_to_quick_settings, R.drawable.toggle_on_24px, onDismiss) {
+                    editor.setQuickSettingsDocument(document.id)
+                    if (!context.requestQuickSettingsTile(document.name)) {
+                        scope.launch { snackbarHostState.showSnackbar(tileHint) }
+                    }
                 }
             }
         }

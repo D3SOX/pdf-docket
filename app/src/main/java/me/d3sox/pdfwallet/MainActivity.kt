@@ -10,7 +10,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,9 +24,9 @@ import me.d3sox.pdfwallet.documents.ACTION_OPEN_DOCUMENT
 import me.d3sox.pdfwallet.documents.EXTRA_DOCUMENT_ID
 import me.d3sox.pdfwallet.documents.removeRecentShortcuts
 import me.d3sox.pdfwallet.settings.AppSettings
-import me.d3sox.pdfwallet.settings.ThemeMode
 import me.d3sox.pdfwallet.ui.AppRoot
 import me.d3sox.pdfwallet.ui.theme.PdfWalletTheme
+import me.d3sox.pdfwallet.ui.theme.isDark
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -61,11 +60,7 @@ class MainActivity : FragmentActivity() {
         setContent {
             val state by vm.uiState.collectAsStateWithLifecycle()
             val uiState = state ?: return@setContent
-            val darkTheme = when (uiState.settings.themeMode) {
-                ThemeMode.SYSTEM -> isSystemInDarkTheme()
-                ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> true
-            }
+            val darkTheme = uiState.settings.themeMode.isDark()
 
             DisposableEffect(darkTheme) {
                 enableEdgeToEdge(

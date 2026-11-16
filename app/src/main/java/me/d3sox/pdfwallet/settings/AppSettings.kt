@@ -58,6 +58,8 @@ data class AppSettings(
     val tagFilterMode: TagFilterMode = TagFilterMode.ALL,
     val documentLayout: DocumentLayout = DocumentLayout.GRID,
     val deleteImportedFiles: Boolean = false,
+    /** the document that the Quick Settings tile opens, if any */
+    val quickSettingsDocumentId: String? = null,
 ) {
     /**
      * Screenshots stay blocked while authentication is enabled, so app content can't leak via "recent apps".

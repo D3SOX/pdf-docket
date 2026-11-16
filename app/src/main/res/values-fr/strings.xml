@@ -230,4 +230,11 @@
     <string name="dialog_password_protection_text">« %1$s » est protégé par un mot de passe. L’application garde une copie sans le mot de passe, qui s’ouvre donc sans le demander.</string>
     <string name="error_newer_backup">Cette sauvegarde provient d’une version plus récente de l’application. Mettez à jour l’application pour la restaurer.</string>
     <string name="tag_name_taken">Une étiquette porte déjà ce nom</string>
+    <string name="choose_document">Choisir un document</string>
+    <string name="add_to_quick_settings">Ajouter aux réglages rapides</string>
+    <string name="remove_from_quick_settings">Retirer des réglages rapides</string>
+    <string name="quick_settings_tile_hint">Ajoutez la tuile PDF Docket aux réglages rapides pour y ouvrir ce document</string>
+    <string name="tile_no_document">Aucun document</string>
+    <string name="widget_label">Document</string>
+    <string name="widget_description">Affiche un document et l\'ouvre d\'un simple appui</string>
 </resources>

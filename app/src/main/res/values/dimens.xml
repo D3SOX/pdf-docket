@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="widget_corner_radius">16dp</dimen>
+    <!-- the preview sits inside the rounded corners, widgets can't clip their content before Android 12 -->
+    <dimen name="widget_padding">8dp</dimen>
+</resources>

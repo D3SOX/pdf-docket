@@ -223,4 +223,11 @@
     <string name="dialog_password_protection_text">Το «%1$s» προστατεύεται με κωδικό. Η εφαρμογή κρατά ένα αντίγραφο χωρίς κωδικό, ώστε να ανοίγει χωρίς να τον ζητά.</string>
     <string name="error_newer_backup">Αυτό το αντίγραφο ασφαλείας είναι από νεότερη έκδοση της εφαρμογής. Ενημερώστε την εφαρμογή για να το επαναφέρετε.</string>
     <string name="tag_name_taken">Υπάρχει ήδη ετικέτα με αυτό το όνομα</string>
+    <string name="choose_document">Επιλέξτε ένα έγγραφο</string>
+    <string name="add_to_quick_settings">Προσθήκη στις Γρήγορες ρυθμίσεις</string>
+    <string name="remove_from_quick_settings">Κατάργηση από τις Γρήγορες ρυθμίσεις</string>
+    <string name="quick_settings_tile_hint">Προσθέστε το πλακίδιο του PDF Docket στις Γρήγορες ρυθμίσεις για να ανοίγετε αυτό το έγγραφο από εκεί</string>
+    <string name="tile_no_document">Κανένα έγγραφο</string>
+    <string name="widget_label">Έγγραφο</string>
+    <string name="widget_description">Εμφανίζει ένα έγγραφο και το ανοίγει με ένα πάτημα</string>
 </resources>

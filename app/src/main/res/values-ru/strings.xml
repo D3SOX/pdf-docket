@@ -238,4 +238,11 @@
     <string name="dialog_password_protection_text">«%1$s» защищён паролем. Приложение хранит копию без пароля, поэтому она открывается без запроса пароля.</string>
     <string name="error_newer_backup">Эта резервная копия создана более новой версией приложения. Обновите приложение, чтобы восстановить её.</string>
     <string name="tag_name_taken">Тег с таким названием уже есть</string>
+    <string name="choose_document">Выберите документ</string>
+    <string name="add_to_quick_settings">Добавить в быстрые настройки</string>
+    <string name="remove_from_quick_settings">Убрать из быстрых настроек</string>
+    <string name="quick_settings_tile_hint">Добавьте плитку PDF Docket в быстрые настройки, чтобы открывать этот документ оттуда</string>
+    <string name="tile_no_document">Нет документа</string>
+    <string name="widget_label">Документ</string>
+    <string name="widget_description">Показывает документ и открывает его одним касанием</string>
 </resources>

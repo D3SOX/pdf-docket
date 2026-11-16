@@ -223,4 +223,11 @@
     <string name="dialog_password_protection_text">„%1$s“ on parooliga kaitstud. Rakendus hoiab paroolita koopiat, nii et see avaneb parooli küsimata.</string>
     <string name="error_newer_backup">See varukoopia on rakenduse uuemast versioonist. Selle taastamiseks uuenda rakendust.</string>
     <string name="tag_name_taken">Selle nimega silt on juba olemas</string>
+    <string name="choose_document">Vali dokument</string>
+    <string name="add_to_quick_settings">Lisa kiirseadetesse</string>
+    <string name="remove_from_quick_settings">Eemalda kiirseadetest</string>
+    <string name="quick_settings_tile_hint">Lisa PDF Docketi paan kiirseadetesse, et seda dokumenti sealt avada</string>
+    <string name="tile_no_document">Dokumenti pole</string>
+    <string name="widget_label">Dokument</string>
+    <string name="widget_description">Näitab dokumenti ja avab selle ühe puudutusega</string>
 </resources>

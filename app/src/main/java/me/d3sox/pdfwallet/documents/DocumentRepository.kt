@@ -38,8 +38,7 @@ class DocumentRepository @Inject constructor(
             list.map {
                 Document(
                     id = it.certificate.id,
-                    // e.g. a file named ".pdf"
-                    name = it.certificate.name.ifBlank { context.getString(R.string.untitled_document) },
+                    name = displayName(it.certificate.name),
                     importedAt = it.certificate.importedAt,
                     position = it.certificate.position,
                     sizeBytes = file(it.certificate.id).length(),
@@ -103,6 +102,12 @@ class DocumentRepository @Inject constructor(
         }
         return duplicate
     }
+
+    /** null if there is no such document */
+    suspend fun name(id: String): String? = certificateDao.name(id)?.let(::displayName)
+
+    // e.g. a file named ".pdf"
+    private fun displayName(name: String) = name.ifBlank { context.getString(R.string.untitled_document) }
 
     /** null if there is no such document */
     suspend fun isArchived(id: String): Boolean? = certificateDao.isArchived(id)

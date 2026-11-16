@@ -61,6 +61,38 @@
                     android:scheme="content" />
             </intent-filter>
         </activity-alias>
+        <!-- started by the launcher, it checks that the widget is one of this app's -->
+        <activity
+            android:name=".widget.WidgetConfigActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.PdfDocket" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <receiver
+            android:name=".widget.DocumentWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_label" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/document_widget_info" />
+        </receiver>
+        <service
+            android:name=".quicksettings.DocumentTileService"
+            android:exported="true"
+            android:icon="@drawable/tag_icon_confirmation_number"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" >
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.pdffileprovider"

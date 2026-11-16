@@ -22,12 +22,13 @@ private fun shortcutId(documentId: String) = "document-$documentId"
 private fun Context.documentShortcut(id: String, name: String) = ShortcutInfoCompat.Builder(this, shortcutId(id))
     .setShortLabel(name)
     .setIcon(IconCompat.createWithResource(this, shortcutIcon))
-    .setIntent(
-        Intent(this, MainActivity::class.java)
-            .setAction(ACTION_OPEN_DOCUMENT)
-            .putExtra(EXTRA_DOCUMENT_ID, id)
-    )
+    .setIntent(openDocumentIntent(id))
     .build()
+
+/** Opens the document, also used by the Quick Settings tile and the widget. */
+fun Context.openDocumentIntent(id: String): Intent = Intent(this, MainActivity::class.java)
+    .setAction(ACTION_OPEN_DOCUMENT)
+    .putExtra(EXTRA_DOCUMENT_ID, id)
 
 fun Context.canAddToHomeScreen(): Boolean = ShortcutManagerCompat.isRequestPinShortcutSupported(this)
 
