@@ -1,6 +1,7 @@
 package me.d3sox.pdfwallet.documents
 
 import android.content.Context
+import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.IoDispatcher
 import me.d3sox.pdfwallet.db.Certificate
 import me.d3sox.pdfwallet.db.CertificateDao
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.security.MessageDigest
@@ -35,7 +38,8 @@ class DocumentRepository @Inject constructor(
             list.map {
                 Document(
                     id = it.certificate.id,
-                    name = it.certificate.name,
+                    // e.g. a file named ".pdf"
+                    name = it.certificate.name.ifBlank { context.getString(R.string.untitled_document) },
                     importedAt = it.certificate.importedAt,
                     position = it.certificate.position,
                     sizeBytes = file(it.certificate.id).length(),
@@ -50,6 +54,26 @@ class DocumentRepository @Inject constructor(
     val tags: Flow<List<Tag>> = tagDao.getAll()
 
     fun file(id: String): File = File(context.filesDir, id)
+
+    private val orphanCleanup = Mutex()
+    private var orphansDeleted = false
+
+    /**
+     * Deletes the files that the app left behind when it was stopped while importing, decrypting or restoring
+     * documents. Runs once per process, and callers wait for it before they write documents.
+     */
+    suspend fun deleteOrphanedFiles() = orphanCleanup.withLock {
+        if (orphansDeleted) return@withLock
+        val ids = certificateDao.ids().toSet()
+        withContext(dispatcher) {
+            context.filesDir.listFiles { file -> file.name.endsWith(".pdf") && file.name !in ids }
+                ?.forEach(File::delete)
+            // the decrypted content of a backup
+            context.cacheDir.listFiles { file -> file.name.startsWith("restore") && file.name.endsWith(".zip") }
+                ?.forEach(File::delete)
+        }
+        orphansDeleted = true
+    }
 
     /**
      * Adds the document at the top of the manual order, unless one with the same content is already there,

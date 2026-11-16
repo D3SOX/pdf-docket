@@ -36,7 +36,6 @@
     <string name="changelog">変更履歴</string>
     <string name="changelog_summary">このバージョンの変更点</string>
     <string name="delete_all">すべて削除</string>
-    <string name="dialog_delete_all_confirmation_message">本当にすべてのドキュメントをアプリから削除しますか？</string>
     <string name="dialog_warning_title">警告！</string>
     <string name="dialog_warning_description">アプリは現在、ロック画面の上に表示されるように設定されています。つまり、携帯電話のロックを解除せずにドキュメントにアクセスできる可能性があります。設定で変更してください。</string>
     <string name="lock">ロック</string>
@@ -211,4 +210,8 @@
     <string name="archive_title">アーカイブ</string>
     <string name="archive_empty_title">アーカイブされたドキュメントはありません</string>
     <string name="archive_empty_description">ドキュメントをアーカイブすると、削除せずに一覧から非表示にできます。ドキュメントを自動でアーカイブする日付も指定できます。</string>
+    <string name="untitled_document">無題のドキュメント</string>
+    <string name="dialog_password_protection_text">「%1$s」はパスワードで保護されています。アプリはパスワードなしのコピーを保存するため、パスワードを求めずに開きます。</string>
+    <string name="error_newer_backup">このバックアップは新しいバージョンのアプリで作成されています。復元するにはアプリを更新してください。</string>
+    <string name="tag_name_taken">この名前のタグは既にあります</string>
 </resources>

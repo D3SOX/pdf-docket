@@ -41,7 +41,6 @@
     <string name="changelog">Journal de modifications</string>
     <string name="changelog_summary">Changements dans cette version de l\'app</string>
     <string name="delete_all">Supprimer tout</string>
-    <string name="dialog_delete_all_confirmation_message">Voulez-vous vraiment supprimer tous les documents de l\'application?</string>
     <string name="dialog_warning_title">Attention!</string>
     <string name="dialog_warning_description">L\'application est actuellement configurée pour être affichée en haut de l\'écran de verrouillage. Cela signifie que vos documents peuvent potentiellement être accédés sans déverrouiller votre téléphone. Allez dans les paramètres pour modifier cela.</string>
     <string name="lock">Bloquer</string>
@@ -227,4 +226,8 @@
     <string name="archive_title">Archives</string>
     <string name="archive_empty_title">Aucun document archivé</string>
     <string name="archive_empty_description">Archivez des documents pour les masquer de votre liste sans les supprimer. Vous pouvez aussi choisir une date à laquelle un document sera archivé automatiquement.</string>
+    <string name="untitled_document">Document sans titre</string>
+    <string name="dialog_password_protection_text">« %1$s » est protégé par un mot de passe. L’application garde une copie sans le mot de passe, qui s’ouvre donc sans le demander.</string>
+    <string name="error_newer_backup">Cette sauvegarde provient d’une version plus récente de l’application. Mettez à jour l’application pour la restaurer.</string>
+    <string name="tag_name_taken">Une étiquette porte déjà ce nom</string>
 </resources>

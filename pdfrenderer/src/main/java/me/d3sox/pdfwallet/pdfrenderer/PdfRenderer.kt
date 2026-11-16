@@ -5,9 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorFilter
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.pdf.PdfRenderer
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -23,18 +20,6 @@ private const val IMPROVED_PDF_RESOLUTION_MULTIPLIER = 4
 private const val MAX_BITMAP_SIZE = 100 * 1024 * 1024
 private const val HEAP_SHARE_PER_BITMAP = 4
 private const val BYTES_PER_PIXEL = 4
-
-@Suppress("MagicNumber")
-private val invertFilter = ColorMatrixColorFilter(
-    ColorMatrix(
-        floatArrayOf(
-            -1f, 0f, 0f, 0f, 255f,
-            0f, -1f, 0f, 0f, 255f,
-            0f, 0f, -1f, 0f, 255f,
-            0f, 0f, 0f, 1f, 0f
-        )
-    )
-)
 
 public object PdfRendererBuilder {
     public fun create(
@@ -53,8 +38,8 @@ public interface PdfRenderer {
     public suspend fun loadFile()
     public suspend fun getPageCount(): Int
     public fun close()
-    public suspend fun renderPage(pageIndex: Int, highResolution: Boolean): Bitmap?
-    public fun getInvertFilter(): ColorFilter
+    /** Renders the page at most [maxWidth] pixels wide, if given, which is cheaper than scaling it down later */
+    public suspend fun renderPage(pageIndex: Int, highResolution: Boolean, maxWidth: Int? = null): Bitmap?
 }
 
 private class PdfRendererImpl(
@@ -103,11 +88,12 @@ private class PdfRendererImpl(
     override suspend fun renderPage(
         pageIndex: Int,
         highResolution: Boolean,
+        maxWidth: Int?,
     ): Bitmap? = withContext(renderContext) {
         // e.g. a file or page that can't be opened, or too little memory even for the smaller bitmap
         try {
             if (renderer == null) loadFile()
-            renderer?.openPage(pageIndex)?.renderAndClose(highResolution) { isActive }
+            renderer?.openPage(pageIndex)?.renderAndClose(highResolution, maxWidth) { isActive }
         } catch (_: Exception) {
             null
         } catch (_: OutOfMemoryError) {
@@ -115,9 +101,13 @@ private class PdfRendererImpl(
         }
     }
 
-    private fun PdfRenderer.Page.renderAndClose(highResolution: Boolean, isActive: () -> Boolean): Bitmap? = use {
+    private fun PdfRenderer.Page.renderAndClose(
+        highResolution: Boolean,
+        maxWidth: Int?,
+        isActive: () -> Boolean,
+    ): Bitmap? = use {
         if (!isActive()) return@use null
-        val bitmap = createBitmap(highResolution)
+        val bitmap = createBitmap(highResolution, maxWidth)
         if (!isActive()) return@use null
         render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
         bitmap
@@ -132,14 +122,17 @@ private class PdfRendererImpl(
         }
 
     @Suppress("SwallowedException")
-    private fun PdfRenderer.Page.createBitmap(highResolution: Boolean): Bitmap {
+    private fun PdfRenderer.Page.createBitmap(highResolution: Boolean, maxWidth: Int?): Bitmap {
         val multiplier = when {
             activityManager?.isLowRamDevice != false -> 1
             highResolution -> IMPROVED_PDF_RESOLUTION_MULTIPLIER
             else -> REGULAR_PDF_RESOLUTION_MULTIPLIER
         }
         // Scale before allocating, so the bitmap never exceeds the size limit, even for huge pages
-        val maxScale = sqrt(maxBitmapSize / (width.toDouble() * height * BYTES_PER_PIXEL))
+        val maxScale = min(
+            sqrt(maxBitmapSize / (width.toDouble() * height * BYTES_PER_PIXEL)),
+            maxWidth?.let { it.toDouble() / width } ?: Double.MAX_VALUE,
+        )
         val bitmap = try {
             createScaledBitmap(min(multiplier.toDouble(), maxScale))
         } catch (e: OutOfMemoryError) {
@@ -159,9 +152,5 @@ private class PdfRendererImpl(
         val bitmapWidth = (width * scale).toInt().coerceIn(1, maxPixels)
         val bitmapHeight = (height * scale).toInt().coerceIn(1, maxPixels / bitmapWidth)
         return Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888)
-    }
-
-    override fun getInvertFilter(): ColorFilter {
-        return invertFilter
     }
 }

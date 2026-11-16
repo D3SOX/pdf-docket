@@ -4,6 +4,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import me.d3sox.pdfwallet.R
@@ -17,13 +18,20 @@ import me.d3sox.pdfwallet.ui.components.action
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-sealed interface DocumentDialog {
-    val document: Document
+/** A dialog for the document with [documentId], which stays open when the screen rotates with [Saver]. */
+data class DocumentDialog(val kind: Kind, val documentId: String) {
+    enum class Kind { RENAME, ASSIGN_TAGS, ARCHIVE_DATE, DELETE }
 
-    data class Rename(override val document: Document) : DocumentDialog
-    data class AssignTags(override val document: Document) : DocumentDialog
-    data class ArchiveDate(override val document: Document) : DocumentDialog
-    data class Delete(override val document: Document) : DocumentDialog
+    companion object {
+        val Saver = Saver<DocumentDialog?, String>(
+            save = { dialog -> dialog?.let { "${it.kind.name}/${it.documentId}" }.orEmpty() },
+            restore = { saved ->
+                saved.split('/', limit = 2).takeIf { it.size == 2 }?.let { (kind, id) ->
+                    DocumentDialog(Kind.valueOf(kind), id)
+                }
+            },
+        )
+    }
 }
 
 /**
@@ -43,10 +51,11 @@ fun DocumentMenu(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val canAddToHomeScreen = remember { context.canAddToHomeScreen() }
+    val open = { kind: DocumentDialog.Kind -> onDialog(DocumentDialog(kind, document.id)) }
     ExpressiveMenu(expanded = expanded, onDismissRequest = onDismiss) {
         group {
-            action(R.string.rename, R.drawable.edit_24px, onDismiss) { onDialog(DocumentDialog.Rename(document)) }
-            action(R.string.tags, R.drawable.tag_24, onDismiss) { onDialog(DocumentDialog.AssignTags(document)) }
+            action(R.string.rename, R.drawable.edit_24px, onDismiss) { open(DocumentDialog.Kind.RENAME) }
+            action(R.string.tags, R.drawable.tag_24, onDismiss) { open(DocumentDialog.Kind.ASSIGN_TAGS) }
         }
         group {
             action(R.string.share, R.drawable.share_24px, onDismiss) { context.sharePdfs(listOf(document)) }
@@ -67,17 +76,18 @@ fun DocumentMenu(
                     editor.setArchived(listOf(document.id), archived = true)
                 }
                 action(R.string.archive_on_date, R.drawable.event_upcoming_24px, onDismiss) {
-                    onDialog(DocumentDialog.ArchiveDate(document))
+                    open(DocumentDialog.Kind.ARCHIVE_DATE)
                 }
             }
-            action(R.string.delete, R.drawable.delete_24, onDismiss) { onDialog(DocumentDialog.Delete(document)) }
+            action(R.string.delete, R.drawable.delete_24, onDismiss) { open(DocumentDialog.Kind.DELETE) }
         }
         extraGroups()
     }
 }
 
 /**
- * Shows [dialog]. The document is looked up in [documents], so the dialog reflects changes while it's open.
+ * Shows [dialog]. The document is looked up in [documents], so the dialog reflects changes while it's open,
+ * and closes once the document is deleted.
  */
 @Composable
 fun DocumentDialogHost(
@@ -88,28 +98,28 @@ fun DocumentDialogHost(
     onDismiss: () -> Unit,
 ) {
     dialog ?: return
-    val document = documents.firstOrNull { it.id == dialog.document.id } ?: dialog.document
-    when (dialog) {
-        is DocumentDialog.Rename -> TextInputDialog(
+    val document = documents.firstOrNull { it.id == dialog.documentId } ?: return
+    when (dialog.kind) {
+        DocumentDialog.Kind.RENAME -> TextInputDialog(
             title = stringResource(R.string.dialog_document_name_title),
             label = stringResource(R.string.document_name),
             initialValue = document.name,
             onConfirm = { editor.rename(document.id, it) },
             onDismiss = onDismiss,
         )
-        is DocumentDialog.AssignTags -> AssignTagsDialog(
+        DocumentDialog.Kind.ASSIGN_TAGS -> AssignTagsDialog(
             tags = tags,
             assignedTagIds = document.tags.map { it.id }.toSet(),
             onAssignedTagsChange = { editor.setTags(document.id, it) },
             onCreateTag = { name, icon -> editor.createTag(name, icon, assignTo = document) },
             onDismiss = onDismiss,
         )
-        is DocumentDialog.ArchiveDate -> ArchiveDateDialog(
+        DocumentDialog.Kind.ARCHIVE_DATE -> ArchiveDateDialog(
             archiveAt = document.archiveAt,
             onConfirm = { editor.setArchiveAt(document.id, it) },
             onDismiss = onDismiss,
         )
-        is DocumentDialog.Delete -> ConfirmDialog(
+        DocumentDialog.Kind.DELETE -> ConfirmDialog(
             text = stringResource(R.string.dialog_delete_confirmation_message),
             confirmLabel = stringResource(R.string.delete),
             onConfirm = { editor.delete(listOf(document.id)) },

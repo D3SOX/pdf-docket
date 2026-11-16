@@ -140,6 +140,7 @@ class BackupRepositoryTest {
         }
         // so restoring again doesn't skip it
         certificateDao.exists("a.pdf") shouldBe false
+        documentRepository.file("a.pdf").exists() shouldBe false
     }
 
     @Test
@@ -190,6 +191,32 @@ class BackupRepositoryTest {
         shouldThrow<NotABackupException> {
             backupRepository.restore(backupUri, PASSWORD)
         }
+    }
+
+    @Test
+    fun restore_ofNewerFormat_failsAsNewerBackup() = runTest {
+        backupRepository.export(backupUri, PASSWORD)
+        val bytes = backup.readBytes()
+        // the format version follows the 9 byte magic
+        bytes[9] = 2
+        backup.writeBytes(bytes)
+
+        shouldThrow<NewerBackupException> {
+            backupRepository.restore(backupUri, PASSWORD)
+        }
+    }
+
+    @Test
+    fun export_skipsDocumentsWithoutTheirFile() = runTest {
+        addDocument("a.pdf", name = "Ticket")
+        addDocument("b.pdf", name = "Missing")
+        documentRepository.file("b.pdf").delete()
+
+        backupRepository.export(backupUri, PASSWORD)
+        deleteEverything()
+
+        backupRepository.restore(backupUri, PASSWORD) shouldBe 1
+        documentRepository.documents.first().single().name shouldBe "Ticket"
     }
 
     @Test

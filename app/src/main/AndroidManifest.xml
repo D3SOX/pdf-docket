@@ -11,13 +11,13 @@
         tools:node="remove"/>
 
     <application
-        android:name=".GreenPassApplication"
+        android:name=".PdfDocketApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GruenerPass.Starting"
+        android:theme="@style/Theme.PdfDocket.Starting"
         tools:ignore="DataExtractionRules"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="tiramisu" >

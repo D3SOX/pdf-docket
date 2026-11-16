@@ -44,9 +44,8 @@ class DocumentEditor @Inject constructor(
 
     fun createTag(name: String, icon: TagIcon?, assignTo: Document? = null) = scope.launch {
         val tagId = repository.createTag(name, icon?.name)
-        if (assignTo != null && tagId > 0) {
-            repository.setTags(assignTo.id, assignTo.tags.map { it.id }.toSet() + tagId)
-        }
+        // only adds the tag, the document's tags may have changed since
+        if (assignTo != null && tagId > 0) repository.updateTags(listOf(assignTo.id), setOf(tagId), emptySet())
     }
 
     fun updateTag(tag: Tag, name: String, icon: TagIcon?) = scope.launch {

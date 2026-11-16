@@ -38,7 +38,6 @@
     <string name="changelog">Changelog</string>
     <string name="changelog_summary">Changes in this app version</string>
     <string name="delete_all">Delete all</string>
-    <string name="dialog_delete_all_confirmation_message">Do you really want to delete all documents from the app?</string>
     <string name="dialog_warning_title">Warning!</string>
     <string name="dialog_warning_description">The app is currently configured to be shown on top of the lock screen. That means your documents can potentially be accessed without unlocking your phone. Go to settings to change this.</string>
     <string name="lock">Lock</string>
@@ -219,4 +218,8 @@
     <string name="archive_title">Archive</string>
     <string name="archive_empty_title">No archived documents</string>
     <string name="archive_empty_description">Archive documents to hide them from your list without deleting them. You can also pick a date for a document to be archived automatically.</string>
+    <string name="untitled_document">Untitled document</string>
+    <string name="dialog_password_protection_text">“%1$s” is password protected. The app keeps a copy without the password, so it opens without asking for it.</string>
+    <string name="error_newer_backup">This backup is from a newer version of the app. Update the app to restore it.</string>
+    <string name="tag_name_taken">A tag with this name already exists</string>
 </resources>

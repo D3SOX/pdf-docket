@@ -63,7 +63,7 @@ fun BulkTagsDialog(
     onDismiss: () -> Unit,
 ) {
     var changes by rememberSaveable { mutableStateOf(emptyMap<Long, Boolean>()) }
-    var showCreateDialog by remember { mutableStateOf(false) }
+    var showCreateDialog by rememberSaveable { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_assign_tags_title)) },
@@ -111,6 +111,7 @@ fun BulkTagsDialog(
     if (showCreateDialog) {
         TagEditorDialog(
             title = stringResource(R.string.add_tag_dialog_text),
+            takenNames = tags.map { it.name },
             onConfirm = onCreateTag,
             onDismiss = { showCreateDialog = false },
         )
@@ -125,7 +126,7 @@ fun AssignTagsDialog(
     onCreateTag: (String, TagIcon?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var showCreateDialog by remember { mutableStateOf(false) }
+    var showCreateDialog by rememberSaveable { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_assign_tags_title)) },
@@ -156,6 +157,7 @@ fun AssignTagsDialog(
     if (showCreateDialog) {
         TagEditorDialog(
             title = stringResource(R.string.add_tag_dialog_text),
+            takenNames = tags.map { it.name },
             onConfirm = onCreateTag,
             onDismiss = { showCreateDialog = false },
         )
@@ -170,9 +172,9 @@ fun ManageTagsDialog(
     onDeleteTag: (Long) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var showCreateDialog by remember { mutableStateOf(false) }
-    var tagToEdit by remember { mutableStateOf<Tag?>(null) }
-    var tagToDelete by remember { mutableStateOf<Tag?>(null) }
+    var showCreateDialog by rememberSaveable { mutableStateOf(false) }
+    var tagToEditId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var tagToDeleteId by rememberSaveable { mutableStateOf<Long?>(null) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.menu_item_manage_tags)) },
@@ -185,13 +187,13 @@ fun ManageTagsDialog(
                     leadingContent = { TagIconView(tag, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                     trailingContent = {
                         Row {
-                            IconButton(onClick = { tagToEdit = tag }) {
+                            IconButton(onClick = { tagToEditId = tag.id }) {
                                 Icon(
                                     painterResource(R.drawable.edit_24px),
                                     contentDescription = stringResource(R.string.edit_tag),
                                 )
                             }
-                            IconButton(onClick = { tagToDelete = tag }) {
+                            IconButton(onClick = { tagToDeleteId = tag.id }) {
                                 Icon(
                                     painterResource(R.drawable.delete_24),
                                     contentDescription = stringResource(R.string.delete),
@@ -214,26 +216,28 @@ fun ManageTagsDialog(
     if (showCreateDialog) {
         TagEditorDialog(
             title = stringResource(R.string.add_tag_dialog_text),
+            takenNames = tags.map { it.name },
             onConfirm = onCreateTag,
             onDismiss = { showCreateDialog = false },
         )
     }
-    tagToEdit?.let { tag ->
+    tags.firstOrNull { it.id == tagToEditId }?.let { tag ->
         TagEditorDialog(
             title = stringResource(R.string.edit_tag),
             initialName = tag.name,
             initialIcon = tag.tagIcon,
+            takenNames = tags.filter { it.id != tag.id }.map { it.name },
             onConfirm = { name, icon -> onEditTag(tag, name, icon) },
-            onDismiss = { tagToEdit = null },
+            onDismiss = { tagToEditId = null },
         )
     }
-    tagToDelete?.let { tag ->
+    tags.firstOrNull { it.id == tagToDeleteId }?.let { tag ->
         ConfirmDialog(
             title = tag.name,
             text = stringResource(R.string.delete_tag_confirmation),
             confirmLabel = stringResource(R.string.delete),
             onConfirm = { onDeleteTag(tag.id) },
-            onDismiss = { tagToDelete = null },
+            onDismiss = { tagToDeleteId = null },
         )
     }
 }
@@ -283,11 +287,12 @@ private fun AddTagButton(onClick: () -> Unit) {
 }
 
 /**
- * Asks for the name and the icon of a new or an existing tag.
+ * Asks for the name and the icon of a new or an existing tag, whose name can't be one of [takenNames].
  */
 @Composable
 private fun TagEditorDialog(
     title: String,
+    takenNames: List<String>,
     onConfirm: (String, TagIcon?) -> Unit,
     onDismiss: () -> Unit,
     initialName: String = "",
@@ -295,7 +300,9 @@ private fun TagEditorDialog(
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
     var icon by rememberSaveable { mutableStateOf(initialIcon) }
-    val isValid = name.isNotBlank()
+    // tag names are unique, the tag wouldn't be saved
+    val isTaken = name.trim() in takenNames
+    val isValid = name.isNotBlank() && !isTaken
     val confirm = {
         if (isValid) {
             onConfirm(name.trim(), icon)
@@ -311,6 +318,10 @@ private fun TagEditorDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.dialog_tag_name_hint)) },
+                    isError = isTaken,
+                    supportingText = if (isTaken) {
+                        { Text(stringResource(R.string.tag_name_taken)) }
+                    } else null,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { confirm() }),

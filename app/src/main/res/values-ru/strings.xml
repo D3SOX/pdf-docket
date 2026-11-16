@@ -43,7 +43,6 @@
     <string name="changelog">История изменений</string>
     <string name="changelog_summary">Изменения в этой версии приложения</string>
     <string name="delete_all">Удалить все</string>
-    <string name="dialog_delete_all_confirmation_message">Вы действительно хотите удалить все документы из приложения?</string>
     <string name="dialog_warning_title">Внимание!</string>
     <string name="dialog_warning_description">Приложение настроено на отображение поверх экрана блокировки. Это означает, что доступ к вашим документам можно получить без разблокировки телефона. Зайдите в настройки, чтобы изменить это.</string>
     <string name="lock">Заблокировать</string>
@@ -235,4 +234,8 @@
     <string name="archive_title">Архив</string>
     <string name="archive_empty_title">Нет архивных документов</string>
     <string name="archive_empty_description">Архивируйте документы, чтобы скрыть их из списка, не удаляя. Также можно выбрать дату, когда документ будет архивирован автоматически.</string>
+    <string name="untitled_document">Документ без названия</string>
+    <string name="dialog_password_protection_text">«%1$s» защищён паролем. Приложение хранит копию без пароля, поэтому она открывается без запроса пароля.</string>
+    <string name="error_newer_backup">Эта резервная копия создана более новой версией приложения. Обновите приложение, чтобы восстановить её.</string>
+    <string name="tag_name_taken">Тег с таким названием уже есть</string>
 </resources>

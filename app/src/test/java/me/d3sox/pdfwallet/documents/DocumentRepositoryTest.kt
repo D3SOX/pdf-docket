@@ -1,5 +1,6 @@
 package me.d3sox.pdfwallet.documents
 
+import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.CoroutineDispatchersModule
 import me.d3sox.pdfwallet.db.Tag
@@ -7,6 +8,7 @@ import me.d3sox.pdfwallet.db.di.DatabaseModule
 import me.d3sox.pdfwallet.documents.tags.TagIcon
 import me.d3sox.pdfwallet.documents.tags.tagIcon
 import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
@@ -24,6 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.io.File
 import javax.inject.Inject
 
 // 2100-01-01
@@ -39,6 +42,7 @@ class DocumentRepositoryTest {
     val hiltRule = HiltAndroidRule(this)
 
     @Inject lateinit var repository: DocumentRepository
+    @Inject @ApplicationContext lateinit var context: Context
 
     @Before
     fun setUp() {
@@ -59,6 +63,28 @@ class DocumentRepositoryTest {
         document.sizeBytes shouldBe "content of a.pdf".length.toLong()
         repository.isArchived("a.pdf") shouldBe false
         repository.isArchived("b.pdf") shouldBe null
+    }
+
+    @Test
+    fun add_namesDocumentsWithoutAFileName() = runTest {
+        // e.g. imported from a file named ".pdf", which shortcuts couldn't use as their label
+        addDocument("a.pdf", name = "")
+
+        repository.documents.first().single().name shouldBe "Untitled document"
+    }
+
+    @Test
+    fun deleteOrphanedFiles_keepsOnlyTheFilesOfDocuments() = runTest {
+        addDocument("a.pdf")
+        // e.g. left behind when the app was stopped while importing or restoring
+        val orphan = repository.file("b.pdf").apply { writeText("orphan") }
+        val restore = File(context.cacheDir, "restore123.zip").apply { writeText("decrypted backup") }
+
+        repository.deleteOrphanedFiles()
+
+        repository.file("a.pdf").exists() shouldBe true
+        orphan.exists() shouldBe false
+        restore.exists() shouldBe false
     }
 
     @Test

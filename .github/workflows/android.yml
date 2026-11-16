@@ -4,8 +4,16 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+# a new push to a pull request supersedes its running checks
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -17,6 +25,8 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Set up JDK
       uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
       with:
@@ -60,6 +70,8 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Set up JDK
       uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
       with:

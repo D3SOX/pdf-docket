@@ -9,8 +9,6 @@ import java.io.File
 import javax.inject.Inject
 
 public interface PdfDecryptor {
-    @Throws(Exception::class, OutOfMemoryError::class)
-    public suspend fun isPdfPasswordProtected(file: File): Boolean
     /** Returns false if the password is wrong. */
     @Throws(Exception::class)
     public suspend fun decrypt(password: String, file: File): Boolean
@@ -19,18 +17,6 @@ public interface PdfDecryptor {
 internal class PdfDecryptorImpl @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ): PdfDecryptor {
-
-    @Suppress("SwallowedException")
-    @Throws(Exception::class, OutOfMemoryError::class)
-    override suspend fun isPdfPasswordProtected(file: File): Boolean = withContext(dispatcher) {
-        try {
-            // Closing the document again frees PDFBox's buffers for it
-            PDDocument.load(file).close()
-            return@withContext false
-        } catch (e: InvalidPasswordException) {
-            return@withContext true
-        }
-    }
 
     @Suppress("SwallowedException")
     @Throws(Exception::class)

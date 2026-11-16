@@ -143,7 +143,8 @@ private fun SettingsGroupScope.link(title: Int, summary: Int, uri: Int, icon: In
         summary = stringResource(summary),
         icon = icon,
         iconColor = color,
-        onClick = { uriHandler.openUri(target) },
+        // e.g. no browser is installed
+        onClick = { runCatching { uriHandler.openUri(target) } },
     ) {
         Icon(
             painterResource(R.drawable.open_in_new_24px),

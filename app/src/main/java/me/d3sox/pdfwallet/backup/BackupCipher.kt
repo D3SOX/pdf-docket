@@ -19,7 +19,8 @@ private const val FORMAT_VERSION = 1
 // 32 MiB of memory, which even old phones can spare
 private const val SCRYPT_LOG_N = 15
 private const val SCRYPT_R = 8
-private const val SCRYPT_P = 1
+// takes longer instead of more memory, older versions read up to MAX_SCRYPT_P
+private const val SCRYPT_P = 3
 // rejects files that would make the key derivation take ages or run out of memory.
 // scrypt needs 128 * r * N bytes.
 private const val MAX_SCRYPT_LOG_N = 20
@@ -34,6 +35,9 @@ private const val TAG_SIZE_BITS = 128
 private val HEADER_SIZE = MAGIC.size + 4 + SALT_SIZE + NONCE_SIZE
 
 class NotABackupException : IOException()
+
+/** The backup was created by a newer version of the app, in a format this one doesn't know */
+class NewerBackupException : IOException()
 
 private class Header(
     val bytes: ByteArray,
@@ -73,6 +77,7 @@ object BackupCipher {
      * [org.bouncycastle.crypto.io.InvalidCipherTextIOException], which a wrong password also causes.
      *
      * @throws NotABackupException if [input] doesn't start with a backup header
+     * @throws NewerBackupException if the backup has a newer format
      */
     fun decrypt(input: InputStream, password: String): InputStream {
         val header = readHeader(input) ?: throw NotABackupException()
@@ -89,7 +94,10 @@ object BackupCipher {
             return null
         }
         var offset = MAGIC.size
-        val isBackup = bytes.copyOfRange(0, offset).contentEquals(MAGIC) && bytes[offset++].toInt() == FORMAT_VERSION
+        val hasMagic = bytes.copyOfRange(0, offset).contentEquals(MAGIC)
+        val version = bytes[offset++].toInt()
+        if (hasMagic && version > FORMAT_VERSION) throw NewerBackupException()
+        val isBackup = hasMagic && version == FORMAT_VERSION
         val header = Header(
             bytes = bytes,
             logN = bytes[offset++].toInt(),

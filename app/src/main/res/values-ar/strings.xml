@@ -47,7 +47,6 @@
     <string name="changelog">سجل التغييرات</string>
     <string name="changelog_summary">التغييرات في إصدار التطبيق هذا</string>
     <string name="delete_all">حذف الكل</string>
-    <string name="dialog_delete_all_confirmation_message">هل تريد حقًا حذف جميع المستندات من التطبيق؟</string>
     <string name="dialog_warning_title">تحذير!</string>
     <string name="dialog_warning_description">تم تكوين التطبيق حاليًا ليتم عرضه أعلى شاشة القفل. هذا يعني أنه يمكن الوصول إلى مستنداتك دون فتح هاتفك. اذهب إلى الإعدادات لتغيير هذا.</string>
     <string name="lock">قفل</string>
@@ -251,4 +250,8 @@
     <string name="archive_title">الأرشيف</string>
     <string name="archive_empty_title">لا توجد مستندات مؤرشفة</string>
     <string name="archive_empty_description">أرشف المستندات لإخفائها من قائمتك دون حذفها. يمكنك أيضًا اختيار تاريخ تتم فيه أرشفة المستند تلقائيًا.</string>
+    <string name="untitled_document">مستند بلا عنوان</string>
+    <string name="dialog_password_protection_text">‏«%1$s» محمي بكلمة مرور. يحتفظ التطبيق بنسخة بدون كلمة المرور، لذا يُفتح دون أن يطلبها.</string>
+    <string name="error_newer_backup">هذه النسخة الاحتياطية من إصدار أحدث من التطبيق. حدّث التطبيق لاستعادتها.</string>
+    <string name="tag_name_taken">توجد علامة بهذا الاسم بالفعل</string>
 </resources>

@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,13 +23,5 @@ class ShortcutsTest {
         context.addRecentShortcut("2.pdf", "Boarding pass")
 
         recentLabels() shouldContainExactly listOf("Boarding pass", "Ticket")
-    }
-
-    @Test
-    fun `a document without a name gets no recent shortcut`() {
-        // e.g. imported from a file named ".pdf"
-        context.addRecentShortcut("1.pdf", "")
-
-        recentLabels().shouldBeEmpty()
     }
 }

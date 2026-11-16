@@ -1,5 +1,5 @@
 plugins {
-    id("greenpass.lib-conventions")
+    id("pdfdocket.lib-conventions")
 }
 
 android.namespace = "me.d3sox.pdfwallet.pdfdecryptor"

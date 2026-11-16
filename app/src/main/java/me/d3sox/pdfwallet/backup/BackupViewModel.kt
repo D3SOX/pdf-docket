@@ -29,6 +29,7 @@ sealed interface BackupMessage {
     data object CreateFailed : BackupMessage
     data class Restored(val count: Int) : BackupMessage
     data object NotABackup : BackupMessage
+    data object NewerBackup : BackupMessage
     data object RestoreFailed : BackupMessage
 }
 
@@ -97,6 +98,8 @@ class BackupViewModel @Inject constructor(
                 return@launch
             } catch (e: NotABackupException) {
                 BackupMessage.NotABackup
+            } catch (e: NewerBackupException) {
+                BackupMessage.NewerBackup
             } catch (e: IOException) {
                 BackupMessage.RestoreFailed
             } catch (e: JSONException) {

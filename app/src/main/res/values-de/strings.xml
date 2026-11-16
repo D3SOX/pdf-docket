@@ -39,7 +39,6 @@
     <string name="changelog">Änderungsprotokoll</string>
     <string name="changelog_summary">Änderungen in dieser App-Version</string>
     <string name="delete_all">Alle löschen</string>
-    <string name="dialog_delete_all_confirmation_message">Willst du wirklich alle Dokumente aus der App löschen?</string>
     <string name="dialog_warning_title">Warnung!</string>
     <string name="dialog_warning_description">Die App ist derzeit so konfiguriert, dass sie über dem Sperrbildschirm angezeigt wird. Das bedeutet deine Dokumente sind potenziell aufrufbar, ohne dein Handy zu entsperren. Gehe zu den Einstellungen, um dies zu ändern.</string>
     <string name="lock">Sperren</string>
@@ -220,4 +219,8 @@
     <string name="archive_title">Archiv</string>
     <string name="archive_empty_title">Keine archivierten Dokumente</string>
     <string name="archive_empty_description">Archiviere Dokumente, um sie aus deiner Liste auszublenden, ohne sie zu löschen. Du kannst auch ein Datum wählen, an dem ein Dokument automatisch archiviert wird.</string>
+    <string name="untitled_document">Unbenanntes Dokument</string>
+    <string name="dialog_password_protection_text">„%1$s“ ist passwortgeschützt. Die App behält eine Kopie ohne Passwort, damit es sich öffnet, ohne danach zu fragen.</string>
+    <string name="error_newer_backup">Dieses Backup stammt von einer neueren Version der App. Aktualisiere die App, um es wiederherzustellen.</string>
+    <string name="tag_name_taken">Es gibt schon einen Tag mit diesem Namen</string>
 </resources>

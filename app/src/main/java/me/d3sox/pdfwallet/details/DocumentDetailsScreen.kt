@@ -126,7 +126,7 @@ fun DocumentDetailsScreen(
         showPdf -> ViewMode.PDF
         else -> ViewMode.BARCODE
     }
-    var dialog by remember { mutableStateOf<DocumentDialog?>(null) }
+    var dialog by rememberSaveable(stateSaver = DocumentDialog.Saver) { mutableStateOf<DocumentDialog?>(null) }
     // documents without barcodes only show the PDF
     val barcodeViewMode = viewMode.takeIf { hasBarcodes[current.id] == true }
     val onViewModeSelect: (ViewMode) -> Unit = { mode ->
@@ -223,7 +223,8 @@ fun DocumentDetailsScreen(
 
 private class DetailsMenuActions(
     val onToggleHalfSizeBarcodes: () -> Unit,
-    val onRotateScreen: () -> Unit,
+    /** null if the screen can't be rotated */
+    val onRotateScreen: (() -> Unit)?,
     val onDialog: (DocumentDialog) -> Unit,
 )
 
@@ -257,7 +258,9 @@ private fun DetailsOverflowMenu(
                 )
             }
             group {
-                action(R.string.rotate_screen, R.drawable.screen_rotation_24px, onDismiss, actions.onRotateScreen)
+                actions.onRotateScreen?.let {
+                    action(R.string.rotate_screen, R.drawable.screen_rotation_24px, onDismiss, it)
+                }
                 if (activity?.isPinned == true) {
                     action(R.string.unpin_app, R.drawable.keep_off_24px, onDismiss, activity::stopLockTask)
                 } else if (activity != null) {
@@ -437,6 +440,7 @@ private fun PdfPager(
         PdfPageView(
             load = { vm.page(documentId, pageIndex) },
             key = "$documentId-$pageIndex",
+            description = stringResource(R.string.page_position, pageIndex + 1, state.pageCount),
             invertColors = invertColors,
             fillWidth = fillWidth,
         )
@@ -474,6 +478,7 @@ private fun PagesPager(
 private fun PdfPageView(
     load: suspend () -> android.graphics.Bitmap?,
     key: String,
+    description: String,
     invertColors: Boolean,
     fillWidth: Boolean,
 ) {
@@ -489,7 +494,7 @@ private fun PdfPageView(
             val overflows = fillWidth && maxWidth * bitmap.height / bitmap.width > maxHeight
             ZoomImage(
                 painter = remember(image) { BitmapPainter(bitmap) },
-                contentDescription = null,
+                contentDescription = description,
                 colorFilter = if (invertColors) invertColorFilter else null,
                 contentScale = if (fillWidth) ContentScale.FillWidth else ContentScale.Fit,
                 alignment = if (overflows) Alignment.TopCenter else Alignment.Center,

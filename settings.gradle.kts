@@ -10,7 +10,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { setUrl("https://jitpack.io") }
+        // only for zxing-cpp, so no other dependency can be resolved from it
+        maven {
+            setUrl("https://jitpack.io")
+            content { includeGroup("com.github.markusfisch") }
+        }
     }
 }
 rootProject.name = "pdfwallet"

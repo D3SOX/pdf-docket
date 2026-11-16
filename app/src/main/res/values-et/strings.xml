@@ -39,7 +39,6 @@
     <string name="changelog">Muudatuste logi</string>
     <string name="changelog_summary">Muudatused selles rakenduse versioonis</string>
     <string name="delete_all">Kustuta kõik</string>
-    <string name="dialog_delete_all_confirmation_message">Kas sa kindlasti soovid kustutada rakendusest kõik dokumendid?</string>
     <string name="dialog_warning_title">Hoiatus!</string>
     <string name="dialog_warning_description">Rakendus on hetkel seadistatud töötama nutiseadme lukustusvaate peal. See tähendab, et võõrastel võib olla võimalik näha sinu dokumente ilma nutiseadet lahti lukustamata. Androidi seadistusest saad seda muuta.</string>
     <string name="lock">Lukusta</string>
@@ -220,4 +219,8 @@
     <string name="archive_title">Arhiiv</string>
     <string name="archive_empty_title">Arhiveeritud dokumente pole</string>
     <string name="archive_empty_description">Arhiveeri dokumente, et peita need loendist ilma kustutamata. Saad valida ka kuupäeva, mil dokument automaatselt arhiveeritakse.</string>
+    <string name="untitled_document">Nimetu dokument</string>
+    <string name="dialog_password_protection_text">„%1$s“ on parooliga kaitstud. Rakendus hoiab paroolita koopiat, nii et see avaneb parooli küsimata.</string>
+    <string name="error_newer_backup">See varukoopia on rakenduse uuemast versioonist. Selle taastamiseks uuenda rakendust.</string>
+    <string name="tag_name_taken">Selle nimega silt on juba olemas</string>
 </resources>

@@ -41,7 +41,6 @@
     <string name="changelog">Registro delle modifiche</string>
     <string name="changelog_summary">Modifiche in questa versione dell\'app</string>
     <string name="delete_all">Elimina tutto</string>
-    <string name="dialog_delete_all_confirmation_message">Vuoi davvero eliminare tutti i documenti dall\'app?</string>
     <string name="dialog_warning_title">Attenzione!</string>
     <string name="dialog_warning_description">L\'applicazione è attualmente configurata per essere visualizzata sulla parte superiore della schermata di blocco. Ciò significa che i documenti possono essere potenzialmente accessibili senza sbloccare il telefono. Vai alle impostazioni per cambiare questo.</string>
     <string name="lock">Blocca</string>
@@ -227,4 +226,8 @@
     <string name="archive_title">Archivio</string>
     <string name="archive_empty_title">Nessun documento archiviato</string>
     <string name="archive_empty_description">Archivia i documenti per nasconderli dall\'elenco senza eliminarli. Puoi anche scegliere una data in cui un documento verrà archiviato automaticamente.</string>
+    <string name="untitled_document">Documento senza titolo</string>
+    <string name="dialog_password_protection_text">«%1$s» è protetto da password. L’app conserva una copia senza password, così si apre senza chiederla.</string>
+    <string name="error_newer_backup">Questo backup proviene da una versione più recente dell’app. Aggiorna l’app per ripristinarlo.</string>
+    <string name="tag_name_taken">Esiste già un tag con questo nome</string>
 </resources>
