@@ -95,6 +95,8 @@ fun AppRoot(
             requestedDocumentId = id
         } else {
             shownDocumentId = id
+            // a pick the closed details never got would turn the new ones away from this document
+            requestedDocumentId = null
             backStack.add(DetailsRoute(id))
         }
     }
