@@ -186,6 +186,7 @@ private fun RowScope.NameTagsAndActions(
             )
         }
         // an empty line would push the name off center
+        if (asListItem && document.note.isNotEmpty()) NoteLine(document.note)
         if (asListItem && document.tags.isNotEmpty()) TagsLine(document.tags)
         if (asListItem) document.archiveAt?.let { ArchiveDateChip(it, Modifier.padding(top = 4.dp)) }
     }
@@ -302,6 +303,17 @@ private fun Preview(
             )
         }
     }
+}
+
+@Composable
+private fun NoteLine(note: String) {
+    Text(
+        text = note,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 /**

@@ -120,6 +120,9 @@ class DocumentFilterTest {
 
         filter.setQuery("ET")
         visibleNames() shouldContainExactly listOf("beta")
+        certificateDao.updateNote("3.pdf", "Seat 42")
+        filter.setQuery("seat")
+        visibleNames() shouldContainExactly listOf("gamma")
         filter.clear()
 
         filter.toggleTag(ticketTagId)

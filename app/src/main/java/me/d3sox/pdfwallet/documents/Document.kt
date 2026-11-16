@@ -14,4 +14,6 @@ data class Document(
     val archived: Boolean = false,
     /** when the document gets archived automatically, in epoch millis */
     val archiveAt: Long? = null,
+    /** empty if there is none */
+    val note: String = "",
 )

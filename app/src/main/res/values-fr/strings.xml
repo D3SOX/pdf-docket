@@ -48,7 +48,7 @@
     <string name="preference_add_show_on_locked_screen">Afficher sur l\'écran de verrouillage</string>
     <string name="preference_add_show_on_locked_screen_description">Permet d\'accéder à l\'application sans déverrouiller votre téléphone. N\'utilisez pas ce paramètre définitivement.</string>
     <string name="search">Recherche</string>
-    <string name="search_query_hint">Nom du document</string>
+    <string name="search_query_hint">Nom ou note</string>
     <string name="dialog_document_name_title">Changer le nom du document</string>
     <string name="export_filtered">Export actuellement filtré</string>
     <string name="delete_filtered">Supprimer actuellement filtré</string>
@@ -222,6 +222,11 @@
     <string name="archive_on_date">Archiver à une date</string>
     <string name="dialog_archive_date_title">Archiver automatiquement le</string>
     <string name="archives_on">Sera archivé le %1$s</string>
+    <string name="note">Note</string>
+    <string name="note_hint">P. ex. place ou numéro de réservation</string>
+    <string name="archive_reminder_channel">Rappels d\'archivage</string>
+    <string name="archive_reminder_text">Sera archivé demain</string>
+    <string name="archive_reminder_hidden">Un document sera archivé demain</string>
     <string name="remove">Supprimer la date</string>
     <string name="archive_title">Archives</string>
     <string name="archive_empty_title">Aucun document archivé</string>
@@ -236,5 +241,5 @@
     <string name="quick_settings_tile_hint">Ajoutez la tuile PDF Docket aux réglages rapides pour y ouvrir ce document</string>
     <string name="tile_no_document">Aucun document</string>
     <string name="widget_label">Document</string>
-    <string name="widget_description">Affiche un document et l\'ouvre d\'un simple appui</string>
+    <string name="widget_description">Affiche le code-barres d\'un document et l\'ouvre d\'un simple appui</string>
 </resources>

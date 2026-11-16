@@ -153,6 +153,8 @@ class BackupRepository @Inject constructor(
                     // added in 1.9.0
                     archived = json.optBoolean("archived"),
                     archiveAt = json.takeIf { it.has("archiveAt") }?.getLong("archiveAt"),
+                    // added in 1.12.0
+                    note = json.optString("note"),
                 )
             )
             tagDao.insertCrossRefs(
@@ -175,6 +177,7 @@ class BackupRepository @Inject constructor(
                         .put("tags", JSONArray(document.tags.map { it.name }))
                         .put("archived", document.archived)
                         .putOpt("archiveAt", document.archiveAt)
+                        .put("note", document.note)
                 }
             ),
         )

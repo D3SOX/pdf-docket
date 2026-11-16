@@ -95,7 +95,8 @@ class DocumentFilter @Inject constructor(
     }
 
     private fun Document.matches(query: String, tagIds: Set<Long>, settings: AppSettings): Boolean {
-        val matchesQuery = query.isEmpty() || name.contains(query, ignoreCase = true)
+        val matchesQuery = query.isEmpty() || name.contains(query, ignoreCase = true) ||
+            note.contains(query, ignoreCase = true)
         val ownTagIds = tags.map { it.id }
         val matchesTags = tagIds.isEmpty() || when (settings.tagFilterMode) {
             TagFilterMode.ALL -> ownTagIds.containsAll(tagIds)

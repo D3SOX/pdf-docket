@@ -45,6 +45,7 @@ class DocumentRepository @Inject constructor(
                     tags = it.tags.sortedBy { tag -> tag.name.lowercase() },
                     archived = it.certificate.archived,
                     archiveAt = it.certificate.archiveAt,
+                    note = it.certificate.note,
                 )
             }
         }
@@ -113,6 +114,8 @@ class DocumentRepository @Inject constructor(
     suspend fun isArchived(id: String): Boolean? = certificateDao.isArchived(id)
 
     suspend fun rename(id: String, name: String) = certificateDao.updateName(id, name)
+
+    suspend fun setNote(id: String, note: String) = certificateDao.updateNote(id, note)
 
     /** @see CertificateDao.reorder */
     suspend fun reorder(ids: List<String>) = certificateDao.reorder(ids)

@@ -30,4 +30,8 @@ data class Certificate(
      * When the document gets archived automatically, in epoch millis, or null
      */
     @ColumnInfo(name = "archiveAt") val archiveAt: Long? = null,
+    /**
+     * The user's note, e.g. a seat or booking number, empty if there is none
+     */
+    @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
 )

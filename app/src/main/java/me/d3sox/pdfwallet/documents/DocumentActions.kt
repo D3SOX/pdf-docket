@@ -11,6 +11,7 @@ import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.AssignTagsDialog
 import me.d3sox.pdfwallet.quicksettings.requestQuickSettingsTile
+import me.d3sox.pdfwallet.reminders.rememberNotificationPermissionRequest
 import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
 import me.d3sox.pdfwallet.ui.components.ConfirmDialog
 import me.d3sox.pdfwallet.ui.components.ExpressiveMenu
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 
 /** A dialog for the document with [documentId], which stays open when the screen rotates with [Saver]. */
 data class DocumentDialog(val kind: Kind, val documentId: String) {
-    enum class Kind { RENAME, ASSIGN_TAGS, ARCHIVE_DATE, DELETE }
+    enum class Kind { RENAME, NOTE, ASSIGN_TAGS, ARCHIVE_DATE, DELETE }
 
     companion object {
         val Saver = Saver<DocumentDialog?, String>(
@@ -62,6 +63,7 @@ fun DocumentMenu(
     ExpressiveMenu(expanded = expanded, onDismissRequest = onDismiss) {
         group {
             action(R.string.rename, R.drawable.edit_24px, onDismiss) { open(DocumentDialog.Kind.RENAME) }
+            action(R.string.note, R.drawable.sticky_note_2_24px, onDismiss) { open(DocumentDialog.Kind.NOTE) }
             action(R.string.tags, R.drawable.tag_24, onDismiss) { open(DocumentDialog.Kind.ASSIGN_TAGS) }
         }
         group {
@@ -116,6 +118,8 @@ fun DocumentDialogHost(
     editor: DocumentEditor,
     onDismiss: () -> Unit,
 ) {
+    // outside the dialog, which closes before the permission is granted
+    val requestNotificationPermission = rememberNotificationPermissionRequest()
     dialog ?: return
     val document = documents.firstOrNull { it.id == dialog.documentId } ?: return
     when (dialog.kind) {
@@ -126,6 +130,15 @@ fun DocumentDialogHost(
             onConfirm = { editor.rename(document.id, it) },
             onDismiss = onDismiss,
         )
+        DocumentDialog.Kind.NOTE -> TextInputDialog(
+            title = stringResource(R.string.note),
+            label = stringResource(R.string.note_hint),
+            initialValue = document.note,
+            onConfirm = { editor.setNote(document.id, it) },
+            onDismiss = onDismiss,
+            singleLine = false,
+            required = false,
+        )
         DocumentDialog.Kind.ASSIGN_TAGS -> AssignTagsDialog(
             tags = tags,
             assignedTagIds = document.tags.map { it.id }.toSet(),
@@ -135,7 +148,11 @@ fun DocumentDialogHost(
         )
         DocumentDialog.Kind.ARCHIVE_DATE -> ArchiveDateDialog(
             archiveAt = document.archiveAt,
-            onConfirm = { editor.setArchiveAt(document.id, it) },
+            onConfirm = {
+                editor.setArchiveAt(document.id, it)
+                // for the reminder the day before
+                if (it != null) requestNotificationPermission()
+            },
             onDismiss = onDismiss,
         )
         DocumentDialog.Kind.DELETE -> ConfirmDialog(

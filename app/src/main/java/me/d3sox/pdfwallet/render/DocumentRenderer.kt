@@ -10,7 +10,11 @@ import me.d3sox.pdfwallet.settings.BarcodeSearchMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -19,6 +23,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val THUMBNAIL_WIDTH_PX = 512
+
+private fun thumbnailKey(id: String) = "thumb-$id"
+
+private fun pageKey(id: String, pageIndex: Int) = "page-$id-$pageIndex"
 
 data class PageBarcode(val pageIndex: Int, val bitmap: Bitmap)
 
@@ -45,6 +53,11 @@ class DocumentRenderer @Inject constructor(
     private val cache = BitmapCache.memoryCache
     private val scans = BitmapCache.scans
     private val scanMutex = Mutex()
+    // never full, so no saved scan is missed while the widgets are being updated
+    private val savedScanIds = MutableSharedFlow<String>(extraBufferCapacity = Channel.UNLIMITED)
+
+    /** The ids of documents whose barcodes were found on every page, once their scan is saved */
+    val savedScans: SharedFlow<String> = savedScanIds.asSharedFlow()
 
     // only accessed on the render dispatcher
     private val renderers = mutableMapOf<String, OpenRenderer>()
@@ -82,8 +95,7 @@ class DocumentRenderer @Inject constructor(
         val settingsKey = "$mode-$generateNewBarcode"
         val key = "$id-$settingsKey"
         scanMutex.withLock {
-            val scan = scans[key]
-                ?: scanStore.load(id, settingsKey)?.also { scans.put(key, it) }
+            val scan = savedScan(id, mode, generateNewBarcode)
                 ?: withRenderer(id) { renderer ->
                     val pageCount = renderer.getPageCount()
                     val barcodes = mutableListOf<PageBarcode>()
@@ -114,6 +126,7 @@ class DocumentRenderer @Inject constructor(
                         if (allPagesScanned) {
                             scans.put(key, it)
                             scanStore.save(id, settingsKey, it)
+                            savedScanIds.tryEmit(id)
                         }
                     }
                 }
@@ -121,9 +134,12 @@ class DocumentRenderer @Inject constructor(
         }
     }
 
-    private fun thumbnailKey(id: String) = "thumb-$id"
-
-    private fun pageKey(id: String, pageIndex: Int) = "page-$id-$pageIndex"
+    /** The barcodes of a complete earlier scan, without searching the document, or null if there's none */
+    suspend fun savedScan(id: String, mode: BarcodeSearchMode, generateNewBarcode: Boolean): BarcodeScan? {
+        val settingsKey = "$mode-$generateNewBarcode"
+        val key = "$id-$settingsKey"
+        return scans[key] ?: scanStore.load(id, settingsKey)?.also { scans.put(key, it) }
+    }
 
     private suspend fun cached(key: String, render: suspend () -> Bitmap?): Bitmap? =
         cache.get(key) ?: render()?.also { cache.put(key, it) }

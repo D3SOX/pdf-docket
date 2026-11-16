@@ -43,7 +43,7 @@
     <string name="preference_add_show_on_locked_screen">ロック画面に表示</string>
     <string name="preference_add_show_on_locked_screen_description">携帯電話のロックを解除せずにアプリにアクセスできるようにします。この設定を恒久的に使用しないでください。</string>
     <string name="search">検索</string>
-    <string name="search_query_hint">ドキュメント名</string>
+    <string name="search_query_hint">名前またはメモ</string>
     <string name="dialog_document_name_title">ドキュメント名の変更</string>
     <string name="export_filtered">フィルタリングされた項目をエクスポート</string>
     <string name="delete_filtered">フィルタリングされた項目を削除</string>
@@ -206,6 +206,11 @@
     <string name="archive_on_date">日付を指定してアーカイブ</string>
     <string name="dialog_archive_date_title">自動でアーカイブする日</string>
     <string name="archives_on">%1$sにアーカイブされます</string>
+    <string name="note">メモ</string>
+    <string name="note_hint">例: 座席や予約番号</string>
+    <string name="archive_reminder_channel">アーカイブのリマインダー</string>
+    <string name="archive_reminder_text">明日アーカイブされます</string>
+    <string name="archive_reminder_hidden">ドキュメントが明日アーカイブされます</string>
     <string name="remove">削除</string>
     <string name="archive_title">アーカイブ</string>
     <string name="archive_empty_title">アーカイブされたドキュメントはありません</string>
@@ -220,5 +225,5 @@
     <string name="quick_settings_tile_hint">クイック設定に PDF Docket のタイルを追加すると、そこからこのドキュメントを開けます</string>
     <string name="tile_no_document">ドキュメントなし</string>
     <string name="widget_label">ドキュメント</string>
-    <string name="widget_description">ドキュメントを表示し、1 回のタップで開きます</string>
+    <string name="widget_description">ドキュメントのバーコードを表示し、1 回のタップで開きます</string>
 </resources>

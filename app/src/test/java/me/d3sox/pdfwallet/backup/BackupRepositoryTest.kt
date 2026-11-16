@@ -81,13 +81,14 @@ class BackupRepositoryTest {
     }
 
     @Test
-    fun restore_bringsBackDocumentsNamesDatesTagsOrderAndArchive() = runTest {
+    fun restore_bringsBackDocumentsNamesDatesTagsOrderArchiveAndNotes() = runTest {
         documentRepository.updateTag(Tag(documentRepository.createTag("Travel"), "Travel", TagIcon.TRAIN.name))
         documentRepository.createTag("Unused")
         addDocument("a.pdf", name = "Train ticket", tags = setOf("Travel"))
         addDocument("b.pdf", name = "Certificate")
         addDocument("c.pdf", name = "Old ticket")
         documentRepository.setArchiveAt("a.pdf", ARCHIVE_AT)
+        documentRepository.setNote("a.pdf", "Seat 42")
         documentRepository.archive(listOf("c.pdf"))
         // differs from the import order, which would be used if the manual order got lost
         documentRepository.reorder(listOf("a.pdf", "b.pdf"))
