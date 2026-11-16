@@ -107,7 +107,12 @@ class DocumentWidgets @Inject constructor(
         val views = RemoteViews(context.packageName, R.layout.widget_document)
         val name = documentRepository.name(documentId)
         // the home screen shows the widget without unlocking the app
-        val preview = if (name != null && !requireAuthentication) renderer.thumbnail(documentId) else null
+        val preview = if (name != null && !requireAuthentication) {
+            // the app lock may have been turned on while rendering
+            renderer.thumbnail(documentId)?.takeUnless { settingsRepository.settings.first().requireAuthentication }
+        } else {
+            null
+        }
         views.setTextViewText(R.id.widget_name, name ?: context.getString(R.string.shortcut_document_deleted))
         if (preview != null) views.setImageViewBitmap(R.id.widget_preview, preview.top(previewAspectRatio(widgetId)))
         views.setViewVisibility(R.id.widget_preview, if (preview != null) View.VISIBLE else View.GONE)
