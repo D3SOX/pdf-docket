@@ -6,6 +6,7 @@ import android.app.StatusBarManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
@@ -51,6 +52,10 @@ class DocumentTileService : TileService() {
             }
             tile.updateTile()
         }
+    }
+
+    override fun onTileRemoved() {
+        scope.launch { settingsRepository.update { it.copy(quickSettingsDocumentId = null) } }
     }
 
     override fun onClick() {
@@ -101,16 +106,43 @@ class DocumentTileService : TileService() {
 }
 
 /**
- * Asks the user to add the tile to Quick Settings, unless it's already there.
+ * Asks the user to add the tile to Quick Settings and calls [onAdded] once it's there, right away if it already is.
  * Returns false where the system can't ask, before Android 13.
  */
-fun Context.requestQuickSettingsTile(label: String): Boolean {
+fun Context.requestQuickSettingsTile(label: String, onAdded: () -> Unit): Boolean {
+    val component = ComponentName(this, DocumentTileService::class.java)
+    val wasRemoved = packageManager.getComponentEnabledSetting(component) ==
+        PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+    setTileServiceEnabled(true)
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
     getSystemService(StatusBarManager::class.java).requestAddTileService(
-        ComponentName(this, DocumentTileService::class.java),
+        component,
         label,
         Icon.createWithResource(this, R.drawable.tag_icon_confirmation_number),
         mainExecutor,
-    ) {}
+    ) { result ->
+        when (result) {
+            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED,
+            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED,
+            -> onAdded()
+            // enabling the service brings back the removed tile, so it stays removed unless the user adds it
+            else -> if (wasRemoved) setTileServiceEnabled(false)
+        }
+    }
     return true
+}
+
+/** Apps can't remove their tile, but the system hides it while its service is disabled. */
+fun Context.removeQuickSettingsTile() = setTileServiceEnabled(false)
+
+private fun Context.setTileServiceEnabled(enabled: Boolean) {
+    packageManager.setComponentEnabledSetting(
+        ComponentName(this, DocumentTileService::class.java),
+        if (enabled) {
+            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+        } else {
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        },
+        PackageManager.DONT_KILL_APP,
+    )
 }
