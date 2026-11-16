@@ -74,4 +74,18 @@ class AppDatabaseMigrationTest {
             database.close()
         }
     }
+
+    @Test
+    fun version4_startsWithoutNotes() = runTest {
+        helper.createDatabase(DATABASE_NAME, 4).use { db ->
+            db.execSQL("INSERT INTO certificates (id, name, importedAt) VALUES ('a.pdf', 'Ticket', 1)")
+        }
+
+        val database = AppDatabase.build(InstrumentationRegistry.getInstrumentation().targetContext, DATABASE_NAME)
+        try {
+            database.certificateDao().getAllWithTags().first().single().certificate.note shouldBe ""
+        } finally {
+            database.close()
+        }
+    }
 }

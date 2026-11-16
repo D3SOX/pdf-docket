@@ -3,4 +3,6 @@
     <dimen name="widget_corner_radius">16dp</dimen>
     <!-- the preview sits inside the rounded corners, widgets can't clip their content before Android 12 -->
     <dimen name="widget_padding">8dp</dimen>
+    <!-- within the widget's corners, around the barcode's quiet zone -->
+    <dimen name="widget_barcode_corner_radius">8dp</dimen>
 </resources>

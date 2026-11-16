@@ -25,6 +25,8 @@ class DocumentEditor @Inject constructor(
         context.renameShortcut(id, name)
     }
 
+    fun setNote(id: String, note: String) = scope.launch { repository.setNote(id, note) }
+
     /** [id] of the document for the Quick Settings tile, or null for none */
     fun setQuickSettingsDocument(id: String?) = scope.launch {
         settingsRepository.update { it.copy(quickSettingsDocumentId = id) }

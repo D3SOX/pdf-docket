@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
+    <!-- for the reminders before documents get archived -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- the device clears the scheduled reminder when it restarts -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission
         android:name="android.permission.INTERNET"
         tools:node="remove" />
@@ -82,6 +86,13 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/document_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".reminders.ArchiveReminderReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
         </receiver>
         <service
             android:name=".quicksettings.DocumentTileService"

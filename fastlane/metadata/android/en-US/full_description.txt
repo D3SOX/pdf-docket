@@ -30,10 +30,11 @@ More Features
 - PDFs can be individually named
 - Assign tags to documents and filter documents by tags
 - Tags can have icons
+- Documents can have a note, e.g. a seat or booking number, and are found by it
 - Documents can be shown as a grid or a list
-- Documents can be archived instead of deleted, right away or automatically on a chosen date
+- Documents can be archived instead of deleted, right away or automatically on a chosen date, with a reminder the day before
 - PDFs can be shared from other apps, also several at once
-- Documents can be added to the home screen
+- Documents can be added to the home screen, also as a widget that shows the barcode
 - Encrypted backups of all documents and tags
 - PDFs can be shared with other apps (indirectly allows printing)
 - Dark Mode support (document stays in original color, optionally inverted)

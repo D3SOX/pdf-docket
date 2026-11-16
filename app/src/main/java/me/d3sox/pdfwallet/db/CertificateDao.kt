@@ -31,6 +31,9 @@ interface CertificateDao {
     @Query("UPDATE certificates SET name = :name WHERE id = :id")
     suspend fun updateName(id: String, name: String)
 
+    @Query("UPDATE certificates SET note = :note WHERE id = :id")
+    suspend fun updateNote(id: String, note: String)
+
     @Query("SELECT MIN(position) FROM certificates")
     suspend fun minPosition(): Int?
 

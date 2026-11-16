@@ -38,11 +38,15 @@ import javax.inject.Singleton
 // the launcher keeps every widget's bitmap in memory, a smaller one would be blurry on larger widgets
 private const val PREVIEW_WIDTH_PX = 384
 
+// barcodes stay a bit larger, so their bars and modules stay sharp enough to be scanned
+private const val BARCODE_SIZE_PX = 768
+
 // a line of the name with the padding around it
 private const val NAME_HEIGHT_DP = 48
 
 /**
- * The home screen widgets, each of which shows the document picked when it was added.
+ * The home screen widgets, each of which shows the first barcode of the document picked when it was added,
+ * or its first page if it has none.
  */
 @Singleton
 class DocumentWidgets @Inject constructor(
@@ -81,11 +85,14 @@ class DocumentWidgets @Inject constructor(
     }
 
     /**
-     * Updates the widgets when a document is renamed or deleted, or the app lock is turned on or off, until cancelled.
+     * Updates the widgets when a document is renamed or deleted, the app lock is turned on or off,
+     * or barcodes are searched differently, until cancelled.
      */
     suspend fun updateOnChanges() = combine(
         documentRepository.documents.map { documents -> documents.associate { it.id to it.name } },
-        settingsRepository.settings.map { it.requireAuthentication },
+        settingsRepository.settings.map {
+            Triple(it.requireAuthentication, it.barcodeSearchMode, it.generateNewBarcode)
+        },
         ::Pair,
     )
         .distinctUntilChanged()
@@ -107,16 +114,23 @@ class DocumentWidgets @Inject constructor(
         val views = RemoteViews(context.packageName, R.layout.widget_document)
         val name = documentRepository.name(documentId)
         // the home screen shows the widget without unlocking the app
-        val preview = if (name != null && !requireAuthentication) {
-            // the app lock may have been turned on while rendering
-            renderer.thumbnail(documentId)?.takeUnless { settingsRepository.settings.first().requireAuthentication }
+        val image = if (name != null && !requireAuthentication) {
+            image(widgetId, documentId)
+                // the app lock may have been turned on while rendering
+                ?.takeUnless { settingsRepository.settings.first().requireAuthentication }
         } else {
             null
         }
         views.setTextViewText(R.id.widget_name, name ?: context.getString(R.string.shortcut_document_deleted))
-        if (preview != null) views.setImageViewBitmap(R.id.widget_preview, preview.top(previewAspectRatio(widgetId)))
-        views.setViewVisibility(R.id.widget_preview, if (preview != null) View.VISIBLE else View.GONE)
-        views.setViewVisibility(R.id.widget_icon, if (preview != null) View.GONE else View.VISIBLE)
+        val imageView = when {
+            image == null -> R.id.widget_icon
+            image.isBarcode -> R.id.widget_barcode
+            else -> R.id.widget_preview
+        }
+        image?.let { views.setImageViewBitmap(imageView, it.bitmap) }
+        listOf(R.id.widget_barcode, R.id.widget_preview, R.id.widget_icon).forEach {
+            views.setViewVisibility(it, if (it == imageView) View.VISIBLE else View.GONE)
+        }
         val intent = if (name != null) {
             context.openDocumentIntent(documentId)
         } else {
@@ -135,6 +149,19 @@ class DocumentWidgets @Inject constructor(
         return views
     }
 
+    private suspend fun image(widgetId: Int, documentId: String): WidgetImage? {
+        val settings = settingsRepository.settings.first()
+        // the first barcode is enough, the rest of a long document isn't searched for it
+        val barcode = renderer.scanBarcodes(documentId, settings.barcodeSearchMode, settings.generateNewBarcode)
+            .first { it.complete || it.barcodes.isNotEmpty() }
+            .barcodes.firstOrNull()
+        return if (barcode != null) {
+            WidgetImage(barcode.bitmap.fitInto(BARCODE_SIZE_PX), isBarcode = true)
+        } else {
+            renderer.thumbnail(documentId)?.let { WidgetImage(it.top(previewAspectRatio(widgetId)), isBarcode = false) }
+        }
+    }
+
     /** width by height of the preview, which leaves room for the name below it */
     private fun previewAspectRatio(widgetId: Int): Float {
         val options = manager.getAppWidgetOptions(widgetId)
@@ -145,6 +172,16 @@ class DocumentWidgets @Inject constructor(
             NAME_HEIGHT_DP
         return if (width > 0 && height > 0) width.toFloat() / height else 1f
     }
+}
+
+/** a barcode, or the top of the first page otherwise */
+private class WidgetImage(val bitmap: Bitmap, val isBarcode: Boolean)
+
+/** scaled down to [size] on its longer side, if it's larger */
+private fun Bitmap.fitInto(size: Int): Bitmap {
+    val factor = size.toFloat() / maxOf(width, height)
+    if (factor >= 1) return this
+    return scale((width * factor).toInt().coerceAtLeast(1), (height * factor).toInt().coerceAtLeast(1))
 }
 
 /**

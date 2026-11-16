@@ -45,7 +45,7 @@
     <string name="preference_add_show_on_locked_screen">Show over lock screen</string>
     <string name="preference_add_show_on_locked_screen_description">Allows to access the app without unlocking your phone. Don\'t use this setting permanently.</string>
     <string name="search">Search</string>
-    <string name="search_query_hint">Document name</string>
+    <string name="search_query_hint">Name or note</string>
     <string name="dialog_document_name_title">Change document name</string>
     <string name="export_filtered">Export currently filtered</string>
     <string name="delete_filtered">Delete currently filtered</string>
@@ -214,6 +214,11 @@
     <string name="archive_on_date">Archive on date</string>
     <string name="dialog_archive_date_title">Archive automatically on</string>
     <string name="archives_on">Gets archived on %1$s</string>
+    <string name="note">Note</string>
+    <string name="note_hint">E.g. seat or booking number</string>
+    <string name="archive_reminder_channel">Archive reminders</string>
+    <string name="archive_reminder_text">Gets archived tomorrow</string>
+    <string name="archive_reminder_hidden">A document gets archived tomorrow</string>
     <string name="remove">Remove</string>
     <string name="archive_title">Archive</string>
     <string name="archive_empty_title">No archived documents</string>
@@ -228,5 +233,5 @@
     <string name="quick_settings_tile_hint">Add the PDF Docket tile to Quick Settings to open this document from there</string>
     <string name="tile_no_document">No document</string>
     <string name="widget_label">Document</string>
-    <string name="widget_description">Shows a document and opens it with one tap</string>
+    <string name="widget_description">Shows the barcode of a document and opens it with one tap</string>
 </resources>

@@ -39,6 +39,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import me.d3sox.pdfwallet.R
 
+private const val MULTI_LINE_MAX_LINES = 6
+
 @Composable
 fun ConfirmDialog(
     text: String,
@@ -74,6 +76,10 @@ fun TextInputDialog(
     isPassword: Boolean = false,
     dismissOnConfirm: Boolean = true,
     errorText: String? = null,
+    /** for longer text, which can't be confirmed with the keyboard then */
+    singleLine: Boolean = true,
+    /** whether the text can't be empty */
+    required: Boolean = true,
 ) {
     val initial = { mutableStateOf(TextFieldValue(initialValue, selection = TextRange(0, initialValue.length))) }
     // a password isn't kept in the saved state
@@ -85,7 +91,7 @@ fun TextInputDialog(
     val focusRequester = remember { FocusRequester() }
     val visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
     // a password is used as it is, as when it was set
-    val isValid = if (isPassword) value.text.isNotEmpty() else value.text.isNotBlank()
+    val isValid = !required || if (isPassword) value.text.isNotEmpty() else value.text.isNotBlank()
     val confirm = {
         if (isValid) {
             onConfirm(if (isPassword) value.text else value.text.trim())
@@ -104,11 +110,12 @@ fun TextInputDialog(
                     label = { Text(label) },
                     isError = errorText != null,
                     supportingText = errorText?.let { { Text(it) } },
-                    singleLine = true,
+                    singleLine = singleLine,
+                    maxLines = if (singleLine) 1 else MULTI_LINE_MAX_LINES,
                     visualTransformation = visualTransformation,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text,
-                        imeAction = ImeAction.Done,
+                        imeAction = if (singleLine) ImeAction.Done else ImeAction.Default,
                     ),
                     keyboardActions = KeyboardActions(onDone = { confirm() }),
                     modifier = Modifier

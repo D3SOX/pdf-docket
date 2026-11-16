@@ -156,15 +156,20 @@ fun DocumentDetailsScreen(
                 title = {
                     Column {
                         Text(current.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        if (documents.size > 1) {
+                        val position = if (documents.size > 1) {
+                            stringResource(R.string.document_position, pagerState.currentPage + 1, documents.size)
+                        } else {
+                            null
+                        }
+                        // the note is shown in full where it's edited
+                        val subtitle = listOfNotNull(position, current.note.substringBefore('\n').ifEmpty { null })
+                        if (subtitle.isNotEmpty()) {
                             Text(
-                                text = stringResource(
-                                    R.string.document_position,
-                                    pagerState.currentPage + 1,
-                                    documents.size,
-                                ),
+                                text = subtitle.joinToString(" · "),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }

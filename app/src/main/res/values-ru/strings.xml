@@ -50,7 +50,7 @@
     <string name="preference_add_show_on_locked_screen">Показывать на заблокированном экране</string>
     <string name="preference_add_show_on_locked_screen_description">Разрешить доступ к приложению без разблокировки телефона. Не используйте эту настройку постоянно.</string>
     <string name="search">Поиск</string>
-    <string name="search_query_hint">Название документа</string>
+    <string name="search_query_hint">Название или заметка</string>
     <string name="dialog_document_name_title">Изменить название документа</string>
     <string name="export_filtered">Экспортировать отфильтрованные</string>
     <string name="delete_filtered">Удалить отфильтрованные</string>
@@ -230,6 +230,11 @@
     <string name="archive_on_date">Архивировать в дату</string>
     <string name="dialog_archive_date_title">Архивировать автоматически</string>
     <string name="archives_on">Будет архивирован %1$s</string>
+    <string name="note">Заметка</string>
+    <string name="note_hint">Например, место или номер брони</string>
+    <string name="archive_reminder_channel">Напоминания об архивации</string>
+    <string name="archive_reminder_text">Будет архивирован завтра</string>
+    <string name="archive_reminder_hidden">Документ будет архивирован завтра</string>
     <string name="remove">Удалить</string>
     <string name="archive_title">Архив</string>
     <string name="archive_empty_title">Нет архивных документов</string>
@@ -244,5 +249,5 @@
     <string name="quick_settings_tile_hint">Добавьте плитку PDF Docket в быстрые настройки, чтобы открывать этот документ оттуда</string>
     <string name="tile_no_document">Нет документа</string>
     <string name="widget_label">Документ</string>
-    <string name="widget_description">Показывает документ и открывает его одним касанием</string>
+    <string name="widget_description">Показывает штрихкод документа и открывает его одним касанием</string>
 </resources>
