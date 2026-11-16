@@ -44,6 +44,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import me.d3sox.pdfwallet.R
@@ -100,6 +102,8 @@ class WidgetConfigActivity : FragmentActivity() {
             // unlocks only the picker, the app's lock timer doesn't know about it.
             // Not saved, so a picker restored after its process was stopped asks again
             var unlocked by remember { mutableStateOf(false) }
+            // the picker locks again once it's left, its content would be shown without asking otherwise
+            LifecycleEventEffect(Lifecycle.Event.ON_STOP) { unlocked = false }
             val documents by remember {
                 documentRepository.documents.map { documents -> documents.filterNot(Document::archived) }
             }.collectAsStateWithLifecycle(null)
