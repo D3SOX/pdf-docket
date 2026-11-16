@@ -36,7 +36,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 // the launcher keeps every widget's bitmap in memory, a smaller one would be blurry on larger widgets
 private const val PREVIEW_WIDTH_PX = 384
@@ -44,7 +46,11 @@ private const val PREVIEW_WIDTH_PX = 384
 // barcodes stay a bit larger, so their bars and modules stay sharp enough to be scanned
 private const val BARCODE_SIZE_PX = 768
 
-private val BARCODE_SEARCH_TIMEOUT = 5.seconds
+// shared by all widgets of an update, which has to finish before the broadcast's deadline
+private val BARCODE_SEARCH_BUDGET = 5.seconds
+
+// enough to load a saved scan, once the budget is spent
+private val SAVED_BARCODES_TIMEOUT = 500.milliseconds
 
 // a line of the name with the padding around it
 private const val NAME_HEIGHT_DP = 48
@@ -107,20 +113,26 @@ class DocumentWidgets @Inject constructor(
     // one at a time, so an update that started before the app lock was turned on can't show a preview afterwards
     suspend fun update(widgetIds: IntArray) = updates.withLock {
         val requireAuthentication = settingsRepository.settings.first().requireAuthentication
+        val searchDeadline = TimeSource.Monotonic.markNow() + BARCODE_SEARCH_BUDGET
         widgetIds.forEach { widgetId ->
             // still being added, until a document is picked
             val documentId = withContext(dispatcher) { documentIds.getString(widgetId.toString(), null) }
                 ?: return@forEach
-            manager.updateAppWidget(widgetId, views(widgetId, documentId, requireAuthentication))
+            manager.updateAppWidget(widgetId, views(widgetId, documentId, requireAuthentication, searchDeadline))
         }
     }
 
-    private suspend fun views(widgetId: Int, documentId: String, requireAuthentication: Boolean): RemoteViews {
+    private suspend fun views(
+        widgetId: Int,
+        documentId: String,
+        requireAuthentication: Boolean,
+        searchDeadline: TimeSource.Monotonic.ValueTimeMark,
+    ): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_document)
         val name = documentRepository.name(documentId)
         // the home screen shows the widget without unlocking the app
         val image = if (name != null && !requireAuthentication) {
-            image(widgetId, documentId)
+            image(widgetId, documentId, searchDeadline)
                 // the app lock may have been turned on while rendering
                 ?.takeUnless { settingsRepository.settings.first().requireAuthentication }
         } else {
@@ -154,12 +166,16 @@ class DocumentWidgets @Inject constructor(
         return views
     }
 
-    private suspend fun image(widgetId: Int, documentId: String): WidgetImage? {
+    private suspend fun image(
+        widgetId: Int,
+        documentId: String,
+        searchDeadline: TimeSource.Monotonic.ValueTimeMark,
+    ): WidgetImage? {
         val settings = settingsRepository.settings.first()
         // The first barcode is enough, the rest of a long document isn't searched for it.
-        // A long document without barcodes would keep the widget's broadcast waiting until every page is searched,
-        // so it shows its first page until the document is opened, which saves the search for the next update
-        val barcode = withTimeoutOrNull(BARCODE_SEARCH_TIMEOUT) {
+        // Long documents without barcodes would keep the widgets' broadcast waiting until every page is searched,
+        // so they show their first page until the document is opened, which saves the search for the next update
+        val barcode = withTimeoutOrNull(maxOf(-searchDeadline.elapsedNow(), SAVED_BARCODES_TIMEOUT)) {
             renderer.scanBarcodes(documentId, settings.barcodeSearchMode, settings.generateNewBarcode)
                 .first { it.complete || it.barcodes.isNotEmpty() }
                 .barcodes.firstOrNull()
