@@ -32,15 +32,19 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
+import kotlin.time.Duration.Companion.seconds
 
 // the launcher keeps every widget's bitmap in memory, a smaller one would be blurry on larger widgets
 private const val PREVIEW_WIDTH_PX = 384
 
 // barcodes stay a bit larger, so their bars and modules stay sharp enough to be scanned
 private const val BARCODE_SIZE_PX = 768
+
+private val BARCODE_SEARCH_TIMEOUT = 5.seconds
 
 // a line of the name with the padding around it
 private const val NAME_HEIGHT_DP = 48
@@ -152,10 +156,14 @@ class DocumentWidgets @Inject constructor(
 
     private suspend fun image(widgetId: Int, documentId: String): WidgetImage? {
         val settings = settingsRepository.settings.first()
-        // the first barcode is enough, the rest of a long document isn't searched for it
-        val barcode = renderer.scanBarcodes(documentId, settings.barcodeSearchMode, settings.generateNewBarcode)
-            .first { it.complete || it.barcodes.isNotEmpty() }
-            .barcodes.firstOrNull()
+        // The first barcode is enough, the rest of a long document isn't searched for it.
+        // A long document without barcodes would keep the widget's broadcast waiting until every page is searched,
+        // so it shows its first page until the document is opened, which saves the search for the next update
+        val barcode = withTimeoutOrNull(BARCODE_SEARCH_TIMEOUT) {
+            renderer.scanBarcodes(documentId, settings.barcodeSearchMode, settings.generateNewBarcode)
+                .first { it.complete || it.barcodes.isNotEmpty() }
+                .barcodes.firstOrNull()
+        }
         return if (barcode != null) {
             WidgetImage(barcode.bitmap.fitInto(barcodeSize), isBarcode = true)
         } else {
