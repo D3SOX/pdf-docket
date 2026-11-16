@@ -34,6 +34,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.sqrt
 
 // the launcher keeps every widget's bitmap in memory, a smaller one would be blurry on larger widgets
 private const val PREVIEW_WIDTH_PX = 384
@@ -156,11 +157,20 @@ class DocumentWidgets @Inject constructor(
             .first { it.complete || it.barcodes.isNotEmpty() }
             .barcodes.firstOrNull()
         return if (barcode != null) {
-            WidgetImage(barcode.bitmap.fitInto(BARCODE_SIZE_PX), isBarcode = true)
+            WidgetImage(barcode.bitmap.fitInto(barcodeSize), isBarcode = true)
         } else {
             renderer.thumbnail(documentId)?.let { WidgetImage(it.top(previewAspectRatio(widgetId)), isBarcode = false) }
         }
     }
+
+    /**
+     * Widgets can't take bitmaps larger than 1.5 times the screen's pixels, which a square barcode
+     * with as many pixels as the screen stays below on small screens.
+     */
+    private val barcodeSize: Int
+        get() = context.resources.displayMetrics.let {
+            minOf(BARCODE_SIZE_PX, sqrt(it.widthPixels * it.heightPixels.toFloat()).toInt())
+        }
 
     /** width by height of the preview, which leaves room for the name below it */
     private fun previewAspectRatio(widgetId: Int): Float {
