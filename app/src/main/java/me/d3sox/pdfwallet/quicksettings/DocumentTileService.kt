@@ -13,6 +13,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import me.d3sox.pdfwallet.MainActivity
 import me.d3sox.pdfwallet.R
+import me.d3sox.pdfwallet.documents.DocumentEditor
 import me.d3sox.pdfwallet.documents.DocumentRepository
 import me.d3sox.pdfwallet.documents.openDocumentIntent
 import me.d3sox.pdfwallet.settings.SettingsRepository
@@ -35,6 +36,9 @@ class DocumentTileService : TileService() {
     @Inject
     lateinit var documentRepository: DocumentRepository
 
+    @Inject
+    lateinit var documentEditor: DocumentEditor
+
     private val scope = MainScope()
 
     override fun onStartListening() {
@@ -54,8 +58,9 @@ class DocumentTileService : TileService() {
         }
     }
 
+    // can be called after onDestroy, so it saves in the application scope
     override fun onTileRemoved() {
-        scope.launch { settingsRepository.update { it.copy(quickSettingsDocumentId = null) } }
+        documentEditor.setQuickSettingsDocument(null)
     }
 
     override fun onClick() {
