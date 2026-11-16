@@ -1,0 +1,2 @@
+- Rotate the screen and share a document from the document's header.
+- The Quick Settings tile is only added once you accept it, and Remove now takes it out of Quick Settings.
