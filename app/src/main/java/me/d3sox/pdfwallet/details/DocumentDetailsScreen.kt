@@ -65,6 +65,7 @@ import me.d3sox.pdfwallet.documents.DocumentDialog
 import me.d3sox.pdfwallet.documents.DocumentDialogHost
 import me.d3sox.pdfwallet.documents.DocumentEditor
 import me.d3sox.pdfwallet.documents.DocumentMenu
+import me.d3sox.pdfwallet.documents.sharePdfs
 import me.d3sox.pdfwallet.documents.addRecentShortcut
 import me.d3sox.pdfwallet.render.BarcodeScan
 import me.d3sox.pdfwallet.settings.AppSettings
@@ -184,13 +185,26 @@ fun DocumentDetailsScreen(
                     if (!settings.showViewModeBar) {
                         barcodeViewMode?.let { ViewModeMenuButton(selected = it, onSelect = onViewModeSelect) }
                     }
+                    onRotateScreen?.let {
+                        IconButton(onClick = it) {
+                            Icon(
+                                painterResource(R.drawable.screen_rotation_24px),
+                                contentDescription = stringResource(R.string.rotate_screen),
+                            )
+                        }
+                    }
+                    IconButton(onClick = { context.sharePdfs(listOf(current)) }) {
+                        Icon(
+                            painterResource(R.drawable.share_24px),
+                            contentDescription = stringResource(R.string.share),
+                        )
+                    }
                     DetailsOverflowMenu(
                         document = current,
                         editor = vm.editor,
                         settings = settings,
                         actions = DetailsMenuActions(
                             onToggleHalfSizeBarcodes = vm::onToggleHalfSizeBarcodes,
-                            onRotateScreen = onRotateScreen,
                             onDialog = { dialog = it },
                         ),
                     )
@@ -243,8 +257,6 @@ fun DocumentDetailsScreen(
 
 private class DetailsMenuActions(
     val onToggleHalfSizeBarcodes: () -> Unit,
-    /** null if the screen can't be rotated */
-    val onRotateScreen: (() -> Unit)?,
     val onDialog: (DocumentDialog) -> Unit,
 )
 
@@ -269,6 +281,8 @@ private fun DetailsOverflowMenu(
             expanded = expanded,
             onDismiss = onDismiss,
             onDialog = actions.onDialog,
+            // next to the menu
+            showShare = false,
         ) {
             group {
                 checkable(
@@ -279,9 +293,6 @@ private fun DetailsOverflowMenu(
                 )
             }
             group {
-                actions.onRotateScreen?.let {
-                    action(R.string.rotate_screen, R.drawable.screen_rotation_24px, onDismiss, it)
-                }
                 if (activity?.isPinned == true) {
                     action(R.string.unpin_app, R.drawable.keep_off_24px, onDismiss, activity::stopLockTask)
                 } else if (activity != null) {
