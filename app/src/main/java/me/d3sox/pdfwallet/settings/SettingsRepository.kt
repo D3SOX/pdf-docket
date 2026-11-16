@@ -42,6 +42,7 @@ private object Keys {
     val tagFilterMode = stringPreferencesKey("tagFilterMode")
     val documentLayout = stringPreferencesKey("documentLayout")
     val deleteImportedFiles = booleanPreferencesKey("deleteImportedFiles")
+    val quickSettingsDocumentId = stringPreferencesKey("quickSettingsDocumentId")
 }
 
 @Singleton
@@ -90,6 +91,7 @@ class SettingsRepository @Inject constructor(
             tagFilterMode = enumOrDefault(this[Keys.tagFilterMode], defaults.tagFilterMode),
             documentLayout = enumOrDefault(this[Keys.documentLayout], defaults.documentLayout),
             deleteImportedFiles = this[Keys.deleteImportedFiles] ?: defaults.deleteImportedFiles,
+            quickSettingsDocumentId = this[Keys.quickSettingsDocumentId],
         )
     }
 
@@ -105,9 +107,7 @@ class SettingsRepository @Inject constructor(
         writeEnum(Keys.barcodeSearchMode) { it.barcodeSearchMode }
         write(Keys.halfSizeBarcodes) { it.halfSizeBarcodes }
         write(Keys.splitScreen) { it.splitScreen }
-        if (new.splitFraction != old.splitFraction) {
-            new.splitFraction?.let { this[Keys.splitFraction] = it } ?: remove(Keys.splitFraction)
-        }
+        writeOrRemove(Keys.splitFraction, old.splitFraction, new.splitFraction)
         write(Keys.showViewModeBar) { it.showViewModeBar }
         write(Keys.syncPages) { it.syncPages }
         write(Keys.reopenAtLastPosition) { it.reopenAtLastPosition }
@@ -125,6 +125,11 @@ class SettingsRepository @Inject constructor(
         writeEnum(Keys.tagFilterMode) { it.tagFilterMode }
         writeEnum(Keys.documentLayout) { it.documentLayout }
         write(Keys.deleteImportedFiles) { it.deleteImportedFiles }
+        writeOrRemove(Keys.quickSettingsDocumentId, old.quickSettingsDocumentId, new.quickSettingsDocumentId)
+    }
+
+    private fun <T> MutablePreferences.writeOrRemove(key: Preferences.Key<T>, old: T?, new: T?) {
+        if (new != old) new?.let { this[key] = it } ?: remove(key)
     }
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String?, default: T): T =

@@ -214,4 +214,11 @@
     <string name="dialog_password_protection_text">「%1$s」はパスワードで保護されています。アプリはパスワードなしのコピーを保存するため、パスワードを求めずに開きます。</string>
     <string name="error_newer_backup">このバックアップは新しいバージョンのアプリで作成されています。復元するにはアプリを更新してください。</string>
     <string name="tag_name_taken">この名前のタグは既にあります</string>
+    <string name="choose_document">ドキュメントを選択</string>
+    <string name="add_to_quick_settings">クイック設定に追加</string>
+    <string name="remove_from_quick_settings">クイック設定から削除</string>
+    <string name="quick_settings_tile_hint">クイック設定に PDF Docket のタイルを追加すると、そこからこのドキュメントを開けます</string>
+    <string name="tile_no_document">ドキュメントなし</string>
+    <string name="widget_label">ドキュメント</string>
+    <string name="widget_description">ドキュメントを表示し、1 回のタップで開きます</string>
 </resources>

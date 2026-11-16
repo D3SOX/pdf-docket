@@ -223,4 +223,11 @@
     <string name="dialog_password_protection_text">„%1$s“ ist passwortgeschützt. Die App behält eine Kopie ohne Passwort, damit es sich öffnet, ohne danach zu fragen.</string>
     <string name="error_newer_backup">Dieses Backup stammt von einer neueren Version der App. Aktualisiere die App, um es wiederherzustellen.</string>
     <string name="tag_name_taken">Es gibt schon einen Tag mit diesem Namen</string>
+    <string name="choose_document">Dokument auswählen</string>
+    <string name="add_to_quick_settings">Zu den Schnelleinstellungen hinzufügen</string>
+    <string name="remove_from_quick_settings">Aus den Schnelleinstellungen entfernen</string>
+    <string name="quick_settings_tile_hint">Füge die Kachel von PDF Docket zu den Schnelleinstellungen hinzu, um dieses Dokument dort zu öffnen</string>
+    <string name="tile_no_document">Kein Dokument</string>
+    <string name="widget_label">Dokument</string>
+    <string name="widget_description">Zeigt ein Dokument und öffnet es mit einem Tippen</string>
 </resources>

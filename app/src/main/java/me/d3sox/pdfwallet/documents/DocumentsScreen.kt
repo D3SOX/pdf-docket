@@ -112,6 +112,8 @@ private enum class SelectionDialog { TAGS, DELETE }
 fun DocumentsScreen(
     isArchive: Boolean,
     settings: AppSettings,
+    /** the document that is shown next to the list, if any */
+    openDocumentId: String?,
     onAddDocument: () -> Unit,
     onOpenDocument: (String) -> Unit,
     onOpenSettings: () -> Unit,
@@ -233,6 +235,8 @@ fun DocumentsScreen(
                 canReorder = settings.sortOrder == SortOrder.MANUAL,
                 onReorder = vm.editor::reorder,
                 onOpenDocument = onOpenDocument,
+                openDocumentId = openDocumentId,
+                quickSettingsDocumentId = settings.quickSettingsDocumentId,
                 onDialog = { documentDialog = it },
                 editor = vm.editor,
                 selectedIds = selectedIds.toSet(),
@@ -614,6 +618,8 @@ private fun DocumentList(
     cachedThumbnail: (String) -> android.graphics.Bitmap?,
     onClearFilters: () -> Unit,
     onOpenDocument: (String) -> Unit,
+    openDocumentId: String?,
+    quickSettingsDocumentId: String?,
     onDialog: (DocumentDialog) -> Unit,
     editor: DocumentEditor,
     selectedIds: Set<String>,
@@ -712,6 +718,8 @@ private fun DocumentList(
                             editor = editor,
                             selectionMode = selectedIds.isNotEmpty(),
                             isSelected = document.id in selectedIds,
+                            isOpen = document.id == openDocumentId,
+                            isInQuickSettings = document.id == quickSettingsDocumentId,
                             isDragging = isDragging,
                             onLongClick = {
                                 drag.onLongPress(document.id, wasSelected = document.id in selectedIds)

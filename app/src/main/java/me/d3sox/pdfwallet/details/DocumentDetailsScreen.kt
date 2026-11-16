@@ -94,6 +94,10 @@ fun DocumentDetailsScreen(
     vm: DocumentDetailsViewModel,
     settings: AppSettings,
     isDarkTheme: Boolean,
+    /** a document picked in the list next to the details, to turn to */
+    requestedDocumentId: String?,
+    onRequestHandled: () -> Unit,
+    onShownDocumentChange: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     FullBrightness(settings.fullBrightness)
@@ -111,6 +115,17 @@ fun DocumentDetailsScreen(
     val pagerState = rememberPagerState(initialPage = initialPage) { pagerDocuments.size }
     val current = documents[pagerState.currentPage.coerceIn(documents.indices)]
     val shown = documents[pagerState.settledPage.coerceIn(documents.indices)]
+    val shownDocument by rememberUpdatedState(shown)
+    LaunchedEffect(pagerState) {
+        snapshotFlow { shownDocument.id }.collect(onShownDocumentChange)
+    }
+    // the list can show a new document before the details get it
+    LaunchedEffect(requestedDocumentId, documents) {
+        val index = documents.indexOfFirst { it.id == requestedDocumentId }
+        if (index < 0) return@LaunchedEffect
+        pagerState.scrollToPage(index)
+        onRequestHandled()
+    }
     val context = LocalContext.current
     // the app icon's menu shows document names without unlocking the app
     LaunchedEffect(shown.id, settings.requireAuthentication) {
@@ -245,6 +260,7 @@ private fun DetailsOverflowMenu(
         DocumentMenu(
             document = document,
             editor = editor,
+            isInQuickSettings = document.id == settings.quickSettingsDocumentId,
             expanded = expanded,
             onDismiss = onDismiss,
             onDialog = actions.onDialog,

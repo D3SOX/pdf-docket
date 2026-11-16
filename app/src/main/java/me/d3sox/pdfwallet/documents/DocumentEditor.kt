@@ -4,6 +4,7 @@ import android.content.Context
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.di.ApplicationScope
 import me.d3sox.pdfwallet.documents.tags.TagIcon
+import me.d3sox.pdfwallet.settings.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -12,14 +13,21 @@ import javax.inject.Inject
 /**
  * Document and tag modifications, shared by the list and the detail screen.
  */
+@Suppress("TooManyFunctions")
 class DocumentEditor @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: DocumentRepository,
+    private val settingsRepository: SettingsRepository,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
     fun rename(id: String, name: String) = scope.launch {
         repository.rename(id, name)
         context.renameShortcut(id, name)
+    }
+
+    /** [id] of the document for the Quick Settings tile, or null for none */
+    fun setQuickSettingsDocument(id: String?) = scope.launch {
+        settingsRepository.update { it.copy(quickSettingsDocumentId = id) }
     }
 
     fun reorder(ids: List<String>) = scope.launch { repository.reorder(ids) }
