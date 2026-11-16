@@ -27,9 +27,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,6 +54,7 @@ class DocumentWidgets @Inject constructor(
 ) {
     private val manager = AppWidgetManager.getInstance(context)
     private val component = ComponentName(context, DocumentWidgetProvider::class.java)
+    private val updates = Mutex()
 
     // the document ids by widget id
     private val documentIds by lazy { context.getSharedPreferences("document_widgets", Context.MODE_PRIVATE) }
@@ -87,11 +89,11 @@ class DocumentWidgets @Inject constructor(
         ::Pair,
     )
         .distinctUntilChanged()
-        // the widgets are up to date when the app starts
-        .drop(1)
+        // also when the app starts, it may have stopped before updating them
         .collectLatest { update(manager.getAppWidgetIds(component)) }
 
-    suspend fun update(widgetIds: IntArray) {
+    // one at a time, so an update that started before the app lock was turned on can't show a preview afterwards
+    suspend fun update(widgetIds: IntArray) = updates.withLock {
         val requireAuthentication = settingsRepository.settings.first().requireAuthentication
         widgetIds.forEach { widgetId ->
             // still being added, until a document is picked

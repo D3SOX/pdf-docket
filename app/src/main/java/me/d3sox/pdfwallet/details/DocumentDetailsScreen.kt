@@ -119,10 +119,11 @@ fun DocumentDetailsScreen(
     LaunchedEffect(pagerState) {
         snapshotFlow { shownDocument.id }.collect(onShownDocumentChange)
     }
-    LaunchedEffect(requestedDocumentId) {
-        val id = requestedDocumentId ?: return@LaunchedEffect
-        val index = pagerDocuments.indexOfFirst { it.id == id }
-        if (index >= 0) pagerState.scrollToPage(index)
+    // the list can show a new document before the details get it
+    LaunchedEffect(requestedDocumentId, documents) {
+        val index = documents.indexOfFirst { it.id == requestedDocumentId }
+        if (index < 0) return@LaunchedEffect
+        pagerState.scrollToPage(index)
         onRequestHandled()
     }
     val context = LocalContext.current
