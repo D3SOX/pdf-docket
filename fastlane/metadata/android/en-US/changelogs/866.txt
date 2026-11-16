@@ -1,0 +1,5 @@
+- Add notes to documents. The list shows them and the search finds them.
+- A notification reminds you the day before a document gets archived.
+- On tablets, the open document sits next to the list.
+- Open a document from a Quick Settings tile or a home screen widget that shows its barcode.
+- Fixes for the app lock, imports, backups, tags and dialogs.
