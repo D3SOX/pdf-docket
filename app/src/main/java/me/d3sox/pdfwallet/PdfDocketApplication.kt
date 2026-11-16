@@ -28,6 +28,7 @@ class PdfDocketApplication : Application() {
         super.onCreate()
         scope.launch { widgets.updateOnChanges() }
         scope.launch { archiveReminders.scheduleOnChanges() }
+        scope.launch { archiveReminders.hideOnLock() }
     }
 
     override fun onTrimMemory(level: Int) {

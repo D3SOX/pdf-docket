@@ -22,6 +22,8 @@ import me.d3sox.pdfwallet.settings.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -63,29 +65,37 @@ class ArchiveReminders @Inject constructor(
         )
 
     /**
-     * Schedules the next reminder whenever an archive date changes, until cancelled.
-     * Reminders that were due before a change are skipped, as the app is open then.
-     * When the app starts, it may have been stopped before a reminder, which is shown then.
+     * Shows the due reminders and schedules the next one when the app starts, which may have been stopped
+     * before a reminder, and whenever an archive date changes, until cancelled.
+     * A date that is set after the time of its reminder is too late for it.
      */
     suspend fun scheduleOnChanges() {
-        var started = false
+        var previous: Map<String, Long?>? = null
         documentRepository.documents
             .map { documents -> documents.associate { it.id to if (it.archived) null else it.archiveAt } }
             .distinctUntilChanged()
-            .collect {
-                mutex.withLock {
-                    if (started) setRemindedUntil(System.currentTimeMillis())
-                    started = true
-                    schedule(documentRepository.documents.first())
-                }
+            .collect { archiveDates ->
+                val changed = previous?.let { old -> archiveDates.filter { (id, date) -> old[id] != date }.keys }
+                previous = archiveDates
+                remindDue(skip = changed.orEmpty())
             }
     }
 
-    /** Shows the reminders that are due, and schedules the next one. */
-    suspend fun remindDue() = mutex.withLock {
+    /** Removes the reminders, which show document names, once the app lock is turned on, until cancelled. */
+    suspend fun hideOnLock() = settingsRepository.settings
+        .map { it.requireAuthentication }
+        .distinctUntilChanged()
+        // only when it's turned on, reminders shown while it was already on don't show names
+        .drop(1)
+        .filter { it }
+        // after reminders that are being shown with the names
+        .collect { mutex.withLock { notificationManager.cancelAll() } }
+
+    /** Shows the reminders that are due, except for the documents with [skip] ids, and schedules the next one. */
+    suspend fun remindDue(skip: Set<String> = emptySet()) = mutex.withLock {
         val now = System.currentTimeMillis()
         val documents = documentRepository.documents.first()
-        val due = dueReminders(documents, remindedUntil(), now, ZoneId.systemDefault())
+        val due = dueReminders(documents, remindedUntil(), now, ZoneId.systemDefault()).filterNot { it.id in skip }
         if (due.isNotEmpty() && canNotify()) {
             val hideNames = settingsRepository.settings.first().requireAuthentication
             notificationManager.createNotificationChannel(
