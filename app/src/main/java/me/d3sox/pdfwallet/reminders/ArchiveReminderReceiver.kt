@@ -13,7 +13,8 @@ import javax.inject.Inject
 internal const val ACTION_REMIND = "me.d3sox.pdfwallet.action.REMIND"
 
 /**
- * Shows the archive reminders when they're due, and after the device starts, which clears the scheduled one.
+ * Shows the archive reminders when they're due, and after the device starts, which clears the scheduled one,
+ * or the time zone changes, which moves the morning of the next one.
  */
 @AndroidEntryPoint
 class ArchiveReminderReceiver : BroadcastReceiver() {
@@ -26,7 +27,7 @@ class ArchiveReminderReceiver : BroadcastReceiver() {
     lateinit var scope: CoroutineScope
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_BOOT_COMPLETED && intent.action != ACTION_REMIND) return
+        if (intent.action !in setOf(Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_TIMEZONE_CHANGED, ACTION_REMIND)) return
         val result = goAsync()
         scope.launch {
             try {
