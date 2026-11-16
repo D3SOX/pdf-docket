@@ -24,11 +24,13 @@ import me.d3sox.pdfwallet.render.DocumentRenderer
 import me.d3sox.pdfwallet.settings.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -36,7 +38,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
@@ -48,9 +49,6 @@ private const val BARCODE_SIZE_PX = 768
 
 // shared by all widgets of an update, which has to finish before the broadcast's deadline
 private val BARCODE_SEARCH_BUDGET = 5.seconds
-
-// enough to load a saved scan, once the budget is spent
-private val SAVED_BARCODES_TIMEOUT = 500.milliseconds
 
 // a line of the name with the padding around it
 private const val NAME_HEIGHT_DP = 48
@@ -97,18 +95,28 @@ class DocumentWidgets @Inject constructor(
 
     /**
      * Updates the widgets when a document is renamed or deleted, the app lock is turned on or off,
-     * or barcodes are searched differently, until cancelled.
+     * or barcodes are searched differently, and a document's widgets once its barcodes were found, until cancelled.
      */
-    suspend fun updateOnChanges() = combine(
-        documentRepository.documents.map { documents -> documents.associate { it.id to it.name } },
-        settingsRepository.settings.map {
-            Triple(it.requireAuthentication, it.barcodeSearchMode, it.generateNewBarcode)
-        },
-        ::Pair,
-    )
-        .distinctUntilChanged()
-        // also when the app starts, it may have stopped before updating them
-        .collectLatest { update(manager.getAppWidgetIds(component)) }
+    suspend fun updateOnChanges() = coroutineScope {
+        // e.g. one that took too long to search for its widget was opened, so the widget can show its barcode
+        launch { renderer.savedScans.collect { update(widgetIds(it)) } }
+        combine(
+            documentRepository.documents.map { documents -> documents.associate { it.id to it.name } },
+            settingsRepository.settings.map {
+                Triple(it.requireAuthentication, it.barcodeSearchMode, it.generateNewBarcode)
+            },
+            ::Pair,
+        )
+            .distinctUntilChanged()
+            // also when the app starts, it may have stopped before updating them
+            .collectLatest { update(manager.getAppWidgetIds(component)) }
+    }
+
+    private suspend fun widgetIds(documentId: String): IntArray = withContext(dispatcher) {
+        manager.getAppWidgetIds(component)
+            .filter { documentIds.getString(it.toString(), null) == documentId }
+            .toIntArray()
+    }
 
     // one at a time, so an update that started before the app lock was turned on can't show a preview afterwards
     suspend fun update(widgetIds: IntArray) = updates.withLock {
@@ -174,12 +182,17 @@ class DocumentWidgets @Inject constructor(
         val settings = settingsRepository.settings.first()
         // The first barcode is enough, the rest of a long document isn't searched for it.
         // Long documents without barcodes would keep the widgets' broadcast waiting until every page is searched,
-        // so they show their first page until the document is opened, which saves the search for the next update
-        val barcode = withTimeoutOrNull(maxOf(-searchDeadline.elapsedNow(), SAVED_BARCODES_TIMEOUT)) {
-            renderer.scanBarcodes(documentId, settings.barcodeSearchMode, settings.generateNewBarcode)
-                .first { it.complete || it.barcodes.isNotEmpty() }
-                .barcodes.firstOrNull()
+        // so they show their first page until the document is opened, which saves its scan and updates them
+        val searchTime = -searchDeadline.elapsedNow()
+        val scan = if (searchTime.isPositive()) {
+            withTimeoutOrNull(searchTime) {
+                renderer.scanBarcodes(documentId, settings.barcodeSearchMode, settings.generateNewBarcode)
+                    .first { it.complete || it.barcodes.isNotEmpty() }
+            }
+        } else {
+            renderer.savedScan(documentId, settings.barcodeSearchMode, settings.generateNewBarcode)
         }
+        val barcode = scan?.barcodes?.firstOrNull()
         return if (barcode != null) {
             WidgetImage(barcode.bitmap.fitInto(barcodeSize), isBarcode = true)
         } else {
