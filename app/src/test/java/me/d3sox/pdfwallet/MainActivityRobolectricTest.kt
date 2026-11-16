@@ -1,6 +1,8 @@
 package me.d3sox.pdfwallet
 
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.activity.BackEventCompat
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
@@ -22,6 +24,7 @@ import me.d3sox.pdfwallet.db.di.DatabaseModule
 import me.d3sox.pdfwallet.documents.DocumentFilter
 import me.d3sox.pdfwallet.documents.DocumentRepository
 import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
+import me.d3sox.pdfwallet.quicksettings.DocumentTileService
 import me.d3sox.pdfwallet.settings.SettingsRepository
 import me.d3sox.pdfwallet.settings.SortOrder
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -421,11 +424,20 @@ class MainActivityRobolectricTest {
             runBlocking { settingsRepository.settings.first() }.quickSettingsDocumentId == firstDocument.id
         }
 
+        val tileState = {
+            context.packageManager.getComponentEnabledSetting(ComponentName(context, DocumentTileService::class.java))
+        }
         openMenu()
         composeRule.onNodeWithText(context.getString(R.string.remove_from_quick_settings)).performClick()
         composeRule.waitUntil(timeoutMillis = 5_000) {
             runBlocking { settingsRepository.settings.first() }.quickSettingsDocumentId == null
         }
+        // apps can't remove their tile, so it's hidden by disabling its service
+        tileState() shouldBe PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+
+        openMenu()
+        composeRule.onNodeWithText(context.getString(R.string.add_to_quick_settings)).performClick()
+        tileState() shouldBe PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
     }
 
     @Test

@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.AssignTagsDialog
+import me.d3sox.pdfwallet.quicksettings.removeQuickSettingsTile
 import me.d3sox.pdfwallet.quicksettings.requestQuickSettingsTile
 import me.d3sox.pdfwallet.reminders.rememberNotificationPermissionRequest
 import me.d3sox.pdfwallet.ui.LocalSnackbarHostState
@@ -39,7 +40,8 @@ data class DocumentDialog(val kind: Kind, val documentId: String) {
 
 /**
  * The menu for a single document, followed by the groups of [extraGroups].
- * Picking a document for the Quick Settings tile shows how to add the tile to the snackbar host of the screen.
+ * Picking a document for the Quick Settings tile offers to add the tile,
+ * or shows how to in the snackbar host of the screen.
  * [editor] archives the document right away.
  * [onDialog] opens the matching [DocumentDialog].
  * Without [showShare], sharing is left to a button next to the menu.
@@ -81,11 +83,14 @@ fun DocumentMenu(
             if (isInQuickSettings) {
                 action(R.string.remove_from_quick_settings, R.drawable.toggle_on_24px, onDismiss) {
                     editor.setQuickSettingsDocument(null)
+                    context.removeQuickSettingsTile()
                 }
             } else {
                 action(R.string.add_to_quick_settings, R.drawable.toggle_on_24px, onDismiss) {
-                    editor.setQuickSettingsDocument(document.id)
-                    if (!context.requestQuickSettingsTile(document.name)) {
+                    val onAdded: () -> Unit = { editor.setQuickSettingsDocument(document.id) }
+                    if (!context.requestQuickSettingsTile(document.name, onAdded)) {
+                        // the tile can't be offered, so it gets the document for when it's added
+                        onAdded()
                         scope.launch { snackbarHostState.showSnackbar(tileHint) }
                     }
                 }
