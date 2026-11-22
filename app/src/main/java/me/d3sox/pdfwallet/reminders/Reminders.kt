@@ -236,7 +236,7 @@ internal fun reminderAt(archiveAt: Long, zone: ZoneId): Long = Reminder(
 
 /**
  * The reminders of the documents that aren't archived. An archive reminder is late once the document is archived,
- * and the user's reminder once its day is over.
+ * and the user's reminder once its day is over or the document is archived.
  */
 internal fun scheduledReminders(documents: List<Document>, zone: ZoneId): List<ScheduledReminder> = documents
     .filterNot { it.archived }
@@ -247,7 +247,9 @@ internal fun scheduledReminders(documents: List<Document>, zone: ZoneId): List<S
             },
             document.reminder?.let {
                 val nextDay = it.date.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-                ScheduledReminder(document, ScheduledReminder.Kind.USER, it.at(zone), lateAt = nextDay)
+                // the app archives documents only while it's open
+                val lateAt = minOf(nextDay, document.archiveAt ?: Long.MAX_VALUE)
+                ScheduledReminder(document, ScheduledReminder.Kind.USER, it.at(zone), lateAt)
             },
         )
     }

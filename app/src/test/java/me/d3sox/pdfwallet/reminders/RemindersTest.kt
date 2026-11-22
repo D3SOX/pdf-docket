@@ -86,6 +86,15 @@ class RemindersTest {
     }
 
     @Test
+    fun dueReminders_skipUserRemindersAfterTheArchiveDate() {
+        // archived only once the app is opened
+        val documents = listOf(document("archived", "2026-11-21T00:00", reminder = reminder("2026-11-21", "10:00")))
+
+        dueReminders(documents, remindedUntil = at("2026-11-21T09:00"), now = at("2026-11-21T10:05"), ZONE)
+            .shouldContainExactly(emptyList())
+    }
+
+    @Test
     fun changedReminders_areOnlyTheKindsWhoseDateChanged() {
         val event = reminder("2026-11-22", "19:30")
         val old = mapOf("archive" to (at("2026-11-23T00:00") to event), "event" to (null to event))
