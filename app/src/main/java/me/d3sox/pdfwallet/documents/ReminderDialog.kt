@@ -22,6 +22,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,8 +56,10 @@ fun ReminderDialog(reminder: Reminder?, onConfirm: (Reminder?) -> Unit, onDismis
     val time = timeSeconds?.let { LocalTime.ofSecondOfDay(it.toLong()) }
     var pickTime by rememberSaveable { mutableStateOf(false) }
     val picked = state.selectedDateMillis?.let { Reminder(localDate(it, ZoneOffset.UTC), time) }
+    // checked again when confirming, the time passes without recomposing the dialog
+    var checkedAt by remember { mutableLongStateOf(0L) }
     // e.g. today in the evening without a time
-    val passed = picked != null && picked.at(ZoneId.systemDefault()) <= System.currentTimeMillis()
+    val passed = picked != null && picked.at(ZoneId.systemDefault()) <= maxOf(checkedAt, System.currentTimeMillis())
     // without the year, which the calendar shows, so the time fits next to the date
     val dateFormatter = remember { DatePickerDefaults.dateFormatter(selectedDateSkeleton = "MMMd") }
     DatePickerDialog(
@@ -64,8 +67,11 @@ fun ReminderDialog(reminder: Reminder?, onConfirm: (Reminder?) -> Unit, onDismis
         confirmButton = {
             TextButton(
                 onClick = {
-                    onConfirm(picked)
-                    onDismiss()
+                    checkedAt = System.currentTimeMillis()
+                    if (picked != null && picked.at(ZoneId.systemDefault()) > checkedAt) {
+                        onConfirm(picked)
+                        onDismiss()
+                    }
                 },
                 enabled = picked != null && !passed,
             ) { Text(stringResource(R.string.ok)) }

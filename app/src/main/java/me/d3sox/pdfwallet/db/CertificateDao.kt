@@ -90,8 +90,12 @@ interface CertificateDao {
     @Query("UPDATE certificates SET reminderDate = :date, reminderTime = :time WHERE id = :id")
     suspend fun setReminder(id: String, date: Long?, time: Int?)
 
-    @Query("UPDATE certificates SET reminderDate = NULL, reminderTime = NULL WHERE id IN (:ids)")
-    suspend fun removeReminders(ids: List<String>)
+    /** Only if the reminder is still on [date] at [time], not if it was changed meanwhile */
+    @Query(
+        "UPDATE certificates SET reminderDate = NULL, reminderTime = NULL " +
+            "WHERE id = :id AND reminderDate = :date AND reminderTime IS :time"
+    )
+    suspend fun removeReminder(id: String, date: Long, time: Int?)
 
     @Query("DELETE FROM certificates WHERE id IN (:ids)")
     suspend fun delete(ids: List<String>)

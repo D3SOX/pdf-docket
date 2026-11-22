@@ -86,6 +86,23 @@ class RemindersTest {
     }
 
     @Test
+    fun changedReminders_areOnlyTheKindsWhoseDateChanged() {
+        val event = reminder("2026-11-22", "19:30")
+        val old = mapOf("archive" to (at("2026-11-23T00:00") to event), "event" to (null to event))
+        val new = mapOf(
+            "archive" to (at("2026-11-24T00:00") to event),
+            "event" to (null to reminder("2026-11-22")),
+            "restored" to (at("2026-11-23T00:00") to null),
+        )
+
+        changedReminders(old, new) shouldBe setOf(
+            "archive" to ScheduledReminder.Kind.ARCHIVE,
+            "event" to ScheduledReminder.Kind.USER,
+            "restored" to ScheduledReminder.Kind.ARCHIVE,
+        )
+    }
+
+    @Test
     fun nextReminder_isTheEarliestOneAfterTheLastCheck() {
         val documents = listOf(
             document("reminded", "2026-11-20T00:00"),

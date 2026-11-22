@@ -139,7 +139,9 @@ class DocumentRepository @Inject constructor(
     suspend fun setReminder(id: String, reminder: Reminder?) =
         certificateDao.setReminder(id, reminder?.date?.toEpochDay(), reminder?.time?.get(MINUTE_OF_DAY))
 
-    suspend fun removeReminders(ids: List<String>) = certificateDao.removeReminders(ids)
+    /** Only if the document still has this [reminder], not if it was changed meanwhile */
+    suspend fun removeReminder(id: String, reminder: Reminder) =
+        certificateDao.removeReminder(id, reminder.date.toEpochDay(), reminder.time?.get(MINUTE_OF_DAY))
 
     /**
      * Archives the documents whose archive date has passed, and then each one when its date is reached,

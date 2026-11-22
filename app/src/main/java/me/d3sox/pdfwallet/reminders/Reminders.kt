@@ -90,7 +90,7 @@ class Reminders @Inject constructor(
             }
             .distinctUntilChanged()
             .collect { dates ->
-                val changed = previous?.let { old -> dates.filter { (id, date) -> old[id] != date }.keys }
+                val changed = previous?.let { changedReminders(it, dates) }
                 previous = dates
                 remindDue(skip = changed.orEmpty())
             }
@@ -107,22 +107,24 @@ class Reminders @Inject constructor(
         .collect { mutex.withLock { notificationManager.cancelAll() } }
 
     /**
-     * Shows the reminders that are due, except for the documents with [skip] ids, removes the user's reminders
-     * that have passed, and schedules the next one.
+     * Shows the reminders that are due, except for the [skip] kinds of the documents with those ids,
+     * removes the user's reminders that have passed, and schedules the next one.
      */
-    suspend fun remindDue(skip: Set<String> = emptySet()) = mutex.withLock {
+    internal suspend fun remindDue(skip: Set<Pair<String, ScheduledReminder.Kind>> = emptySet()) = mutex.withLock {
         val now = System.currentTimeMillis()
         val zone = ZoneId.systemDefault()
         val documents = documentRepository.documents.first()
-        val due = dueReminders(documents, remindedUntil(), now, zone).filterNot { it.document.id in skip }
+        val due = dueReminders(documents, remindedUntil(), now, zone).filterNot { it.document.id to it.kind in skip }
         if (due.isNotEmpty() && canNotify()) {
             val hideNames = settingsRepository.settings.first().requireAuthentication
             createChannels()
             due.forEach { notify(it, hideNames) }
         }
         setRemindedUntil(now)
-        val passed = documents.filter { document -> document.reminder?.let { it.at(zone) <= now } == true }
-        if (passed.isNotEmpty()) documentRepository.removeReminders(passed.map { it.id })
+        documents.forEach { document ->
+            // a reminder set after the documents were read stays
+            document.reminder?.takeIf { it.at(zone) <= now }?.let { documentRepository.removeReminder(document.id, it) }
+        }
         schedule(documents)
     }
 
@@ -212,6 +214,20 @@ class Reminders @Inject constructor(
         preferences.edit(commit = true) { putLong(REMINDED_UNTIL, time) }
     }
 }
+
+/**
+ * The ids and kinds of the reminders whose dates changed from [old] to [new], which map the document ids
+ * to their archive dates and reminders. Only the changed kind, the other reminder of a document may still be due.
+ */
+internal fun changedReminders(
+    old: Map<String, Pair<Long?, Reminder?>>,
+    new: Map<String, Pair<Long?, Reminder?>>,
+): Set<Pair<String, ScheduledReminder.Kind>> = new.flatMap { (id, dates) ->
+    listOfNotNull(
+        (id to ScheduledReminder.Kind.ARCHIVE).takeIf { old[id]?.first != dates.first },
+        (id to ScheduledReminder.Kind.USER).takeIf { old[id]?.second != dates.second },
+    )
+}.toSet()
 
 /** In the morning of the day before [archiveAt], the last day of the document. */
 internal fun reminderAt(archiveAt: Long, zone: ZoneId): Long = Reminder(

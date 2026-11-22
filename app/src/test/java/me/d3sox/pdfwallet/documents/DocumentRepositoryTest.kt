@@ -112,6 +112,23 @@ class DocumentRepositoryTest {
     }
 
     @Test
+    fun removeReminder_keepsAReminderThatWasChangedMeanwhile() = runTest {
+        addDocument("fired.pdf")
+        addDocument("changed.pdf")
+        val fired = Reminder(LocalDate.of(2030, 5, 1))
+        val changed = Reminder(LocalDate.of(2030, 5, 1), LocalTime.of(19, 30))
+        repository.setReminder("fired.pdf", fired)
+        repository.setReminder("changed.pdf", changed)
+
+        repository.removeReminder("fired.pdf", fired)
+        repository.removeReminder("changed.pdf", fired)
+
+        val documents = repository.documents.first().associateBy { it.id }
+        documents.getValue("fired.pdf").reminder shouldBe null
+        documents.getValue("changed.pdf").reminder shouldBe changed
+    }
+
+    @Test
     fun archiveWhenDue_archivesOnlyDocumentsWhoseDateHasPassed() = runTest {
         addDocument("due.pdf")
         addDocument("later.pdf")
