@@ -211,6 +211,16 @@
     <string name="archive_reminder_channel">アーカイブのリマインダー</string>
     <string name="archive_reminder_text">明日アーカイブされます</string>
     <string name="archive_reminder_hidden">ドキュメントが明日アーカイブされます</string>
+    <string name="remind_me">リマインダー</string>
+    <string name="dialog_reminder_title">リマインドする日</string>
+    <string name="dialog_reminder_time_title">リマインドする時刻</string>
+    <string name="add_time">時刻を追加</string>
+    <string name="reminder_passed">この時刻は過ぎています</string>
+    <string name="reminds_on">%1$s にリマインド</string>
+    <string name="reminder_channel">リマインダー</string>
+    <string name="reminder_text">今日</string>
+    <string name="reminder_text_at">今日 %1$s</string>
+    <string name="reminder_hidden">ドキュメントのリマインダー</string>
     <string name="remove">削除</string>
     <string name="archive_title">アーカイブ</string>
     <string name="archive_empty_title">アーカイブされたドキュメントはありません</string>

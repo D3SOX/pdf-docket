@@ -211,6 +211,16 @@
     <string name="archive_reminder_channel">보관 알림</string>
     <string name="archive_reminder_text">내일 보관됨</string>
     <string name="archive_reminder_hidden">문서가 내일 보관됩니다</string>
+    <string name="remind_me">알림 설정</string>
+    <string name="dialog_reminder_title">알림 날짜</string>
+    <string name="dialog_reminder_time_title">알림 시간</string>
+    <string name="add_time">시간 추가</string>
+    <string name="reminder_passed">이미 지난 시간입니다</string>
+    <string name="reminds_on">%1$s에 알림</string>
+    <string name="reminder_channel">리마인더</string>
+    <string name="reminder_text">오늘</string>
+    <string name="reminder_text_at">오늘 %1$s</string>
+    <string name="reminder_hidden">문서 알림</string>
     <string name="remove">삭제</string>
     <string name="archive_title">보관함</string>
     <string name="archive_empty_title">보관된 문서 없음</string>

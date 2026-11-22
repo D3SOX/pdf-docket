@@ -10,12 +10,13 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [Certificate::class, Tag::class, CertificateTagCrossRef::class, DocumentPosition::class],
-    version = 5,
+    version = 6,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3, spec = AppDatabase.ManualOrderNewestFirst::class),
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6),
     ],
 )
 abstract class AppDatabase : RoomDatabase() {

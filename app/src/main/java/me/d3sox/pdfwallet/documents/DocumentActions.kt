@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 
 /** A dialog for the document with [documentId], which stays open when the screen rotates with [Saver]. */
 data class DocumentDialog(val kind: Kind, val documentId: String) {
-    enum class Kind { RENAME, NOTE, ASSIGN_TAGS, ARCHIVE_DATE, DELETE }
+    enum class Kind { RENAME, NOTE, ASSIGN_TAGS, REMINDER, ARCHIVE_DATE, DELETE }
 
     companion object {
         val Saver = Saver<DocumentDialog?, String>(
@@ -105,6 +105,9 @@ fun DocumentMenu(
                 action(R.string.archive, R.drawable.archive_24px, onDismiss) {
                     editor.setArchived(listOf(document.id), archived = true)
                 }
+                action(R.string.remind_me, R.drawable.notifications_24px, onDismiss) {
+                    open(DocumentDialog.Kind.REMINDER)
+                }
                 action(R.string.archive_on_date, R.drawable.event_upcoming_24px, onDismiss) {
                     open(DocumentDialog.Kind.ARCHIVE_DATE)
                 }
@@ -153,6 +156,14 @@ fun DocumentDialogHost(
             assignedTagIds = document.tags.map { it.id }.toSet(),
             onAssignedTagsChange = { editor.setTags(document.id, it) },
             onCreateTag = { name, icon -> editor.createTag(name, icon, assignTo = document) },
+            onDismiss = onDismiss,
+        )
+        DocumentDialog.Kind.REMINDER -> ReminderDialog(
+            reminder = document.reminder,
+            onConfirm = {
+                editor.setReminder(document.id, it)
+                if (it != null) requestNotificationPermission()
+            },
             onDismiss = onDismiss,
         )
         DocumentDialog.Kind.ARCHIVE_DATE -> ArchiveDateDialog(

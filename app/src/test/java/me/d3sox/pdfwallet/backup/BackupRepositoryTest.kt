@@ -9,6 +9,7 @@ import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.db.di.DatabaseModule
 import me.d3sox.pdfwallet.documents.Document
 import me.d3sox.pdfwallet.documents.DocumentRepository
+import me.d3sox.pdfwallet.documents.Reminder
 import me.d3sox.pdfwallet.documents.tags.TagIcon
 import me.d3sox.pdfwallet.pdfimporter.PendingCertificate
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -33,6 +34,8 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalTime
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
@@ -81,7 +84,7 @@ class BackupRepositoryTest {
     }
 
     @Test
-    fun restore_bringsBackDocumentsNamesDatesTagsOrderArchiveAndNotes() = runTest {
+    fun restore_bringsBackDocumentsNamesDatesTagsOrderArchiveNotesAndReminders() = runTest {
         documentRepository.updateTag(Tag(documentRepository.createTag("Travel"), "Travel", TagIcon.TRAIN.name))
         documentRepository.createTag("Unused")
         addDocument("a.pdf", name = "Train ticket", tags = setOf("Travel"))
@@ -89,6 +92,8 @@ class BackupRepositoryTest {
         addDocument("c.pdf", name = "Old ticket")
         documentRepository.setArchiveAt("a.pdf", ARCHIVE_AT)
         documentRepository.setNote("a.pdf", "Seat 42")
+        documentRepository.setReminder("a.pdf", Reminder(LocalDate.of(2030, 5, 1), LocalTime.of(19, 30)))
+        documentRepository.setReminder("b.pdf", Reminder(LocalDate.of(2030, 5, 2)))
         documentRepository.archive(listOf("c.pdf"))
         // differs from the import order, which would be used if the manual order got lost
         documentRepository.reorder(listOf("a.pdf", "b.pdf"))

@@ -227,6 +227,16 @@
     <string name="archive_reminder_channel">Lembretes de arquivamento</string>
     <string name="archive_reminder_text">Será arquivado amanhã</string>
     <string name="archive_reminder_hidden">Um documento será arquivado amanhã</string>
+    <string name="remind_me">Lembrar-me</string>
+    <string name="dialog_reminder_title">Lembrar-me em</string>
+    <string name="dialog_reminder_time_title">Lembrar-me às</string>
+    <string name="add_time">Adicionar hora</string>
+    <string name="reminder_passed">Esta hora já passou</string>
+    <string name="reminds_on">Lembrete em %1$s</string>
+    <string name="reminder_channel">Lembretes</string>
+    <string name="reminder_text">Hoje</string>
+    <string name="reminder_text_at">Hoje às %1$s</string>
+    <string name="reminder_hidden">Lembrete de um documento</string>
     <string name="remove">Remover</string>
     <string name="archive_title">Arquivo</string>
     <string name="archive_empty_title">Nenhum documento arquivado</string>

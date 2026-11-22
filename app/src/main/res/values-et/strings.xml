@@ -220,6 +220,16 @@
     <string name="archive_reminder_channel">Arhiveerimise meeldetuletused</string>
     <string name="archive_reminder_text">Arhiveeritakse homme</string>
     <string name="archive_reminder_hidden">Üks dokument arhiveeritakse homme</string>
+    <string name="remind_me">Tuleta meelde</string>
+    <string name="dialog_reminder_title">Tuleta meelde</string>
+    <string name="dialog_reminder_time_title">Tuleta meelde kell</string>
+    <string name="add_time">Lisa kellaaeg</string>
+    <string name="reminder_passed">See aeg on möödas</string>
+    <string name="reminds_on">Tuletab meelde %1$s</string>
+    <string name="reminder_channel">Meeldetuletused</string>
+    <string name="reminder_text">Täna</string>
+    <string name="reminder_text_at">Täna kell %1$s</string>
+    <string name="reminder_hidden">Dokumendi meeldetuletus</string>
     <string name="remove">Eemalda</string>
     <string name="archive_title">Arhiiv</string>
     <string name="archive_empty_title">Arhiveeritud dokumente pole</string>

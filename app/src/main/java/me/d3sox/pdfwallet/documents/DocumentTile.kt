@@ -7,6 +7,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -53,13 +55,16 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import android.graphics.Bitmap
+import android.text.format.DateUtils
 import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.db.Tag
 import me.d3sox.pdfwallet.documents.tags.iconDrawable
 import java.text.DateFormat
+import java.time.ZoneId
 import java.util.Date
 
 private const val PREVIEW_ASPECT_RATIO = 4f / 3f
@@ -139,14 +144,12 @@ fun DocumentTile(
                         .align(Alignment.TopEnd)
                         .padding(6.dp),
                 )
-                document.archiveAt?.let {
-                    ArchiveDateChip(
-                        it,
-                        Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(6.dp),
-                    )
-                }
+                DateChips(
+                    document,
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(6.dp),
+                )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 NameTagsAndActions(
@@ -166,7 +169,7 @@ private fun RowScope.NameTagsAndActions(
     selectionMode: Boolean,
     isSelected: Boolean,
     isInQuickSettings: Boolean,
-    // grid tiles show the tags and the archive date on the preview
+    // grid tiles show the tags, the reminder and the archive date on the preview
     asListItem: Boolean,
 ) {
     Column(
@@ -188,7 +191,7 @@ private fun RowScope.NameTagsAndActions(
         // an empty line would push the name off center
         if (asListItem && document.note.isNotEmpty()) NoteLine(document.note)
         if (asListItem && document.tags.isNotEmpty()) TagsLine(document.tags)
-        if (asListItem) document.archiveAt?.let { ArchiveDateChip(it, Modifier.padding(top = 4.dp)) }
+        if (asListItem) DateChips(document, Modifier.padding(top = 4.dp), inRow = true)
     }
     if (selectionMode) {
         Checkbox(checked = isSelected, onCheckedChange = null, modifier = Modifier.padding(12.dp))
@@ -228,6 +231,50 @@ private fun TagChips(tags: List<Tag>, modifier: Modifier) {
 }
 
 /**
+ * When the document reminds and gets archived automatically, below each other,
+ * or with [inRow] next to each other, wrapping if they don't fit.
+ */
+@Composable
+private fun DateChips(document: Document, modifier: Modifier, inRow: Boolean = false) {
+    if (document.reminder == null && document.archiveAt == null) return
+    val chips = @Composable {
+        document.reminder?.let { ReminderChip(it, Modifier) }
+        document.archiveAt?.let { ArchiveDateChip(it, Modifier) }
+    }
+    if (inRow) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = modifier,
+        ) { chips() }
+    } else {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier) { chips() }
+    }
+}
+
+/**
+ * When the document reminds, with the time if there is one.
+ */
+@Composable
+private fun ReminderChip(reminder: Reminder, modifier: Modifier) {
+    val context = LocalContext.current
+    val text = remember(reminder) {
+        val flags = DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH or
+            if (reminder.time != null) DateUtils.FORMAT_SHOW_TIME else 0
+        DateUtils.formatDateTime(context, reminder.at(ZoneId.systemDefault()), flags)
+    }
+    val description = stringResource(R.string.reminds_on, text)
+    TagChip(
+        text = text,
+        icon = R.drawable.notifications_24px,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        modifier = modifier.clearAndSetSemantics { contentDescription = description },
+        maxWidth = Dp.Infinity,
+    )
+}
+
+/**
  * When the document gets archived automatically.
  */
 @Composable
@@ -240,6 +287,7 @@ private fun ArchiveDateChip(archiveAt: Long, modifier: Modifier) {
         color = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         modifier = modifier.clearAndSetSemantics { contentDescription = description },
+        maxWidth = Dp.Infinity,
     )
 }
 
@@ -250,6 +298,8 @@ private fun TagChip(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    // tag names can be long, dates are short enough to show in full
+    maxWidth: Dp = TAG_CHIP_MAX_WIDTH,
 ) {
     Surface(
         shape = CircleShape,
@@ -260,7 +310,7 @@ private fun TagChip(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .widthIn(max = TAG_CHIP_MAX_WIDTH)
+                .widthIn(max = maxWidth)
                 .padding(horizontal = 8.dp, vertical = 3.dp),
         ) {
             if (icon != null) {

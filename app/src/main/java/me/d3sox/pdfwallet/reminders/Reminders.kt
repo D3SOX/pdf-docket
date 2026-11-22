@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.text.format.DateUtils
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -17,6 +18,7 @@ import me.d3sox.pdfwallet.R
 import me.d3sox.pdfwallet.coroutines.dispatcher.di.IoDispatcher
 import me.d3sox.pdfwallet.documents.Document
 import me.d3sox.pdfwallet.documents.DocumentRepository
+import me.d3sox.pdfwallet.documents.Reminder
 import me.d3sox.pdfwallet.documents.openDocumentIntent
 import me.d3sox.pdfwallet.settings.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,16 +36,27 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val CHANNEL_ID = "archive_reminders"
-private const val REMINDER_HOUR = 9
+private const val ARCHIVE_CHANNEL_ID = "archive_reminders"
+private const val CHANNEL_ID = "reminders"
 private const val REMINDED_UNTIL = "remindedUntil"
+
+/** A reminder of [document], shown at [at], unless it's [lateAt] by then, both in epoch millis. */
+internal data class ScheduledReminder(val document: Document, val kind: Kind, val at: Long, val lateAt: Long) {
+    enum class Kind {
+        /** in the morning before the day it gets archived automatically, its last day */
+        ARCHIVE,
+
+        /** the [Document.reminder] the user picked, e.g. on the day of an event */
+        USER,
+    }
+}
 
 /**
  * Reminds of each document in the morning before the day it gets archived automatically, its last day,
- * with a notification that opens it.
+ * and on the day and at the time of its [Document.reminder], with notifications that open it.
  */
 @Singleton
-class ArchiveReminders @Inject constructor(
+class Reminders @Inject constructor(
     @ApplicationContext private val context: Context,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val documentRepository: DocumentRepository,
@@ -53,7 +66,7 @@ class ArchiveReminders @Inject constructor(
     private val notificationManager = NotificationManagerCompat.from(context)
     private val mutex = Mutex()
 
-    // reminders up to this time were shown or skipped
+    // reminders up to this time were shown or skipped, the name is from when there were only archive reminders
     private val preferences by lazy { context.getSharedPreferences("archive_reminders", Context.MODE_PRIVATE) }
 
     private val alarm: PendingIntent
@@ -66,17 +79,19 @@ class ArchiveReminders @Inject constructor(
 
     /**
      * Shows the due reminders and schedules the next one when the app starts, which may have been stopped
-     * before a reminder, and whenever an archive date changes, until cancelled.
+     * before a reminder, and whenever an archive date or a reminder changes, until cancelled.
      * A date that is set after the time of its reminder is too late for it.
      */
     suspend fun scheduleOnChanges() {
-        var previous: Map<String, Long?>? = null
+        var previous: Map<String, Pair<Long?, Reminder?>>? = null
         documentRepository.documents
-            .map { documents -> documents.associate { it.id to if (it.archived) null else it.archiveAt } }
+            .map { documents ->
+                documents.associate { it.id to if (it.archived) null to null else it.archiveAt to it.reminder }
+            }
             .distinctUntilChanged()
-            .collect { archiveDates ->
-                val changed = previous?.let { old -> archiveDates.filter { (id, date) -> old[id] != date }.keys }
-                previous = archiveDates
+            .collect { dates ->
+                val changed = previous?.let { old -> dates.filter { (id, date) -> old[id] != date }.keys }
+                previous = dates
                 remindDue(skip = changed.orEmpty())
             }
     }
@@ -91,22 +106,37 @@ class ArchiveReminders @Inject constructor(
         // after reminders that are being shown with the names
         .collect { mutex.withLock { notificationManager.cancelAll() } }
 
-    /** Shows the reminders that are due, except for the documents with [skip] ids, and schedules the next one. */
+    /**
+     * Shows the reminders that are due, except for the documents with [skip] ids, removes the user's reminders
+     * that have passed, and schedules the next one.
+     */
     suspend fun remindDue(skip: Set<String> = emptySet()) = mutex.withLock {
         val now = System.currentTimeMillis()
+        val zone = ZoneId.systemDefault()
         val documents = documentRepository.documents.first()
-        val due = dueReminders(documents, remindedUntil(), now, ZoneId.systemDefault()).filterNot { it.id in skip }
+        val due = dueReminders(documents, remindedUntil(), now, zone).filterNot { it.document.id in skip }
         if (due.isNotEmpty() && canNotify()) {
             val hideNames = settingsRepository.settings.first().requireAuthentication
-            notificationManager.createNotificationChannel(
-                NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT)
-                    .setName(context.getString(R.string.archive_reminder_channel))
-                    .build()
-            )
+            createChannels()
             due.forEach { notify(it, hideNames) }
         }
         setRemindedUntil(now)
+        val passed = documents.filter { document -> document.reminder?.let { it.at(zone) <= now } == true }
+        if (passed.isNotEmpty()) documentRepository.removeReminders(passed.map { it.id })
         schedule(documents)
+    }
+
+    private fun createChannels() {
+        notificationManager.createNotificationChannelsCompat(
+            listOf(
+                NotificationChannelCompat.Builder(ARCHIVE_CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT)
+                    .setName(context.getString(R.string.archive_reminder_channel))
+                    .build(),
+                NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT)
+                    .setName(context.getString(R.string.reminder_channel))
+                    .build(),
+            )
+        )
     }
 
     private suspend fun schedule(documents: List<Document>) {
@@ -126,23 +156,47 @@ class ArchiveReminders @Inject constructor(
 
     // canNotify checks the permission
     @SuppressLint("MissingPermission")
-    private fun notify(document: Document, hideName: Boolean) {
+    private fun notify(reminder: ScheduledReminder, hideName: Boolean) {
+        val document = reminder.document
         val open = PendingIntent.getActivity(
             context,
             document.id.hashCode(),
             context.openDocumentIntent(document.id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.event_upcoming_24px)
+        val (channel, hiddenTitle, text) = when (reminder.kind) {
+            ScheduledReminder.Kind.ARCHIVE -> Triple(
+                ARCHIVE_CHANNEL_ID,
+                context.getString(R.string.archive_reminder_hidden),
+                context.getString(R.string.archive_reminder_text),
+            )
+            ScheduledReminder.Kind.USER -> Triple(
+                CHANNEL_ID,
+                context.getString(R.string.reminder_hidden),
+                if (document.reminder?.time != null) {
+                    val time = DateUtils.formatDateTime(context, reminder.at, DateUtils.FORMAT_SHOW_TIME)
+                    context.getString(R.string.reminder_text_at, time)
+                } else {
+                    context.getString(R.string.reminder_text)
+                },
+            )
+        }
+        val notification = NotificationCompat.Builder(context, channel)
+            .setSmallIcon(
+                when (reminder.kind) {
+                    ScheduledReminder.Kind.ARCHIVE -> R.drawable.event_upcoming_24px
+                    ScheduledReminder.Kind.USER -> R.drawable.notifications_24px
+                }
+            )
             // the lock screen shows notifications without unlocking the app
-            .setContentTitle(if (hideName) context.getString(R.string.archive_reminder_hidden) else document.name)
-            .setContentText(if (hideName) null else context.getString(R.string.archive_reminder_text))
+            .setContentTitle(if (hideName) hiddenTitle else document.name)
+            .setContentText(if (hideName) null else text)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(open)
             .setAutoCancel(true)
             .build()
-        notificationManager.notify(document.id, 0, notification)
+        // each document can have one reminder of each kind
+        notificationManager.notify(document.id, reminder.kind.ordinal, notification)
     }
 
     /** The first time, there are no reminders before now. */
@@ -160,24 +214,32 @@ class ArchiveReminders @Inject constructor(
 }
 
 /** In the morning of the day before [archiveAt], the last day of the document. */
-internal fun reminderAt(archiveAt: Long, zone: ZoneId): Long = Instant.ofEpochMilli(archiveAt).atZone(zone)
-    .toLocalDate()
-    .minusDays(1)
-    .atTime(REMINDER_HOUR, 0)
-    .atZone(zone)
-    .toInstant()
-    .toEpochMilli()
+internal fun reminderAt(archiveAt: Long, zone: ZoneId): Long = Reminder(
+    Instant.ofEpochMilli(archiveAt).atZone(zone).toLocalDate().minusDays(1),
+).at(zone)
 
-/** The documents to remind of, whose reminder is after [remindedUntil] and not after [now], before they're archived */
-internal fun dueReminders(documents: List<Document>, remindedUntil: Long, now: Long, zone: ZoneId): List<Document> =
-    documents.filter { document ->
-        val archiveAt = document.archiveAt ?: return@filter false
-        !document.archived && archiveAt > now && reminderAt(archiveAt, zone) in (remindedUntil + 1)..now
+/**
+ * The reminders of the documents that aren't archived. An archive reminder is late once the document is archived,
+ * and the user's reminder once its day is over.
+ */
+internal fun scheduledReminders(documents: List<Document>, zone: ZoneId): List<ScheduledReminder> = documents
+    .filterNot { it.archived }
+    .flatMap { document ->
+        listOfNotNull(
+            document.archiveAt?.let {
+                ScheduledReminder(document, ScheduledReminder.Kind.ARCHIVE, reminderAt(it, zone), lateAt = it)
+            },
+            document.reminder?.let {
+                val nextDay = it.date.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+                ScheduledReminder(document, ScheduledReminder.Kind.USER, it.at(zone), lateAt = nextDay)
+            },
+        )
     }
 
+/** The reminders that are after [remindedUntil] and not after [now], and not late yet */
+internal fun dueReminders(documents: List<Document>, remindedUntil: Long, now: Long, zone: ZoneId) =
+    scheduledReminders(documents, zone).filter { it.at in (remindedUntil + 1)..now && now < it.lateAt }
+
 /** When the first reminder after [remindedUntil] is due, or null if there is none. It may be due already. */
-internal fun nextReminder(documents: List<Document>, remindedUntil: Long, zone: ZoneId): Long? = documents
-    .filterNot { it.archived }
-    .mapNotNull { document -> document.archiveAt?.let { reminderAt(it, zone) } }
-    .filter { it > remindedUntil }
-    .minOrNull()
+internal fun nextReminder(documents: List<Document>, remindedUntil: Long, zone: ZoneId): Long? =
+    scheduledReminders(documents, zone).map { it.at }.filter { it > remindedUntil }.minOrNull()

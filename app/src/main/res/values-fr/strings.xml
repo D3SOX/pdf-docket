@@ -227,6 +227,16 @@
     <string name="archive_reminder_channel">Rappels d\'archivage</string>
     <string name="archive_reminder_text">Sera archivé demain</string>
     <string name="archive_reminder_hidden">Un document sera archivé demain</string>
+    <string name="remind_me">Me le rappeler</string>
+    <string name="dialog_reminder_title">Me le rappeler le</string>
+    <string name="dialog_reminder_time_title">Me le rappeler à</string>
+    <string name="add_time">Ajouter une heure</string>
+    <string name="reminder_passed">Cette heure est passée</string>
+    <string name="reminds_on">Rappel le %1$s</string>
+    <string name="reminder_channel">Rappels</string>
+    <string name="reminder_text">Aujourd’hui</string>
+    <string name="reminder_text_at">Aujourd’hui à %1$s</string>
+    <string name="reminder_hidden">Rappel d’un document</string>
     <string name="remove">Supprimer la date</string>
     <string name="archive_title">Archives</string>
     <string name="archive_empty_title">Aucun document archivé</string>

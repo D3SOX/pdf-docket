@@ -227,6 +227,16 @@
     <string name="archive_reminder_channel">Promemoria di archiviazione</string>
     <string name="archive_reminder_text">Verrà archiviato domani</string>
     <string name="archive_reminder_hidden">Un documento verrà archiviato domani</string>
+    <string name="remind_me">Ricordamelo</string>
+    <string name="dialog_reminder_title">Ricordamelo il</string>
+    <string name="dialog_reminder_time_title">Ricordamelo alle</string>
+    <string name="add_time">Aggiungi ora</string>
+    <string name="reminder_passed">Quest’ora è già passata</string>
+    <string name="reminds_on">Promemoria il %1$s</string>
+    <string name="reminder_channel">Promemoria</string>
+    <string name="reminder_text">Oggi</string>
+    <string name="reminder_text_at">Oggi alle %1$s</string>
+    <string name="reminder_hidden">Promemoria per un documento</string>
     <string name="remove">Rimuovi</string>
     <string name="archive_title">Archivio</string>
     <string name="archive_empty_title">Nessun documento archiviato</string>
