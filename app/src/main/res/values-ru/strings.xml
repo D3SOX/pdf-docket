@@ -235,6 +235,16 @@
     <string name="archive_reminder_channel">Напоминания об архивации</string>
     <string name="archive_reminder_text">Будет архивирован завтра</string>
     <string name="archive_reminder_hidden">Документ будет архивирован завтра</string>
+    <string name="remind_me">Напомнить</string>
+    <string name="dialog_reminder_title">Напомнить</string>
+    <string name="dialog_reminder_time_title">Напомнить в</string>
+    <string name="add_time">Добавить время</string>
+    <string name="reminder_passed">Это время уже прошло</string>
+    <string name="reminds_on">Напомнит %1$s</string>
+    <string name="reminder_channel">Напоминания</string>
+    <string name="reminder_text">Сегодня</string>
+    <string name="reminder_text_at">Сегодня в %1$s</string>
+    <string name="reminder_hidden">Напоминание о документе</string>
     <string name="remove">Удалить</string>
     <string name="archive_title">Архив</string>
     <string name="archive_empty_title">Нет архивных документов</string>

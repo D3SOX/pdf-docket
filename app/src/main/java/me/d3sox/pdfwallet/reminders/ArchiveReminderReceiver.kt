@@ -13,14 +13,15 @@ import javax.inject.Inject
 internal const val ACTION_REMIND = "me.d3sox.pdfwallet.action.REMIND"
 
 /**
- * Shows the archive reminders when they're due, and after the device starts, which clears the scheduled one,
- * or the time zone changes, which moves the morning of the next one.
+ * Shows the reminders when they're due, and after the device starts, which clears the scheduled one,
+ * or the time zone changes, which moves the next one.
+ * It keeps the name from when there were only archive reminders, alarms scheduled before an update target it.
  */
 @AndroidEntryPoint
 class ArchiveReminderReceiver : BroadcastReceiver() {
 
     @Inject
-    lateinit var reminders: ArchiveReminders
+    lateinit var reminders: Reminders
 
     @Inject
     @ApplicationScope

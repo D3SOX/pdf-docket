@@ -227,6 +227,16 @@
     <string name="archive_reminder_channel">Recordatorios de archivo</string>
     <string name="archive_reminder_text">Se archivará mañana</string>
     <string name="archive_reminder_hidden">Un documento se archivará mañana</string>
+    <string name="remind_me">Recordármelo</string>
+    <string name="dialog_reminder_title">Recordármelo el</string>
+    <string name="dialog_reminder_time_title">Recordármelo a las</string>
+    <string name="add_time">Añadir hora</string>
+    <string name="reminder_passed">Esta hora ya ha pasado</string>
+    <string name="reminds_on">Recordatorio el %1$s</string>
+    <string name="reminder_channel">Recordatorios</string>
+    <string name="reminder_text">Hoy</string>
+    <string name="reminder_text_at">Hoy a las %1$s</string>
+    <string name="reminder_hidden">Recordatorio de un documento</string>
     <string name="remove">Quitar</string>
     <string name="archive_title">Archivo</string>
     <string name="archive_empty_title">No hay documentos archivados</string>

@@ -22,6 +22,9 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.temporal.ChronoField.MINUTE_OF_DAY
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
@@ -34,8 +37,8 @@ private const val DOCUMENTS_DIRECTORY = "documents/"
 private val DOCUMENT_ID = Regex("[0-9a-f-]+\\.pdf")
 
 /**
- * Backups are encrypted ZIP files with the PDFs and a JSON file with their names, import dates, tags
- * and whether and when they get archived, listed in the manual sort order.
+ * Backups are encrypted ZIP files with the PDFs and a JSON file with their names, import dates, tags,
+ * whether and when they get archived, notes and reminders, listed in the manual sort order.
  * Tag icons are stored separately, so older versions can still restore newer backups.
  */
 @Singleton
@@ -155,6 +158,11 @@ class BackupRepository @Inject constructor(
                     archiveAt = json.takeIf { it.has("archiveAt") }?.getLong("archiveAt"),
                     // added in 1.12.0
                     note = json.optString("note"),
+                    // added in 1.14.0
+                    reminderDate = json.optString("reminderDate").takeIf { it.isNotEmpty() }
+                        ?.let { LocalDate.parse(it).toEpochDay() },
+                    reminderTime = json.optString("reminderTime").takeIf { it.isNotEmpty() }
+                        ?.let { LocalTime.parse(it).get(MINUTE_OF_DAY) },
                 )
             )
             tagDao.insertCrossRefs(
@@ -178,6 +186,8 @@ class BackupRepository @Inject constructor(
                         .put("archived", document.archived)
                         .putOpt("archiveAt", document.archiveAt)
                         .put("note", document.note)
+                        .putOpt("reminderDate", document.reminder?.date?.toString())
+                        .putOpt("reminderTime", document.reminder?.time?.toString())
                 }
             ),
         )

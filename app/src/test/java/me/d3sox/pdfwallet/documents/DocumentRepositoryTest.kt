@@ -27,6 +27,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 // 2100-01-01
@@ -88,19 +90,42 @@ class DocumentRepositoryTest {
     }
 
     @Test
-    fun archive_cancelsTheArchiveDateAndUnarchiveBringsTheDocumentBack() = runTest {
+    fun archive_cancelsTheArchiveDateAndReminderAndUnarchiveBringsTheDocumentBack() = runTest {
         addDocument("a.pdf")
         repository.setArchiveAt("a.pdf", FUTURE)
-        repository.documents.first().single().archiveAt shouldBe FUTURE
+        val reminder = Reminder(LocalDate.of(2030, 5, 1), LocalTime.of(19, 30))
+        repository.setReminder("a.pdf", reminder)
+        repository.documents.first().single().let {
+            it.archiveAt shouldBe FUTURE
+            it.reminder shouldBe reminder
+        }
 
         repository.archive(listOf("a.pdf"))
         repository.documents.first().single().let {
             it.archived shouldBe true
             it.archiveAt shouldBe null
+            it.reminder shouldBe null
         }
 
         repository.unarchive(listOf("a.pdf"))
         repository.documents.first().single().archived shouldBe false
+    }
+
+    @Test
+    fun removeReminder_keepsAReminderThatWasChangedMeanwhile() = runTest {
+        addDocument("fired.pdf")
+        addDocument("changed.pdf")
+        val fired = Reminder(LocalDate.of(2030, 5, 1))
+        val changed = Reminder(LocalDate.of(2030, 5, 1), LocalTime.of(19, 30))
+        repository.setReminder("fired.pdf", fired)
+        repository.setReminder("changed.pdf", changed)
+
+        repository.removeReminder("fired.pdf", fired)
+        repository.removeReminder("changed.pdf", fired)
+
+        val documents = repository.documents.first().associateBy { it.id }
+        documents.getValue("fired.pdf").reminder shouldBe null
+        documents.getValue("changed.pdf").reminder shouldBe changed
     }
 
     @Test

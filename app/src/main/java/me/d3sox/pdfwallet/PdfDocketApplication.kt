@@ -3,7 +3,7 @@ package me.d3sox.pdfwallet
 import android.app.Application
 import android.content.ComponentCallbacks2
 import me.d3sox.pdfwallet.di.ApplicationScope
-import me.d3sox.pdfwallet.reminders.ArchiveReminders
+import me.d3sox.pdfwallet.reminders.Reminders
 import me.d3sox.pdfwallet.render.BitmapCache
 import me.d3sox.pdfwallet.widget.DocumentWidgets
 import dagger.hilt.android.HiltAndroidApp
@@ -18,7 +18,7 @@ class PdfDocketApplication : Application() {
     lateinit var widgets: DocumentWidgets
 
     @Inject
-    lateinit var archiveReminders: ArchiveReminders
+    lateinit var reminders: Reminders
 
     @Inject
     @ApplicationScope
@@ -27,8 +27,8 @@ class PdfDocketApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         scope.launch { widgets.updateOnChanges() }
-        scope.launch { archiveReminders.scheduleOnChanges() }
-        scope.launch { archiveReminders.hideOnLock() }
+        scope.launch { reminders.scheduleOnChanges() }
+        scope.launch { reminders.hideOnLock() }
     }
 
     override fun onTrimMemory(level: Int) {

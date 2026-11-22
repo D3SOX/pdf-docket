@@ -16,4 +16,5 @@ data class Document(
     val archiveAt: Long? = null,
     /** empty if there is none */
     val note: String = "",
+    val reminder: Reminder? = null,
 )

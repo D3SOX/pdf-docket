@@ -63,8 +63,11 @@ interface CertificateDao {
     @Query("SELECT archived FROM certificates WHERE id = :id")
     suspend fun isArchived(id: String): Boolean?
 
-    /** Also cancels their automatic archiving */
-    @Query("UPDATE certificates SET archived = 1, archiveAt = NULL WHERE id IN (:ids)")
+    /** Also cancels their automatic archiving and reminders */
+    @Query(
+        "UPDATE certificates SET archived = 1, archiveAt = NULL, reminderDate = NULL, reminderTime = NULL " +
+            "WHERE id IN (:ids)"
+    )
     suspend fun archive(ids: List<String>)
 
     @Query("UPDATE certificates SET archived = 0 WHERE id IN (:ids)")
@@ -77,8 +80,22 @@ interface CertificateDao {
     @Query("SELECT MIN(archiveAt) FROM certificates")
     fun nextArchiveAt(): Flow<Long?>
 
-    @Query("UPDATE certificates SET archived = 1, archiveAt = NULL WHERE archiveAt <= :now")
+    @Query(
+        "UPDATE certificates SET archived = 1, archiveAt = NULL, reminderDate = NULL, reminderTime = NULL " +
+            "WHERE archiveAt <= :now"
+    )
     suspend fun archiveDue(now: Long)
+
+    /** [date] in epoch days, [time] in minutes of the day */
+    @Query("UPDATE certificates SET reminderDate = :date, reminderTime = :time WHERE id = :id")
+    suspend fun setReminder(id: String, date: Long?, time: Int?)
+
+    /** Only if the reminder is still on [date] at [time], not if it was changed meanwhile */
+    @Query(
+        "UPDATE certificates SET reminderDate = NULL, reminderTime = NULL " +
+            "WHERE id = :id AND reminderDate = :date AND reminderTime IS :time"
+    )
+    suspend fun removeReminder(id: String, date: Long, time: Int?)
 
     @Query("DELETE FROM certificates WHERE id IN (:ids)")
     suspend fun delete(ids: List<String>)

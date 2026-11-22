@@ -220,6 +220,16 @@
     <string name="archive_reminder_channel">Archiv-Erinnerungen</string>
     <string name="archive_reminder_text">Wird morgen archiviert</string>
     <string name="archive_reminder_hidden">Ein Dokument wird morgen archiviert</string>
+    <string name="remind_me">Erinnern</string>
+    <string name="dialog_reminder_title">Erinnern am</string>
+    <string name="dialog_reminder_time_title">Erinnern um</string>
+    <string name="add_time">Uhrzeit hinzufügen</string>
+    <string name="reminder_passed">Dieser Zeitpunkt ist vorbei</string>
+    <string name="reminds_on">Erinnert dich am %1$s</string>
+    <string name="reminder_channel">Erinnerungen</string>
+    <string name="reminder_text">Heute</string>
+    <string name="reminder_text_at">Heute um %1$s</string>
+    <string name="reminder_hidden">Erinnerung an ein Dokument</string>
     <string name="remove">Entfernen</string>
     <string name="archive_title">Archiv</string>
     <string name="archive_empty_title">Keine archivierten Dokumente</string>

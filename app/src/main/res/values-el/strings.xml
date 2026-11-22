@@ -220,6 +220,16 @@
     <string name="archive_reminder_channel">Υπενθυμίσεις αρχειοθέτησης</string>
     <string name="archive_reminder_text">Θα αρχειοθετηθεί αύριο</string>
     <string name="archive_reminder_hidden">Ένα έγγραφο θα αρχειοθετηθεί αύριο</string>
+    <string name="remind_me">Υπενθύμιση</string>
+    <string name="dialog_reminder_title">Υπενθύμιση στις</string>
+    <string name="dialog_reminder_time_title">Υπενθύμιση την ώρα</string>
+    <string name="add_time">Προσθήκη ώρας</string>
+    <string name="reminder_passed">Αυτή η ώρα έχει περάσει</string>
+    <string name="reminds_on">Υπενθύμιση στις %1$s</string>
+    <string name="reminder_channel">Υπενθυμίσεις</string>
+    <string name="reminder_text">Σήμερα</string>
+    <string name="reminder_text_at">Σήμερα στις %1$s</string>
+    <string name="reminder_hidden">Υπενθύμιση για ένα έγγραφο</string>
     <string name="remove">Αφαίρεση</string>
     <string name="archive_title">Αρχείο</string>
     <string name="archive_empty_title">Δεν υπάρχουν αρχειοθετημένα έγγραφα</string>

@@ -21,6 +21,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.security.MessageDigest
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.temporal.ChronoField.MINUTE_OF_DAY
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,6 +49,10 @@ class DocumentRepository @Inject constructor(
                     archived = it.certificate.archived,
                     archiveAt = it.certificate.archiveAt,
                     note = it.certificate.note,
+                    reminder = it.certificate.reminderDate?.let { date ->
+                        val time = it.certificate.reminderTime?.toLong()
+                        Reminder(LocalDate.ofEpochDay(date), time?.let { LocalTime.MIN.with(MINUTE_OF_DAY, time) })
+                    },
                 )
             }
         }
@@ -120,13 +127,21 @@ class DocumentRepository @Inject constructor(
     /** @see CertificateDao.reorder */
     suspend fun reorder(ids: List<String>) = certificateDao.reorder(ids)
 
-    /** Also cancels their automatic archiving */
+    /** Also cancels their automatic archiving and reminders */
     suspend fun archive(ids: List<String>) = certificateDao.archive(ids)
 
     suspend fun unarchive(ids: List<String>) = certificateDao.unarchive(ids)
 
     /** [archiveAt] in epoch millis, or null to keep the document */
     suspend fun setArchiveAt(id: String, archiveAt: Long?) = certificateDao.setArchiveAt(id, archiveAt)
+
+    /** null to remove it */
+    suspend fun setReminder(id: String, reminder: Reminder?) =
+        certificateDao.setReminder(id, reminder?.date?.toEpochDay(), reminder?.time?.get(MINUTE_OF_DAY))
+
+    /** Only if the document still has this [reminder], not if it was changed meanwhile */
+    suspend fun removeReminder(id: String, reminder: Reminder) =
+        certificateDao.removeReminder(id, reminder.date.toEpochDay(), reminder.time?.get(MINUTE_OF_DAY))
 
     /**
      * Archives the documents whose archive date has passed, and then each one when its date is reached,

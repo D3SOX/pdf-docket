@@ -251,6 +251,16 @@
     <string name="archive_reminder_channel">تذكيرات الأرشفة</string>
     <string name="archive_reminder_text">ستتم أرشفته غدًا</string>
     <string name="archive_reminder_hidden">ستتم أرشفة مستند غدًا</string>
+    <string name="remind_me">ذكّرني</string>
+    <string name="dialog_reminder_title">ذكّرني في</string>
+    <string name="dialog_reminder_time_title">ذكّرني الساعة</string>
+    <string name="add_time">إضافة وقت</string>
+    <string name="reminder_passed">لقد مضى هذا الوقت</string>
+    <string name="reminds_on">يذكّرك في %1$s</string>
+    <string name="reminder_channel">التذكيرات</string>
+    <string name="reminder_text">اليوم</string>
+    <string name="reminder_text_at">اليوم الساعة %1$s</string>
+    <string name="reminder_hidden">تذكير بمستند</string>
     <string name="remove">إزالة</string>
     <string name="archive_title">الأرشيف</string>
     <string name="archive_empty_title">لا توجد مستندات مؤرشفة</string>

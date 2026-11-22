@@ -78,7 +78,7 @@ private object FutureDates : SelectableDates {
     override fun isSelectableYear(year: Int) = year >= LocalDate.now().year
 }
 
-private fun localDate(epochMillis: Long, zone: ZoneId): LocalDate =
+internal fun localDate(epochMillis: Long, zone: ZoneId): LocalDate =
     Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalDate()
 
-private fun LocalDate.startMillis(zone: ZoneId): Long = atStartOfDay(zone).toInstant().toEpochMilli()
+internal fun LocalDate.startMillis(zone: ZoneId): Long = atStartOfDay(zone).toInstant().toEpochMilli()

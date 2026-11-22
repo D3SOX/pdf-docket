@@ -33,6 +33,7 @@ More Features
 - Documents can have a note, e.g. a seat or booking number, and are found by it
 - Documents can be shown as a grid or a list
 - Documents can be archived instead of deleted, right away or automatically on a chosen date, with a reminder the day before
+- Reminders on a chosen day, e.g. of an event, with an optional time
 - PDFs can be shared from other apps, also several at once
 - Documents can be added to the home screen, also as a widget that shows the barcode
 - Encrypted backups of all documents and tags

@@ -46,6 +46,9 @@ class DocumentEditor @Inject constructor(
     /** [archiveAt] in epoch millis, or null to keep the document */
     fun setArchiveAt(id: String, archiveAt: Long?) = scope.launch { repository.setArchiveAt(id, archiveAt) }
 
+    /** null to remove it */
+    fun setReminder(id: String, reminder: Reminder?) = scope.launch { repository.setReminder(id, reminder) }
+
     fun setTags(id: String, tagIds: Set<Long>) = scope.launch { repository.setTags(id, tagIds) }
 
     fun updateTags(ids: List<String>, addedTagIds: Set<Long>, removedTagIds: Set<Long>) = scope.launch {

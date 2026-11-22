@@ -34,4 +34,12 @@ data class Certificate(
      * The user's note, e.g. a seat or booking number, empty if there is none
      */
     @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
+    /**
+     * The day of the user's reminder, in epoch days, or null if there is none
+     */
+    @ColumnInfo(name = "reminderDate") val reminderDate: Long? = null,
+    /**
+     * The time of the reminder, in minutes of the day, or null for the morning
+     */
+    @ColumnInfo(name = "reminderTime") val reminderTime: Int? = null,
 )
