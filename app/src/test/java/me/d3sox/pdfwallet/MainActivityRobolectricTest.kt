@@ -16,6 +16,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.ViewModelProvider
@@ -220,7 +221,9 @@ class MainActivityRobolectricTest {
             composeRule.waitUntil(timeoutMillis = 5_000) {
                 composeRule.onAllNodes(hasText(archiveTitle)).fetchSemanticsNodes().isNotEmpty()
             }
-            val fullWidth = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot.width
+            val original = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot
+            val originalX = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().positionInRoot.x
+            val rootWidth = composeRule.onRoot().fetchSemanticsNode().size.width
             composeRule.runOnIdle {
                 dispatcher.dispatchOnBackStarted(BackEventCompat(0f, 100f, 0f, edge))
                 dispatcher.dispatchOnBackProgressed(BackEventCompat(100f, 100f, 0.5f, edge))
@@ -228,8 +231,12 @@ class MainActivityRobolectricTest {
             composeRule.waitForIdle()
 
             composeRule.onAllNodes(hasText("Ticket A")).fetchSemanticsNodes().isNotEmpty() shouldBe true
-            val previewWidth = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot.width
-            (previewWidth < fullWidth) shouldBe true
+            val preview = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot
+            (preview.width < original.width) shouldBe true
+            // shrinking to 90% moves the title by at most a tenth of the width, so only following the finger passes
+            val towardsFinger = if (edge == BackEventCompat.EDGE_RIGHT) -1 else 1
+            val slid = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().positionInRoot.x - originalX
+            (slid * towardsFinger > rootWidth * 0.25f) shouldBe true
 
             composeRule.runOnIdle { dispatcher.dispatchOnBackCancelled() }
             composeRule.onNodeWithText(archiveTitle).assertIsDisplayed()
