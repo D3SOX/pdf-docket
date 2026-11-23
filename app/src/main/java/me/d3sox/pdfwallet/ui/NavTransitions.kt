@@ -4,9 +4,11 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -18,19 +20,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
-import androidx.navigationevent.NavigationEvent
 
 private const val DURATION_MS = 400
-private const val PREDICTIVE_DURATION_MS = 300
+private const val PREDICTIVE_DURATION_MS = 350
+private const val PREDICTIVE_DELAY_MS = 66
+private const val PREDICTIVE_FADE_MS = 75
+private const val PREDICTIVE_SLIDE_MS = 200
+private const val PREDICTIVE_SCALE_MS = 250
 private const val PREDICTIVE_SCALE = 0.9f
+private const val PREDICTIVE_ALPHA = 0.75f
 private val LEAVING_CORNER_RADIUS = 32.dp
-private const val CORNER_DURATION_MS = PREDICTIVE_DURATION_MS / 4
+private const val CORNER_DURATION_MS = 75
 
 /** How far the screen below moves along, as a fraction of its width */
 private const val PARALLAX = 4
@@ -51,20 +56,19 @@ fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.backTransition(): Content
         .apply { targetContentZIndex = -1f }
 
 /**
- * Material's predictive back for full screens: while swiping, the screen shrinks towards the side the gesture
- * started from and rounds its corners (see [roundedWhileLeaving]), revealing the previous screen below.
- * It fades out once the gesture goes through.
+ * While the back gesture is held, the screen shrinks as it follows the finger towards the end, and the previous screen
+ * grows in behind it from the start. A gesture that goes through finishes the same movement.
  */
-fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.predictiveBackTransition(swipeEdge: Int): ContentTransform {
-    val pivotX = if (swipeEdge == NavigationEvent.EDGE_RIGHT) 0f else 1f
-    return (slideInHorizontally(tween(PREDICTIVE_DURATION_MS, easing = LinearEasing)) { -it / PARALLAX } togetherWith
-        scaleOut(
-            tween(PREDICTIVE_DURATION_MS, easing = LinearEasing),
-            targetScale = PREDICTIVE_SCALE,
-            transformOrigin = TransformOrigin(pivotX, pivotFractionY = 0.5f),
-        ) + fadeOut(tween(PREDICTIVE_DURATION_MS / 2, delayMillis = PREDICTIVE_DURATION_MS / 2)))
+fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.predictiveBackTransition(): ContentTransform =
+    (slideInHorizontally(tween(PREDICTIVE_DURATION_MS, easing = FastOutSlowInEasing)) { -it / PARALLAX } +
+        fadeIn(tween(PREDICTIVE_FADE_MS, PREDICTIVE_DELAY_MS, LinearEasing), initialAlpha = PREDICTIVE_ALPHA) +
+        scaleIn(
+            tween(PREDICTIVE_DURATION_MS, PREDICTIVE_DELAY_MS, LinearEasing),
+            initialScale = PREDICTIVE_SCALE,
+        ) togetherWith
+        slideOutHorizontally(tween(PREDICTIVE_SLIDE_MS, easing = FastOutSlowInEasing)) { it } +
+        scaleOut(tween(PREDICTIVE_SCALE_MS, easing = LinearEasing), targetScale = PREDICTIVE_SCALE))
         .apply { targetContentZIndex = -1f }
-}
 
 /**
  * Rounds the corners of screens while they leave, so a shrinking screen looks like a card above the previous one.

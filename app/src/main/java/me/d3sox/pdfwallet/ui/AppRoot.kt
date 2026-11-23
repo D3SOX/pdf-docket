@@ -147,7 +147,7 @@ fun AppRoot(
             sceneStrategies = listOf(listDetailStrategy),
             transitionSpec = { forwardTransition() },
             popTransitionSpec = { backTransition() },
-            predictivePopTransitionSpec = { predictiveBackTransition(it) },
+            predictivePopTransitionSpec = { predictiveBackTransition() },
             entryProvider = entryProvider {
                 entry<DocumentsRoute>(metadata = listPaneMetadata) {
                     DocumentsScreen(
