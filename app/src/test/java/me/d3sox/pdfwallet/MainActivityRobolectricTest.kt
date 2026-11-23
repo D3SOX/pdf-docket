@@ -222,6 +222,7 @@ class MainActivityRobolectricTest {
                 composeRule.onAllNodes(hasText(archiveTitle)).fetchSemanticsNodes().isNotEmpty()
             }
             val original = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot
+            val originalX = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().positionInRoot.x
             val rootWidth = composeRule.onRoot().fetchSemanticsNode().size.width
             composeRule.runOnIdle {
                 dispatcher.dispatchOnBackStarted(BackEventCompat(0f, 100f, 0f, edge))
@@ -233,7 +234,9 @@ class MainActivityRobolectricTest {
             val preview = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().boundsInRoot
             (preview.width < original.width) shouldBe true
             // shrinking to 90% moves the title by at most a tenth of the width, so only following the finger passes
-            (preview.left - original.left > rootWidth * 0.25f) shouldBe true
+            val towardsFinger = if (edge == BackEventCompat.EDGE_RIGHT) -1 else 1
+            val slid = composeRule.onNodeWithText(archiveTitle).fetchSemanticsNode().positionInRoot.x - originalX
+            (slid * towardsFinger > rootWidth * 0.25f) shouldBe true
 
             composeRule.runOnIdle { dispatcher.dispatchOnBackCancelled() }
             composeRule.onNodeWithText(archiveTitle).assertIsDisplayed()

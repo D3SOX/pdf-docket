@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import androidx.navigationevent.NavigationEvent
 
 private const val DURATION_MS = 400
 private const val PREDICTIVE_DURATION_MS = 350
@@ -56,19 +57,23 @@ fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.backTransition(): Content
         .apply { targetContentZIndex = -1f }
 
 /**
- * While the back gesture is held, the screen shrinks as it follows the finger towards the end, and the previous screen
- * grows in behind it from the start. A gesture that goes through finishes the same movement.
+ * While the back gesture is held, the screen shrinks as it follows the finger away from the edge the gesture started
+ * from, and the previous screen grows in behind it from that edge. A gesture that goes through finishes the movement.
  */
-fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.predictiveBackTransition(): ContentTransform =
-    (slideInHorizontally(tween(PREDICTIVE_DURATION_MS, easing = FastOutSlowInEasing)) { -it / PARALLAX } +
+fun <T : Any> AnimatedContentTransitionScope<Scene<T>>.predictiveBackTransition(swipeEdge: Int): ContentTransform {
+    val direction = if (swipeEdge == NavigationEvent.EDGE_RIGHT) -1 else 1
+    return (slideInHorizontally(tween(PREDICTIVE_DURATION_MS, easing = FastOutSlowInEasing)) {
+        -direction * it / PARALLAX
+    } +
         fadeIn(tween(PREDICTIVE_FADE_MS, PREDICTIVE_DELAY_MS, LinearEasing), initialAlpha = PREDICTIVE_ALPHA) +
         scaleIn(
             tween(PREDICTIVE_DURATION_MS, PREDICTIVE_DELAY_MS, LinearEasing),
             initialScale = PREDICTIVE_SCALE,
         ) togetherWith
-        slideOutHorizontally(tween(PREDICTIVE_SLIDE_MS, easing = FastOutSlowInEasing)) { it } +
+        slideOutHorizontally(tween(PREDICTIVE_SLIDE_MS, easing = FastOutSlowInEasing)) { direction * it } +
         scaleOut(tween(PREDICTIVE_SCALE_MS, easing = LinearEasing), targetScale = PREDICTIVE_SCALE))
         .apply { targetContentZIndex = -1f }
+}
 
 /**
  * Rounds the corners of screens while they leave, so a shrinking screen looks like a card above the previous one.
